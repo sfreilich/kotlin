@@ -13,6 +13,11 @@
 #include "ThreadData.hpp"
 #include "ThreadState.hpp"
 
+#if KONAN_MACOSX
+#include <os/log.h>
+#include <os/signpost.h>
+#endif
+
 using namespace kotlin;
 
 namespace {
@@ -21,14 +26,28 @@ namespace {
 int64_t activeCount = 0;
 std::atomic<void (*)(mm::ThreadData&)> safePointAction = nullptr;
 
+#if KONAN_MACOSX
+os_log_t safePointsLogObject() noexcept {
+    static thread_local os_log_t result = os_log_create("org.kotlinlang.native.runtime", "safepoint");
+    return result;
+}
+#endif
+
 void safePointActionImpl(mm::ThreadData& threadData) noexcept {
     static thread_local bool recursion = false;
     RuntimeAssert(!recursion, "Recursive safepoint");
     AutoReset guard(&recursion, true);
 
+#if KONAN_MACOSX
+    auto id = os_signpost_id_make_with_pointer(safePointsLogObject(), &threadData);
+    os_signpost_interval_begin(safePointsLogObject(), id, "Safepoint", "thread id: %d", threadData.threadId());
+#endif
     threadData.gcScheduler().safePoint();
     threadData.gc().safePoint();
     threadData.suspensionData().suspendIfRequested();
+#if KONAN_MACOSX
+    os_signpost_interval_end(safePointsLogObject(), id, "Safepoint");
+#endif
 }
 
 ALWAYS_INLINE void slowPathImpl(mm::ThreadData& threadData) noexcept {
