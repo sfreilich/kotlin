@@ -13,7 +13,12 @@
 #include "ThreadData.hpp"
 #include "ThreadState.hpp"
 
-#if KONAN_MACOSX
+// TODO: Remove after the bootstrap that brings changes in ClangArgs.kt
+#ifndef KONAN_SUPPORTS_SIGNPOSTS
+#define KONAN_SUPPORTS_SIGNPOSTS KONAN_MACOSX || KONAN_IOS || KONAN_WATCHOS || KONAN_TVOS
+#endif
+
+#if KONAN_SUPPORTS_SIGNPOSTS
 #include <os/log.h>
 #include <os/signpost.h>
 #endif
@@ -26,11 +31,34 @@ namespace {
 int64_t activeCount = 0;
 std::atomic<void (*)(mm::ThreadData&)> safePointAction = nullptr;
 
-#if KONAN_MACOSX
-os_log_t safePointsLogObject() noexcept {
-    static thread_local os_log_t result = os_log_create("org.kotlinlang.native.runtime", "safepoint");
-    return result;
-}
+#if KONAN_SUPPORTS_SIGNPOSTS
+
+#define SAFEPOINT_SIGNPOST_NAME "Safepoint" // signpost API requires strings be literals
+
+class SafePointSignpostInterval : private Pinned {
+public:
+    explicit SafePointSignpostInterval(mm::ThreadData& threadData) noexcept : id_(os_signpost_id_make_with_pointer(logObject, &threadData)) {
+        os_signpost_interval_begin(logObject, id_, SAFEPOINT_SIGNPOST_NAME, "thread id: %d", threadData.threadId());
+    }
+
+    ~SafePointSignpostInterval() {
+        os_signpost_interval_end(logObject, id_, SAFEPOINT_SIGNPOST_NAME);
+    }
+
+private:
+    static os_log_t logObject;
+    uint64_t id_;
+};
+
+#undef SAFEPOINT_SIGNPOST_NAME
+
+// static
+os_log_t SafePointSignpostInterval::logObject = os_log_create("org.kotlinlang.native.runtime", "safepoint");
+#else
+class SafePointSignpostInterval : private Pinned {
+public:
+    explicit SafePointSignpostInterval(mm::ThreadData& threadData) noexcept {}
+};
 #endif
 
 void safePointActionImpl(mm::ThreadData& threadData) noexcept {
@@ -38,16 +66,13 @@ void safePointActionImpl(mm::ThreadData& threadData) noexcept {
     RuntimeAssert(!recursion, "Recursive safepoint");
     AutoReset guard(&recursion, true);
 
-#if KONAN_MACOSX
-    auto id = os_signpost_id_make_with_pointer(safePointsLogObject(), &threadData);
-    os_signpost_interval_begin(safePointsLogObject(), id, "Safepoint", "thread id: %d", threadData.threadId());
-#endif
+    std::optional<SafePointSignpostInterval> signpost;
+    if (compiler::enableSafepointSignposts()) {
+        signpost.emplace(threadData);
+    }
     threadData.gcScheduler().safePoint();
     threadData.gc().safePoint();
     threadData.suspensionData().suspendIfRequested();
-#if KONAN_MACOSX
-    os_signpost_interval_end(safePointsLogObject(), id, "Safepoint");
-#endif
 }
 
 ALWAYS_INLINE void slowPathImpl(mm::ThreadData& threadData) noexcept {
