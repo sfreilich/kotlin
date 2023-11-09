@@ -152,7 +152,7 @@ kotlin {
 
 @Suppress("DEPRECATION")
 tasks.withType<KotlinCompile<*>>().configureEach {
-    kotlinOptions.languageVersion = "1.9"
+    kotlinOptions.languageVersion = "2.0"
     kotlinOptions.apiVersion = "2.0"
     kotlinOptions.freeCompilerArgs += listOf(
         "-Xallow-kotlin-package",
@@ -162,7 +162,6 @@ tasks.withType<KotlinCompile<*>>().configureEach {
         "-opt-in=kotlin.RequiresOptIn",
         "-opt-in=kotlin.ExperimentalUnsignedTypes",
         "-opt-in=kotlin.ExperimentalStdlibApi",
-        "-Xsuppress-api-version-greater-than-language-version-error",
     )
 }
 

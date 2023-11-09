@@ -41,10 +41,11 @@ fun outgoingConfiguration(name: String, configure: Action<Configuration> = Actio
         configure(this)
     }
 
-fun KotlinCommonCompilerOptions.mainCompilationWithK1() {
-    languageVersion = KotlinVersion.KOTLIN_1_9
+fun KotlinCommonCompilerOptions.mainCompilationOptions() {
+    languageVersion = KotlinVersion.KOTLIN_2_0
     apiVersion = KotlinVersion.KOTLIN_2_0
-    freeCompilerArgs.add("-Xsuppress-api-version-greater-than-language-version-error")
+    freeCompilerArgs.add("-Xstdlib-compilation")
+    freeCompilerArgs.add("-Xdont-warn-on-error-suppression")
 }
 
 val configurationBuiltins = resolvingConfiguration("builtins") {
@@ -90,7 +91,7 @@ kotlin {
                                 diagnosticNamesArg,
                             )
                         )
-                        mainCompilationWithK1()
+                        mainCompilationOptions()
                         // workaround for compiling legacy MPP metadata, remove when this compilation is not needed anymore
                         // restate the list of opt-ins
                         optIn.addAll(commonOptIns)
@@ -130,7 +131,7 @@ kotlin {
                                 diagnosticNamesArg,
                             )
                         )
-                        mainCompilationWithK1()
+                        mainCompilationOptions()
                     }
                 }
                 defaultSourceSet {
@@ -158,7 +159,7 @@ kotlin {
                                 diagnosticNamesArg,
                             )
                         )
-                        mainCompilationWithK1()
+                        mainCompilationOptions()
                     }
                 }
             }
@@ -177,7 +178,7 @@ kotlin {
                                 diagnosticNamesArg,
                             )
                         )
-                        mainCompilationWithK1()
+                        mainCompilationOptions()
                     }
                 }
             }
@@ -252,7 +253,7 @@ kotlin {
                     }
                 }
                 compileTaskProvider.configure {
-                    compilerOptions.mainCompilationWithK1()
+                    compilerOptions.mainCompilationOptions()
                 }
             }
         }
@@ -276,7 +277,7 @@ kotlin {
                 kotlinOptions.freeCompilerArgs += "-Xir-module-name=kotlin"
                 kotlinOptions.allWarningsAsErrors = true
                 compileTaskProvider.configure {
-                    compilerOptions.mainCompilationWithK1()
+                    compilerOptions.mainCompilationOptions()
                 }
             }
         }
