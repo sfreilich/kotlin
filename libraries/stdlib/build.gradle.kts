@@ -42,9 +42,9 @@ fun outgoingConfiguration(name: String, configure: Action<Configuration> = Actio
     }
 
 fun KotlinCommonCompilerOptions.mainCompilationWithK1() {
-    languageVersion = KotlinVersion.KOTLIN_1_9
+    languageVersion = KotlinVersion.KOTLIN_2_0
     apiVersion = KotlinVersion.KOTLIN_2_0
-    freeCompilerArgs.add("-Xsuppress-api-version-greater-than-language-version-error")
+//    freeCompilerArgs.add("-Xsuppress-api-version-greater-than-language-version-error")
 }
 
 val configurationBuiltins = resolvingConfiguration("builtins") {

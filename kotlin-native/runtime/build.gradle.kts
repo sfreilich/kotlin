@@ -602,10 +602,10 @@ konanArtifacts {
                 "-opt-in=kotlin.ExperimentalMultiplatform",
                 "-opt-in=kotlin.native.internal.InternalForKotlinNative",
                 "-language-version",
-                "1.9",
+                "2.0",
                 "-api-version",
                 "2.0",
-                "-Xsuppress-api-version-greater-than-language-version-error",
+//                "-Xsuppress-api-version-greater-than-language-version-error",
         )
 
         commonStdlibSrcDirs.forEach { commonSrcDir(it) }
