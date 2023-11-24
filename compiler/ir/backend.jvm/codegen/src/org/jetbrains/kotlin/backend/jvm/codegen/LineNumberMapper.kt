@@ -137,19 +137,19 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 
     fun dropCurrentSmap() {
 //        smapStack.removeFirst()
+        sourceMapCopierStack.removeFirst()
         inlineBlockStack.removeFirst()
     }
 
     private fun getLineNumberForOffset(offset: Int): Int {
-        // TODO create new smap copier
-        // we need to get SMAP of current class and we don't need any other.
-        // we just want to avoid duplications inside current class.
-        val currentFileEntry = inlineBlockStack.firstOrNull()?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
-        return currentFileEntry.getLineNumber(offset) + 1
-
-//        if (smapStack.isEmpty()) {
-//            return fileEntry.getLineNumber(offset) + 1
-//        }
+        val line = if (sourceMapCopierStack.isEmpty()) {
+            fileEntry.getLineNumber(offset) + 1
+        } else {
+            val currentFileEntry = inlineBlockStack.firstOrNull()?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
+            val lineNumber = currentFileEntry.getLineNumber(offset) + 1
+            sourceMapCopierStack.first().mapLineNumber(lineNumber)
+        }
+        return line
 //
 //        var previousData: DataForIrInlinedFunction? = null
 //        var result = -1
@@ -213,6 +213,24 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //        }
 //
 //        smapStack.add(0, newData)
+
+        val startOffset = inlinedBlock.inlineCall.startOffset
+        val callSite = if (inlinedBlock.isLambdaInlining()) {
+            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
+            callSite
+        } else {
+            val sourceMapper = if (sourceMapCopierStack.isEmpty()) smap else sourceMapCopierStack.first().parent//.parentSmap
+            val sourcePosition = let {
+                val sourceInfo = sourceMapper.sourceInfo!!
+                val localFileEntry = inlineBlockStack.firstOrNull()?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
+                val line = if (startOffset < 0) lastLineNumber else localFileEntry.getLineNumber(startOffset) + 1
+                SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
+            }
+            sourcePosition
+        }
+        val newCopier = SourceMapCopier(smap, classSMAP, callSite)
+
+        sourceMapCopierStack.add(0, newCopier)
         inlineBlockStack.add(0, inlinedBlock)
     }
 

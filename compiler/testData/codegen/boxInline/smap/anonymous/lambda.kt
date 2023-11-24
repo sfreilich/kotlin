@@ -2,29 +2,19 @@
 
 // FILE: 1.kt
 
-package builders
+inline fun a(block: () -> Unit) {
+    b(block)
+}
 
-inline fun call(crossinline init: () -> Unit) {
-    val lambda = {
-        init()
-    }; lambda()
+inline fun b(block: () -> Unit) {
+    block()
 }
 
 // FILE: 2.kt
 
-import builders.*
-
-fun test(): String {
-    var res = "Fail"
-
-    call {
-        res = "OK"
-    }
-
-    return res
-}
-
-
 fun box(): String {
-    return test()
+    a {
+        1
+    }
+    return "OK"
 }
