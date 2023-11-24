@@ -120,6 +120,7 @@ class SourceMapper(val sourceInfo: SourceInfo?) {
     }
 }
 
+// Represents SMAP as a structure that is contained in `SourceDebugExtension` attribute of a class.
 class SMAP(val fileMappings: List<FileMapping>) {
     // assuming disjoint line mappings (otherwise binary search can't be used anyway)
     private val intervals = fileMappings.flatMap { it.lineMappings }.sortedBy { it.dest }
