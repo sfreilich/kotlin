@@ -52,6 +52,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     private var noLineNumberScope: Boolean = false
 
     private val smapStack = mutableListOf<DataForIrInlinedFunction>()
+    private val inlineBlockStack = mutableListOf<IrInlinedFunctionBlock>()
 
     private data class DataForIrInlinedFunction(
         val smap: SourceMapCopier,
@@ -135,35 +136,38 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 
     fun dropCurrentSmap() {
         smapStack.removeFirst()
+        inlineBlockStack.removeFirst()
     }
 
     private fun getLineNumberForOffset(offset: Int): Int {
-        if (smapStack.isEmpty()) {
-            return fileEntry.getLineNumber(offset) + 1
-        }
+        return fileEntry.getLineNumber(offset) + 1
 
-        var previousData: DataForIrInlinedFunction? = null
-        var result = -1
-        val iterator = smapStack.iterator()
-        while (iterator.hasNext()) {
-            if (previousData != null && previousData.inlinedBlock.isLambdaInlining()) {
-                val inlinedAt = getDeclarationWhereGivenElementWasInlined(previousData.inlinedBlock.inlinedElement)
-                while (iterator.hasNext() && iterator.next().inlinedBlock.inlineDeclaration != inlinedAt) {
-                    // after lambda's smap we should skip "frames" that were inlined inside body of inline function that accept given lambda
-                    continue
-                }
-                if (!iterator.hasNext()) break
-            }
-            val inlineData = iterator.next()
-
-            previousData = inlineData
-            val localFileEntry = inlineData.inlinedBlock.getClassThatContainsDeclaration().fileParentBeforeInline.fileEntry
-            val lineNumber = if (result == -1) localFileEntry.getLineNumber(offset) + 1 else result
-            val mappedLineNumber = inlineData.smap.mapLineNumber(lineNumber)
-            result = mappedLineNumber
-        }
-
-        return result
+//        if (smapStack.isEmpty()) {
+//            return fileEntry.getLineNumber(offset) + 1
+//        }
+//
+//        var previousData: DataForIrInlinedFunction? = null
+//        var result = -1
+//        val iterator = smapStack.iterator()
+//        while (iterator.hasNext()) {
+//            if (previousData != null && previousData.inlinedBlock.isLambdaInlining()) {
+//                val inlinedAt = getDeclarationWhereGivenElementWasInlined(previousData.inlinedBlock.inlinedElement)
+//                while (iterator.hasNext() && iterator.next().inlinedBlock.inlineDeclaration != inlinedAt) {
+//                    // after lambda's smap we should skip "frames" that were inlined inside body of inline function that accept given lambda
+//                    continue
+//                }
+//                if (!iterator.hasNext()) break
+//            }
+//            val inlineData = iterator.next()
+//
+//            previousData = inlineData
+//            val localFileEntry = inlineData.inlinedBlock.getClassThatContainsDeclaration().fileParentBeforeInline.fileEntry
+//            val lineNumber = if (result == -1) localFileEntry.getLineNumber(offset) + 1 else result
+//            val mappedLineNumber = inlineData.smap.mapLineNumber(lineNumber)
+//            result = mappedLineNumber
+//        }
+//
+//        return result
     }
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP, data: BlockInfo) {
@@ -204,6 +208,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         }
 
         smapStack.add(0, newData)
+        inlineBlockStack.add(0, inlinedBlock)
     }
 
     fun stashSmapForGivenTry(tryInfo: TryWithFinallyInfo, block: () -> Unit) {
@@ -214,9 +219,11 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         }
 
         val smapInTryBlock = smapStack.take(smapCountToDrop)
+        val inlinedBlocksInTryBlock = inlineBlockStack.take(smapCountToDrop)
         smapInTryBlock.forEach { _ -> dropCurrentSmap() }
         block()
         smapInTryBlock.reversed().forEach { smapStack.add(0, it) }
+        inlinedBlocksInTryBlock.reversed().forEach { inlineBlockStack.add(0, it) }
         if (smapInTryBlock.isNotEmpty()) {
             lastLineNumber = lastLineNumberBeforeFinally
         }
