@@ -77,6 +77,7 @@ class SourceMapCopier(val parent: SourceMapper, private val smap: SMAP, val call
 
 data class SourcePosition(val line: Int, val file: String, val path: String)
 
+// This class allows us to build new SMAP from scratch by mapping lines one by one.
 class SourceMapper(val sourceInfo: SourceInfo?) {
     private var maxUsedValue: Int = sourceInfo?.linesInFile ?: 0
     private var fileMappings: LinkedHashMap<Pair<String, String>, FileMapping> = linkedMapOf()
@@ -121,6 +122,7 @@ class SourceMapper(val sourceInfo: SourceInfo?) {
 }
 
 // Represents SMAP as a structure that is contained in `SourceDebugExtension` attribute of a class.
+// This structure is immutable, we can only query for a result.
 class SMAP(val fileMappings: List<FileMapping>) {
     // assuming disjoint line mappings (otherwise binary search can't be used anyway)
     private val intervals = fileMappings.flatMap { it.lineMappings }.sortedBy { it.dest }
