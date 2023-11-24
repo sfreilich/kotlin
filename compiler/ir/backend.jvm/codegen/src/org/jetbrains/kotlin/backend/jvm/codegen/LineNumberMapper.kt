@@ -167,7 +167,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP, data: BlockInfo) {
-        val inlineCall = inlinedBlock.inlineCall
+        val startOffset = inlinedBlock.inlineCall.startOffset
 
         val newData = if (inlinedBlock.isLambdaInlining()) {
             val callSite = smapStack.firstOrNull()?.smap?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
@@ -191,7 +191,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
             val sourcePosition = let {
                 val sourceInfo = sourceMapper.sourceInfo!!
                 val localFileEntry = smapStack.firstOrNull()?.inlinedBlock?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
-                val line = if (inlineCall.startOffset < 0) lastLineNumber else localFileEntry.getLineNumber(inlineCall.startOffset) + 1
+                val line = if (startOffset < 0) lastLineNumber else localFileEntry.getLineNumber(startOffset) + 1
                 SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
             }
 
