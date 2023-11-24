@@ -51,7 +51,8 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     private var lastLineNumber: Int = -1
     private var noLineNumberScope: Boolean = false
 
-    private val smapStack = mutableListOf<DataForIrInlinedFunction>()
+//    private val smapStack = mutableListOf<DataForIrInlinedFunction>()
+    private val sourceMapCopierStack = mutableListOf<SourceMapCopier>()
     private val inlineBlockStack = mutableListOf<IrInlinedFunctionBlock>()
 
     private data class DataForIrInlinedFunction(
@@ -135,12 +136,16 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     fun dropCurrentSmap() {
-        smapStack.removeFirst()
+//        smapStack.removeFirst()
         inlineBlockStack.removeFirst()
     }
 
     private fun getLineNumberForOffset(offset: Int): Int {
-        return fileEntry.getLineNumber(offset) + 1
+        // TODO create new smap copier
+        // we need to get SMAP of current class and we don't need any other.
+        // we just want to avoid duplications inside current class.
+        val currentFileEntry = inlineBlockStack.firstOrNull()?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
+        return currentFileEntry.getLineNumber(offset) + 1
 
 //        if (smapStack.isEmpty()) {
 //            return fileEntry.getLineNumber(offset) + 1
@@ -171,62 +176,62 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP, data: BlockInfo) {
-        val startOffset = inlinedBlock.inlineCall.startOffset
-
-        val newData = if (inlinedBlock.isLambdaInlining()) {
-            val callSite = smapStack.firstOrNull()?.smap?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
-
-            val sourceMapper = if (smapStack.isEmpty()) {
-                smap
-            } else {
-                val inlinedAt = getDeclarationWhereGivenElementWasInlined(inlinedBlock.inlinedElement)
-                val inlineData = smapStack.firstOrNull { it.inlinedBlock.inlineDeclaration == inlinedAt }
-                    ?: smapStack.first() // if we are in anonymous inlined class and lambda was declared outside
-                inlineData.smap.parent
-            }
-            DataForIrInlinedFunction(
-                SourceMapCopier(sourceMapper, classSMAP, callSite),
-                inlinedBlock,
-                context.getSourceMapper(inlinedBlock.getClassThatContainsDeclaration()),
-                data.infos.filterIsInstance<TryWithFinallyInfo>().lastOrNull(),
-            )
-        } else {
-            val sourceMapper = if (smapStack.isEmpty()) smap else smapStack.first().parentSmap
-            val sourcePosition = let {
-                val sourceInfo = sourceMapper.sourceInfo!!
-                val localFileEntry = smapStack.firstOrNull()?.inlinedBlock?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
-                val line = if (startOffset < 0) lastLineNumber else localFileEntry.getLineNumber(startOffset) + 1
-                SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
-            }
-
-            DataForIrInlinedFunction(
-                SourceMapCopier(sourceMapper, classSMAP, sourcePosition),
-                inlinedBlock,
-                context.getSourceMapper(inlinedBlock.getClassThatContainsDeclaration()),
-                data.infos.filterIsInstance<TryWithFinallyInfo>().lastOrNull(),
-            )
-        }
-
-        smapStack.add(0, newData)
+//        val startOffset = inlinedBlock.inlineCall.startOffset
+//
+//        val newData = if (inlinedBlock.isLambdaInlining()) {
+//            val callSite = smapStack.firstOrNull()?.smap?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
+//
+//            val sourceMapper = if (smapStack.isEmpty()) {
+//                smap
+//            } else {
+//                val inlinedAt = getDeclarationWhereGivenElementWasInlined(inlinedBlock.inlinedElement)
+//                val inlineData = smapStack.firstOrNull { it.inlinedBlock.inlineDeclaration == inlinedAt }
+//                    ?: smapStack.first() // if we are in anonymous inlined class and lambda was declared outside
+//                inlineData.smap.parent
+//            }
+//            DataForIrInlinedFunction(
+//                SourceMapCopier(sourceMapper, classSMAP, callSite),
+//                inlinedBlock,
+//                context.getSourceMapper(inlinedBlock.getClassThatContainsDeclaration()),
+//                data.infos.filterIsInstance<TryWithFinallyInfo>().lastOrNull(),
+//            )
+//        } else {
+//            val sourceMapper = if (smapStack.isEmpty()) smap else smapStack.first().parentSmap
+//            val sourcePosition = let {
+//                val sourceInfo = sourceMapper.sourceInfo!!
+//                val localFileEntry = smapStack.firstOrNull()?.inlinedBlock?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
+//                val line = if (startOffset < 0) lastLineNumber else localFileEntry.getLineNumber(startOffset) + 1
+//                SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
+//            }
+//
+//            DataForIrInlinedFunction(
+//                SourceMapCopier(sourceMapper, classSMAP, sourcePosition),
+//                inlinedBlock,
+//                context.getSourceMapper(inlinedBlock.getClassThatContainsDeclaration()),
+//                data.infos.filterIsInstance<TryWithFinallyInfo>().lastOrNull(),
+//            )
+//        }
+//
+//        smapStack.add(0, newData)
         inlineBlockStack.add(0, inlinedBlock)
     }
 
     fun stashSmapForGivenTry(tryInfo: TryWithFinallyInfo, block: () -> Unit) {
-        val lastLineNumberBeforeFinally = lastLineNumber
-        val smapCountToDrop = smapStack.indexOfLast { it.tryInfo == tryInfo } + 1
-        if (smapCountToDrop == 0) {
-            return block()
-        }
-
-        val smapInTryBlock = smapStack.take(smapCountToDrop)
-        val inlinedBlocksInTryBlock = inlineBlockStack.take(smapCountToDrop)
-        smapInTryBlock.forEach { _ -> dropCurrentSmap() }
-        block()
-        smapInTryBlock.reversed().forEach { smapStack.add(0, it) }
-        inlinedBlocksInTryBlock.reversed().forEach { inlineBlockStack.add(0, it) }
-        if (smapInTryBlock.isNotEmpty()) {
-            lastLineNumber = lastLineNumberBeforeFinally
-        }
+//        val lastLineNumberBeforeFinally = lastLineNumber
+//        val smapCountToDrop = smapStack.indexOfLast { it.tryInfo == tryInfo } + 1
+//        if (smapCountToDrop == 0) {
+//            return block()
+//        }
+//
+//        val smapInTryBlock = smapStack.take(smapCountToDrop)
+//        val inlinedBlocksInTryBlock = inlineBlockStack.take(smapCountToDrop)
+//        smapInTryBlock.forEach { _ -> dropCurrentSmap() }
+//        block()
+//        smapInTryBlock.reversed().forEach { smapStack.add(0, it) }
+//        inlinedBlocksInTryBlock.reversed().forEach { inlineBlockStack.add(0, it) }
+//        if (smapInTryBlock.isNotEmpty()) {
+//            lastLineNumber = lastLineNumberBeforeFinally
+//        }
     }
 
     private fun setUpAdditionalLineNumbersBeforeLambdaInlining(inlinedBlock: IrInlinedFunctionBlock) {
@@ -234,17 +239,16 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         val callee = inlinedBlock.inlineDeclaration as? IrFunction
 
         // TODO: reuse code from org/jetbrains/kotlin/codegen/inline/MethodInliner.kt:267
-        val overrideLineNumber = smapStack
-            .map { it.inlinedBlock }
+        val overrideLineNumber = inlineBlockStack
             .firstOrNull { !it.isLambdaInlining() }?.inlineDeclaration?.isInlineOnly() == true
-        val currentLineNumber = if (overrideLineNumber) smapStack.first().smap.callSite!!.line else lineNumberForOffset
+        val currentLineNumber = if (overrideLineNumber) sourceMapCopierStack.first().callSite!!.line else lineNumberForOffset
 
         val firstLine = callee?.body?.statements?.firstOrNull()?.let {
             inlinedBlock.inlineDeclaration.fileEntry.getLineNumber(it.startOffset) + 1
         } ?: -1
         if ((inlinedBlock.isInvokeOnDefaultArg() != overrideLineNumber) && currentLineNumber >= 0 && firstLine == currentLineNumber) {
             val label = Label()
-            val fakeLineNumber = (smapStack.firstOrNull()?.smap?.parent ?: smap)
+            val fakeLineNumber = (sourceMapCopierStack.firstOrNull()?.parent ?: smap)
                 .mapSyntheticLineNumber(SourceMapper.LOCAL_VARIABLE_INLINE_ARGUMENT_SYNTHETIC_LINE_NUMBER)
             expressionCodegen.mv.visitLabel(label)
             expressionCodegen.mv.visitLineNumber(fakeLineNumber, label)
@@ -255,10 +259,9 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         val lineNumberForOffset = getLineNumberForOffset(inlinedBlock.inlineCall.startOffset)
 
         // TODO: reuse code from org/jetbrains/kotlin/codegen/inline/MethodInliner.kt:316
-        val overrideLineNumber = smapStack
-            .map { it.inlinedBlock }
+        val overrideLineNumber = inlineBlockStack
             .firstOrNull { !it.isLambdaInlining() }?.inlineDeclaration?.isInlineOnly() == true
-        val currentLineNumber = if (overrideLineNumber) smapStack.first().smap.callSite!!.line else lineNumberForOffset
+        val currentLineNumber = if (overrideLineNumber) sourceMapCopierStack.first().callSite!!.line else lineNumberForOffset
         if (currentLineNumber != -1) {
             if (overrideLineNumber) {
                 // This is from the function we're inlining into, so no need to remap.
@@ -273,7 +276,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 
     private fun IrInlinedFunctionBlock.getClassThatContainsDeclaration(): IrClass {
         val firstFunctionInlineBlock = if (this.inlinedElement is IrCallableReference<*>)
-            smapStack.map { it.inlinedBlock }.firstOrNull { it.isFunctionInlining() }
+            inlineBlockStack.firstOrNull { it.isFunctionInlining() }
         else
             this
 
@@ -281,7 +284,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     private fun getDeclarationWhereGivenElementWasInlined(inlinedElement: IrElement): IrDeclaration? {
-        return smapStack.map { it.inlinedBlock }.extractDeclarationWhereGivenElementWasInlined(inlinedElement)
+        return inlineBlockStack.extractDeclarationWhereGivenElementWasInlined(inlinedElement)
     }
 
     private fun IrInlinedFunctionBlock.isInvokeOnDefaultArg(): Boolean {
