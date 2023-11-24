@@ -244,7 +244,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //        val smapInTryBlock = smapStack.take(smapCountToDrop)
 //        val inlinedBlocksInTryBlock = inlineBlockStack.take(smapCountToDrop)
 //        smapInTryBlock.forEach { _ -> dropCurrentSmap() }
-//        block()
+        block()
 //        smapInTryBlock.reversed().forEach { smapStack.add(0, it) }
 //        inlinedBlocksInTryBlock.reversed().forEach { inlineBlockStack.add(0, it) }
 //        if (smapInTryBlock.isNotEmpty()) {
