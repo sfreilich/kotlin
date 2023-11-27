@@ -1426,17 +1426,15 @@ class ExpressionCodegen(
     ) {
         val gapStart = markNewLinkedLabel()
         data.localGapScope(tryWithFinallyInfo) {
-            lineNumberMapper.stashSmapForGivenTry(tryWithFinallyInfo) {
-                finallyDepth++
-                if (isFinallyMarkerRequired) {
-                    generateFinallyMarker(mv, finallyDepth, true)
-                }
-                tryWithFinallyInfo.onExit.accept(this, data).discard()
-                if (isFinallyMarkerRequired) {
-                    generateFinallyMarker(mv, finallyDepth, false)
-                }
-                finallyDepth--
+            finallyDepth++
+            if (isFinallyMarkerRequired) {
+                generateFinallyMarker(mv, finallyDepth, true)
             }
+            tryWithFinallyInfo.onExit.accept(this, data).discard()
+            if (isFinallyMarkerRequired) {
+                generateFinallyMarker(mv, finallyDepth, false)
+            }
+            finallyDepth--
             if (tryCatchBlockEnd != null) {
                 tryWithFinallyInfo.onExit.markLineNumber(startOffset = false)
                 mv.goTo(tryCatchBlockEnd)
