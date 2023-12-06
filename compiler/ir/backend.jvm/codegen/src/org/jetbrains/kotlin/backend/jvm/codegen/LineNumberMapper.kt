@@ -157,7 +157,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         } else {
             val offset = inlineBlockStack.reversed().first { !it.isInvokeOnDefaultArg() }.inlineCall.startOffset
             val sourceInfo = smap.sourceInfo!!
-            val line = fileEntry.getLineNumber(offset) + 1
+            val line = (fileEntry.getLineNumber(offset) + 1).takeIf { it > 0 } ?: lastLineNumber
             val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
             sourcePosition
         }
