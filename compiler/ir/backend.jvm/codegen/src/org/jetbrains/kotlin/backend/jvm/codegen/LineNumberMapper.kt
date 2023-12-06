@@ -149,24 +149,21 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP, data: BlockInfo) {
-        val startOffset = inlinedBlock.inlineCall.startOffset
+        inlineBlockStack.add(0, inlinedBlock)
+
         val callSite = if (inlinedBlock.isLambdaInlining()) {
             val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
             callSite
         } else {
-            val sourceMapper = if (sourceMapCopierStack.isEmpty()) smap else sourceMapCopierStack.first().parent//.parentSmap
-            val sourcePosition = let {
-                val sourceInfo = sourceMapper.sourceInfo!!
-                val localFileEntry = inlineBlockStack.firstOrNull()?.inlineDeclaration?.fileParentBeforeInline?.fileEntry ?: fileEntry
-                val line = if (startOffset < 0) lastLineNumber else localFileEntry.getLineNumber(startOffset) + 1
-                SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
-            }
+            val offset = inlineBlockStack.reversed().first { !it.isInvokeOnDefaultArg() }.inlineCall.startOffset
+            val sourceInfo = smap.sourceInfo!!
+            val line = fileEntry.getLineNumber(offset) + 1
+            val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
             sourcePosition
         }
         val newCopier = SourceMapCopier(smap, classSMAP, callSite)
 
         sourceMapCopierStack.add(0, newCopier)
-        inlineBlockStack.add(0, inlinedBlock)
     }
 
     private fun setUpAdditionalLineNumbersBeforeLambdaInlining(inlinedBlock: IrInlinedFunctionBlock) {
