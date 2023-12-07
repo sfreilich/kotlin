@@ -154,13 +154,29 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         val callSite = if (inlinedBlock.isLambdaInlining()) {
             val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
             callSite
-        } else {
-            val offset = inlineBlockStack.reversed().first { !it.isInvokeOnDefaultArg() }.inlineCall.startOffset
+        } else if (inlineBlockStack.size == 1) {
+//            val offset = inlineBlockStack.firstOrNull {
+//                it.inlineDeclaration.fileParentBeforeInline.fileEntry == fileEntry
+//            }?.inlineCall?.startOffset
             val sourceInfo = smap.sourceInfo!!
-            val line = (fileEntry.getLineNumber(offset) + 1).takeIf { it > 0 } ?: lastLineNumber
-            val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
+//            val line = fileEntry.getLineNumber(inlineBlockStack.last().inlineCall.startOffset) + 1 // TODO get last line number from fileEntry file
+            val line = if (inlineBlockStack.size == 1) {
+                lastLineNumber
+            } else {
+                val offset = if (inlineBlockStack[inlineBlockStack.size - 2].inlineDeclaration.fileParentBeforeInline.fileEntry == fileEntry) {
+                    inlinedBlock.inlineCall.startOffset
+                } else {
+                    inlineBlockStack.last().inlineCall.startOffset
+                }
+
+//                val offset = inlineBlockStack.firstOrNull {
+//                    it.isFunctionInlining() && it.inlineDeclaration.fileParentBeforeInline.fileEntry == fileEntry
+//                }?.inlineCall?.startOffset ?: inlineBlockStack.last().inlineCall.startOffset
+                fileEntry.getLineNumber(offset) + 1
+            }
+            val sourcePosition = SourcePosition(lastLineNumber, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
             sourcePosition
-        }
+        } else null
         val newCopier = SourceMapCopier(smap, classSMAP, callSite)
 
         sourceMapCopierStack.add(0, newCopier)
