@@ -155,11 +155,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
             val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
             callSite
         } else {
-//            val offset = inlineBlockStack.firstOrNull {
-//                it.inlineDeclaration.fileParentBeforeInline.fileEntry == fileEntry
-//            }?.inlineCall?.startOffset
             val sourceInfo = smap.sourceInfo!!
-//            val line = fileEntry.getLineNumber(inlineBlockStack.last().inlineCall.startOffset) + 1 // TODO get last line number from fileEntry file
             val currentFile = if (inlineBlockStack.size == 1) {
                 fileEntry
             } else {
@@ -168,20 +164,6 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
             val offset = inlinedBlock.inlineCall.startOffset
             val line = currentFile.getLineNumber(offset) + 1
 
-//            val line = if (inlineBlockStack.size == 1) {
-//                lastLineNumber
-//            } else {
-//                val offset = if (inlineBlockStack[inlineBlockStack.size - 2].inlineDeclaration.fileParentBeforeInline.fileEntry == fileEntry) {
-//                    inlinedBlock.inlineCall.startOffset
-//                } else {
-//                    inlineBlockStack.last().inlineCall.startOffset
-//                }
-//
-////                val offset = inlineBlockStack.firstOrNull {
-////                    it.isFunctionInlining() && it.inlineDeclaration.fileParentBeforeInline.fileEntry == fileEntry
-////                }?.inlineCall?.startOffset ?: inlineBlockStack.last().inlineCall.startOffset
-//                fileEntry.getLineNumber(offset) + 1
-//            }
             val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
             sourcePosition
         }
