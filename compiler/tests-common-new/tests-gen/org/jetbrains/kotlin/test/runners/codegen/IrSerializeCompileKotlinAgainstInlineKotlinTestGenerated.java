@@ -4936,6 +4936,12 @@ public class IrSerializeCompileKotlinAgainstInlineKotlinTestGenerated extends Ab
             }
 
             @Test
+            @TestMetadata("inlineInDefault3.kt")
+            public void testInlineInDefault3() throws Exception {
+                runTest("compiler/testData/codegen/boxInline/smap/defaultLambda/inlineInDefault3.kt");
+            }
+
+            @Test
             @TestMetadata("kt21827.kt")
             public void testKt21827() throws Exception {
                 runTest("compiler/testData/codegen/boxInline/smap/defaultLambda/kt21827.kt");
