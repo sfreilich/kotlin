@@ -94,7 +94,7 @@ open class JvmBoxRunner(testServices: TestServices) : JvmBinaryArtifactHandler(t
         } catch (e: Throwable) {
             if (reportProblems) {
                 try {
-                    println(classFileFactory.createText())
+//                    println(classFileFactory.createText())
                 } catch (_: Throwable) {
                     // In FIR we have factory which can't print bytecode
                     //   and it throws exception otherwise. So we need
@@ -103,6 +103,8 @@ open class JvmBoxRunner(testServices: TestServices) : JvmBinaryArtifactHandler(t
                 }
             }
             throw e
+        } finally {
+            println(classFileFactory.createText())
         }
     }
 
