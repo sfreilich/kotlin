@@ -6,9 +6,6 @@
 package org.jetbrains.kotlin.backend.jvm.codegen
 
 import org.jetbrains.kotlin.backend.common.ir.extractDeclarationWhereGivenElementWasInlined
-import org.jetbrains.kotlin.ir.util.inlineDeclaration
-import org.jetbrains.kotlin.ir.util.isFunctionInlining
-import org.jetbrains.kotlin.ir.util.isLambdaInlining
 import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
 import org.jetbrains.kotlin.backend.jvm.MultifileFacadeFileEntry
 import org.jetbrains.kotlin.backend.jvm.ir.fileParentBeforeInline
@@ -29,10 +26,7 @@ import org.jetbrains.kotlin.ir.expressions.IrCallableReference
 import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
 import org.jetbrains.kotlin.ir.expressions.IrInlinedFunctionBlock
-import org.jetbrains.kotlin.ir.util.fileEntry
-import org.jetbrains.kotlin.ir.util.parentAsClass
-import org.jetbrains.kotlin.ir.util.parentClassOrNull
-import org.jetbrains.kotlin.ir.util.statements
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.util.OperatorNameConventions
 import org.jetbrains.org.objectweb.asm.Label
 import kotlin.contracts.ExperimentalContracts
@@ -155,17 +149,36 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP, data: BlockInfo) {
         inlineBlockStack.add(0, inlinedBlock)
 
-        val callSite = if (inlinedBlock.isLambdaInlining()) {
-            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
-            callSite
-        } else {
-            val offset = inlineBlockStack.last().inlineCall.startOffset
-            val sourceInfo = smap.sourceInfo!!
-            val line = (fileEntry.getLineNumber(offset) + 1).takeIf { it > 0 } ?: lastLineNumber
-            val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
-            sourcePosition
-        }
-        val newCopier = SourceMapCopier(smap, classSMAP, callSite)
+//        val callSite = if (inlinedBlock.isLambdaInlining()) {
+//            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
+//            callSite
+//        } else if (inlineBlockStack.size == 2) {
+//            val offset = inlinedBlock.inlineCall.startOffset
+//            val sourceInfo = smap.sourceInfo!!
+//            val line = (fileEntry.getLineNumber(offset) + 1).takeIf { it > 0 } ?: lastLineNumber
+//            val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
+//            sourcePosition
+//        } else {
+//            null
+//        }
+
+//        val prevDeclaration = if (inlineBlockStack.size == 1) {
+//            expressionCodegen.irFunction
+//        } else {
+//            inlineBlockStack[1].inlineDeclaration
+//        }
+//
+//        // call site is not null only for those calls that are located in the same location as the first inline call
+//        val callSite = if (prevDeclaration.parentsWithSelf.contains(expressionCodegen.irFunction)) {
+//            val offset = inlinedBlock.inlineCall.startOffset
+//            val sourceInfo = smap.sourceInfo!!
+//            val line = (fileEntry.getLineNumber(offset) + 1).takeIf { it > 0 } ?: lastLineNumber
+//            val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
+//            sourcePosition
+//        } else {
+//            null
+//        }
+        val newCopier = SourceMapCopier(smap, classSMAP, null)
 
         sourceMapCopierStack.add(0, newCopier)
     }
