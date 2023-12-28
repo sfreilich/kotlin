@@ -146,10 +146,29 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
             val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
             callSite
         } else {
+            val currentFile = if (inlineBlockStack.isEmpty()) {
+                irFunction.fileParentBeforeInline
+            } else {
+                inlineBlockStack.last().inlineDeclaration.fileParentBeforeInline
+            }
+
+            val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
+                is MultifileFacadeFileEntry -> currentFileEntry.partFiles.single().name
+                else -> currentFile.name
+            }
+
+            val currentClass = if (inlineBlockStack.isEmpty()) {
+                expressionCodegen.classCodegen.irClass
+            } else {
+                inlineBlockStack.last().inlineDeclaration.parentClassOrNull!!
+            }
+            val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
+                ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
+
             val offset = inlinedBlock.inlineCall.startOffset
-            val sourceInfo = smap.sourceInfo!!
-            val line = (fileEntry.getLineNumber(offset) + 1).takeIf { it > 0 } ?: lastLineNumber
-            val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
+            val line = currentFile.fileEntry.getLineNumber(offset) + 1
+
+            val sourcePosition = SourcePosition(line, sourceFileName, type.internalName)
             sourcePosition
         }
 
