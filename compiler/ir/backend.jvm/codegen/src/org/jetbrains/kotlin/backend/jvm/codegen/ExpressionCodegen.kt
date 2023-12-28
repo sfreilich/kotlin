@@ -473,7 +473,7 @@ class ExpressionCodegen(
             inlineCall.markLineNumber(startOffset = true)
             mv.nop()
 
-            lineNumberMapper.buildSmapFor(inlinedBlock, inlinedBlock.buildOrGetClassSMAP(info), info)
+            lineNumberMapper.buildSmapFor(inlinedBlock/*, inlinedBlock.buildOrGetClassSMAP(info), info*/)
 
             if (inlineCall.usesDefaultArguments()) {
                 // $default function has first LN pointing to original callee

@@ -141,40 +141,23 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         return line
     }
 
-    fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP, data: BlockInfo) {
-        inlineBlockStack.add(0, inlinedBlock)
-
+    fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock/*, classSMAP: SMAP, data: BlockInfo*/) {
         val callSite = if (inlinedBlock.isLambdaInlining()) {
             val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
             callSite
         } else {
-            val currentFile = if (inlineBlockStack.size == 1) {
-                irFunction.fileParentBeforeInline
-            } else {
-                inlineBlockStack[inlineBlockStack.size - 2].inlineDeclaration.fileParentBeforeInline
-            }
-
-            val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
-                is MultifileFacadeFileEntry -> currentFileEntry.partFiles.single().name
-                else -> currentFile.name
-            }
-
-            val currentClass = if (inlineBlockStack.size == 1) {
-                expressionCodegen.classCodegen.irClass
-            } else {
-                inlineBlockStack[inlineBlockStack.size - 2].inlineDeclaration.parentClassOrNull!!
-            }
-            val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
-                ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
-
             val offset = inlinedBlock.inlineCall.startOffset
-            val line = currentFile.fileEntry.getLineNumber(offset) + 1
-
-            val sourcePosition = SourcePosition(line, sourceFileName, type.internalName)
+            val sourceInfo = smap.sourceInfo!!
+            val line = (fileEntry.getLineNumber(offset) + 1).takeIf { it > 0 } ?: lastLineNumber
+            val sourcePosition = SourcePosition(line, sourceInfo.sourceFileName!!, sourceInfo.pathOrCleanFQN)
             sourcePosition
         }
-        val newCopier = SourceMapCopier(smap, classSMAP, callSite)
 
+        val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
+        val emptySMAP = SMAP(emptySourceMapper.resultMappings)
+        val newCopier = SourceMapCopier(smap, emptySMAP, callSite)
+
+        inlineBlockStack.add(0, inlinedBlock)
         sourceMapCopierStack.add(0, newCopier)
     }
 
