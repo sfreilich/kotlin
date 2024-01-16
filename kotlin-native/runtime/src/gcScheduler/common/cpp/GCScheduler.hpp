@@ -64,6 +64,16 @@ public:
     // Called by the GC thread only.
     void onGCFinish(int64_t epoch, size_t aliveBytes) noexcept;
 
+    void disallowGC() noexcept;
+
+    void allowGC() noexcept;
+
+    void waitGCAllowed(int64_t epoch) noexcept;
+
+    void onMutatorWillWaitForGC(int64_t epoch) noexcept;
+
+    uint64_t gcDelayCount() noexcept;
+
 private:
     GCSchedulerConfig config_;
     std_support::unique_ptr<Impl> impl_;

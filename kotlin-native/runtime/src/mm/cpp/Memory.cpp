@@ -633,6 +633,27 @@ RUNTIME_NOTHROW extern "C" void DisposeRegularWeakReferenceImpl(ObjHeader* weakR
     mm::disposeRegularWeakReferenceImpl(weakRef);
 }
 
+extern "C" void Kotlin_native_runtime_GC_Delay_disallowGC(ObjHeader*) {
+    mm::GlobalData::Instance().gcScheduler().disallowGC();
+}
+
+extern "C" void Kotlin_native_runtime_GC_Delay_allowGC(ObjHeader*) {
+    mm::GlobalData::Instance().gcScheduler().allowGC();
+}
+
+extern "C" KLong Kotlin_native_runtime_GC_Delay_getMaxGCDelayDurationMicroseconds(ObjHeader*) {
+    return mm::GlobalData::Instance().gcScheduler().config().maxGCDelayIntervalMicroseconds;
+}
+
+extern "C" void Kotlin_native_runtime_GC_Delay_setMaxGCDelayDurationMicroseconds(ObjHeader*, KLong value) {
+    RuntimeAssert(value > 0, "Must have been handled by the caller");
+    mm::GlobalData::Instance().gcScheduler().config().maxGCDelayIntervalMicroseconds = value;
+}
+
+extern "C" KLong Kotlin_native_runtime_GC_Delay_getGCDelayCount(ObjHeader*) {
+    return mm::GlobalData::Instance().gcScheduler().gcDelayCount();
+}
+
 void kotlin::OnMemoryAllocation(size_t totalAllocatedBytes) noexcept {
     mm::GlobalData::Instance().gcScheduler().setAllocatedBytes(totalAllocatedBytes);
 }

@@ -63,3 +63,23 @@ ALWAYS_INLINE void gcScheduler::GCScheduler::onGCStart() noexcept {
 ALWAYS_INLINE void gcScheduler::GCScheduler::onGCFinish(int64_t epoch, size_t aliveBytes) noexcept {
     impl().impl().onGCFinish(epoch, aliveBytes);
 }
+
+void gcScheduler::GCScheduler::allowGC() noexcept {
+    impl().impl().gcDelay().allowGC();
+}
+
+void gcScheduler::GCScheduler::disallowGC() noexcept {
+    impl().impl().gcDelay().disallowGC();
+}
+
+void gcScheduler::GCScheduler::waitGCAllowed(int64_t epoch) noexcept {
+    impl().impl().gcDelay().waitGCAllowed(epoch, config_.maxGCDelayInterval());
+}
+
+void gcScheduler::GCScheduler::onMutatorWillWaitForGC(int64_t epoch) noexcept {
+    impl().impl().gcDelay().onMutatorWillWaitForGC(epoch);
+}
+
+uint64_t gcScheduler::GCScheduler::gcDelayCount() noexcept {
+    return impl().impl().gcDelay().gcDelayCount();
+}

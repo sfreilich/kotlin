@@ -8,6 +8,7 @@
 #include "GCScheduler.hpp"
 
 #include "AppStateTracking.hpp"
+#include "GCDelay.hpp"
 #include "GCSchedulerConfig.hpp"
 #include "GlobalData.hpp"
 #include "HeapGrowthController.hpp"
@@ -79,8 +80,10 @@ public:
             case HeapGrowthController::MemoryBoundary::kTarget:
                 RuntimeLogDebug({kTagGC}, "Scheduling GC by allocation");
                 auto epoch = scheduleGC_.scheduleNextEpochIfNotInProgress();
-                RuntimeLogWarning({kTagGC}, "Pausing the mutators until epoch %" PRId64 " is done", epoch);
-                mutatorAssists_.requestAssists(epoch);
+                if (gcDelay_.tryGCAssist(epoch)) {
+                    RuntimeLogWarning({kTagGC}, "Pausing the mutators until epoch %" PRId64 " is done", epoch);
+                    mutatorAssists_.requestAssists(epoch);
+                }
                 return;
         }
     }
@@ -101,6 +104,8 @@ public:
 
     MutatorAssists& mutatorAssists() noexcept { return mutatorAssists_; }
 
+    GCDelay<Clock>& gcDelay() noexcept { return gcDelay_; }
+
 private:
     GCSchedulerConfig& config_;
     EpochScheduler scheduleGC_;
@@ -109,6 +114,7 @@ private:
     RegularIntervalPacer<Clock> regularIntervalPacer_;
     RepeatedTimer<Clock> timer_;
     MutatorAssists mutatorAssists_;
+    GCDelay<Clock> gcDelay_;
 };
 
 } // namespace internal
