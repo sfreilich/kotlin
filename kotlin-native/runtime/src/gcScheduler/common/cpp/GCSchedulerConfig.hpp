@@ -41,8 +41,10 @@ struct GCSchedulerConfig {
     // See `mutatorAssists()`.
     std::atomic<std::underlying_type_t<MutatorAssists>> mutatorAssistsImpl =
             static_cast<std::underlying_type_t<MutatorAssists>>(MutatorAssists::kDefault);
+    std::atomic<int64_t> maxGCDelayIntervalMicroseconds = 1000 * 1000;
 
     std::chrono::microseconds regularGcInterval() const { return std::chrono::microseconds(regularGcIntervalMicroseconds.load()); }
+    std::chrono::microseconds maxGCDelayInterval() const { return std::chrono::microseconds(maxGCDelayIntervalMicroseconds.load()); }
 
     // Whether mutators should stop and wait for GC to complete when
     // current object heap size is bigger than `targetHeapBytes`.

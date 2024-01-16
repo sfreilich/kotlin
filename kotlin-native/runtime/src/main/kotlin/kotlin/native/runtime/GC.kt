@@ -426,6 +426,33 @@ public object GC {
         private external fun setBatchSize(value: ULong)
     }
 
+    public object Delay {
+        @GCUnsafeCall("Kotlin_native_runtime_GC_Delay_disallowGC")
+        public external fun disallowGC(): Unit
+
+        @GCUnsafeCall("Kotlin_native_runtime_GC_Delay_allowGC")
+        public external fun allowGC(): Unit
+
+        public var maxGCDelayDuration: Duration
+            get() = getMaxGCDelayDurationMicroseconds().microseconds
+            set(value) {
+                require(!value.isNegative()) { "maxGCDelayDuration must not be negative: $value" }
+                setMaxGCDelayDurationMicroseconds(value.inWholeMicroseconds)
+            }
+
+        public val gcDelayCount: Long
+            get() = getGCDelayCount()
+
+        @GCUnsafeCall("Kotlin_native_runtime_GC_Delay_getMaxGCDelayDurationMicroseconds")
+        private external fun getMaxGCDelayDurationMicroseconds(): Long
+
+        @GCUnsafeCall("Kotlin_native_runtime_GC_Delay_setMaxGCDelayDurationMicroseconds")
+        private external fun setMaxGCDelayDurationMicroseconds(value: Long): Unit
+
+        @GCUnsafeCall("Kotlin_native_runtime_GC_Delay_getGCDelayCount")
+        private external fun getGCDelayCount(): Long
+    }
+
     @GCUnsafeCall("Kotlin_native_internal_GC_getThreshold")
     private external fun getThreshold(): Int
 

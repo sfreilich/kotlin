@@ -499,6 +499,28 @@ fun main() {
                 model("", extension = "swift", recursive = true)
             }
         }
+        // Various tests on K/N GC.
+        testGroup("native/native.tests/tests-gen", "native/native.tests/testData") {
+            testClass<AbstractNativeBlackBoxTest>(
+                suiteTestClassName = "NativeGCTestGenerated",
+                annotations = listOf(
+                    provider<UseStandardTestCaseGroupProvider>(),
+                    annotation(Tag::class.java, "gc"),
+                )
+            ) {
+                model("gc")
+            }
+            testClass<AbstractNativeBlackBoxTest>(
+                suiteTestClassName = "FirNativeGCTestGenerated",
+                annotations = listOf(
+                    provider<UseStandardTestCaseGroupProvider>(),
+                    annotation(Tag::class.java, "gc"),
+                    *frontendFir(),
+                )
+            ) {
+                model("gc")
+            }
+        }
     }
 }
 

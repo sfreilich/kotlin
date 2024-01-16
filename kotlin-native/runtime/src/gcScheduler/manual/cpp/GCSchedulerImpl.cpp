@@ -48,3 +48,9 @@ void gcScheduler::GCScheduler::scheduleAndWaitFinalized() noexcept {
 ALWAYS_INLINE void gcScheduler::GCScheduler::setAllocatedBytes(size_t bytes) noexcept {}
 ALWAYS_INLINE void gcScheduler::GCScheduler::onGCStart() noexcept {}
 ALWAYS_INLINE void gcScheduler::GCScheduler::onGCFinish(int64_t epoch, size_t aliveBytes) noexcept {}
+
+void gcScheduler::GCScheduler::allowGC() noexcept {}
+void gcScheduler::GCScheduler::disallowGC() noexcept {}
+void gcScheduler::GCScheduler::waitGCAllowed(int64_t epoch) noexcept {}
+void gcScheduler::GCScheduler::onMutatorWillWaitForGC(int64_t epoch) noexcept {}
+uint64_t gcScheduler::GCScheduler::gcDelayCount() noexcept { return 0; }
