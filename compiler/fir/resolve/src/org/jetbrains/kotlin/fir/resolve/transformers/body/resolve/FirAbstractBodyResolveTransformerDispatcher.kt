@@ -5,9 +5,11 @@
 
 package org.jetbrains.kotlin.fir.resolve.transformers.body.resolve
 
+import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.fir.*
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.expressions.*
+import org.jetbrains.kotlin.fir.resolve.fullyExpandedClassFromContext
 import org.jetbrains.kotlin.fir.resolve.ResolutionMode
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.calls.ResolutionContext
@@ -84,11 +86,16 @@ abstract class FirAbstractBodyResolveTransformerDispatcher(
         val resolvedTypeRef = if (typeRef is FirResolvedTypeRef) {
             typeRef
         } else {
+            val contextScope = when {
+                session.languageVersionSettings.supportsContextSensitiveResolution ->
+                    data.fullyExpandedClassFromContext(components, session)?.staticScope(session, scopeSession)
+                else -> null
+            }
             typeResolverTransformer.withFile(context.file) {
                 transformTypeRef(
                     typeRef,
                     ScopeClassDeclaration(
-                        components.createCurrentScopeList(),
+                        components.createCurrentScopeList() + listOfNotNull(contextScope),
                         context.containingClassDeclarations,
                         context.containers.lastOrNull { it is FirTypeParameterRefsOwner && it !is FirAnonymousFunction }
                     )

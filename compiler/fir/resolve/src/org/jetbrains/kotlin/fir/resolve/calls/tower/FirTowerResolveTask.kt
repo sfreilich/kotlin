@@ -7,17 +7,22 @@ package org.jetbrains.kotlin.fir.resolve.calls.tower
 
 import org.jetbrains.kotlin.KtFakeSourceElementKind
 import org.jetbrains.kotlin.KtSourceElement
+import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.fakeElement
 import org.jetbrains.kotlin.fir.declarations.ContextReceiverGroup
 import org.jetbrains.kotlin.fir.declarations.FirTowerDataContext
+import org.jetbrains.kotlin.fir.declarations.staticScope
 import org.jetbrains.kotlin.fir.expressions.FirExpression
 import org.jetbrains.kotlin.fir.expressions.FirQualifiedAccessExpression
 import org.jetbrains.kotlin.fir.expressions.FirResolvedQualifier
 import org.jetbrains.kotlin.fir.expressions.builder.buildExpressionStub
 import org.jetbrains.kotlin.fir.expressions.builder.buildResolvedQualifier
+import org.jetbrains.kotlin.fir.languageVersionSettings
 import org.jetbrains.kotlin.fir.resolve.BodyResolveComponents
 import org.jetbrains.kotlin.fir.resolve.DoubleColonLHS
+import org.jetbrains.kotlin.fir.resolve.ResolutionMode
 import org.jetbrains.kotlin.fir.resolve.calls.*
+import org.jetbrains.kotlin.fir.resolve.fullyExpandedClassFromContext
 import org.jetbrains.kotlin.fir.resolve.setTypeOfQualifier
 import org.jetbrains.kotlin.fir.scopes.FirScope
 import org.jetbrains.kotlin.fir.scopes.impl.FirWhenSubjectImportingScope
@@ -62,7 +67,8 @@ internal abstract class FirBaseTowerResolveTask(
     private val manager: TowerResolveManager,
     protected val towerDataElementsForName: TowerDataElementsForName,
     private val collector: CandidateCollector,
-    private val candidateFactory: CandidateFactory
+    private val candidateFactory: CandidateFactory,
+    private val resolutionMode: ResolutionMode? = null,
 ) {
     protected val session get() = components.session
 
@@ -182,6 +188,14 @@ internal abstract class FirBaseTowerResolveTask(
             }
         }
 
+        if (session.languageVersionSettings.supportsContextSensitiveResolution) {
+            val contextClass = resolutionMode?.fullyExpandedClassFromContext(components, session)
+            val contextScope = contextClass?.staticScope(session, components.scopeSession)
+            if (contextScope != null) {
+                onScope(contextScope, contextClass.symbol, TowerGroup.QualifierOrClassifier)
+            }
+        }
+
         for ((depth, contextReceiverGroup) in towerDataElementsForName.contextReceiverGroups) {
             onContextReceiverGroup(contextReceiverGroup, parentGroup.ContextReceiverGroup(depth))
         }
@@ -219,12 +233,14 @@ internal open class FirTowerResolveTask(
     towerDataElementsForName: TowerDataElementsForName,
     collector: CandidateCollector,
     candidateFactory: CandidateFactory,
+    resolutionMode: ResolutionMode? = null,
 ) : FirBaseTowerResolveTask(
     components,
     manager,
     towerDataElementsForName,
     collector,
     candidateFactory,
+    resolutionMode,
 ) {
 
     suspend fun runResolverForQualifierReceiver(
