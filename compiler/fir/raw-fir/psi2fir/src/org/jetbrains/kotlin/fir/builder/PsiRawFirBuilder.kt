@@ -1889,6 +1889,7 @@ open class PsiRawFirBuilder(
                             isCrossinline = false
                             isNoinline = false
                             isVararg = false
+                            isDataarg = false
                         }
                         addDestructuringVariables(
                             destructuringVariables,

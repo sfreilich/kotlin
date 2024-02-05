@@ -809,7 +809,8 @@ class FirElementSerializer private constructor(
                     || extension.hasAdditionalAnnotations(parameter),
             declaresDefaultValue,
             parameter.isCrossinline,
-            parameter.isNoinline
+            parameter.isNoinline,
+            parameter.isDataarg,
         )
         if (flags != builder.flags) {
             builder.flags = flags
