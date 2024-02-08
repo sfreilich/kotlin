@@ -40,6 +40,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     private val fileEntry = irFunction.fileParentBeforeInline.fileEntry
 
     private var lastLineNumber: Int = -1
+    private var lastLineNumberBeforeInline: Int = -1
     private var noLineNumberScope: Boolean = false
 
     private val sourceMapCopierStack = mutableListOf<SourceMapCopier>()
@@ -65,6 +66,10 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         if (lastLineNumber != lineNumber) {
             lastLineNumber = lineNumber
             expressionCodegen.mv.visitLineNumber(lineNumber, markNewLabel())
+        }
+
+        if (inlineBlockStack.isEmpty() && lastLineNumberBeforeInline != lineNumber) {
+            lastLineNumberBeforeInline = lineNumber
         }
     }
 
@@ -142,34 +147,52 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock/*, classSMAP: SMAP, data: BlockInfo*/) {
-        val callSite = if (inlinedBlock.isLambdaInlining()) {
-            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
-            callSite
-        } else {
-            val currentFile = if (inlineBlockStack.isEmpty()) {
-                irFunction.fileParentBeforeInline
-            } else {
-                inlineBlockStack.last().inlineDeclaration.fileParentBeforeInline
-            }
+        // TODO can I do KotlinDebug to be the same as for bytecode inliner?
+//        val callSite = if (inlinedBlock.isLambdaInlining()) {
+//            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
+//            callSite
+//        } else {
+//            val currentFile = if (inlineBlockStack.isEmpty()) {
+//                irFunction.fileParentBeforeInline
+//            } else {
+//                inlineBlockStack.last().inlineDeclaration.fileParentBeforeInline
+//            }
+//
+//            val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
+//                is MultifileFacadeFileEntry -> currentFileEntry.partFiles.single().name
+//                else -> currentFile.name
+//            }
+//
+//            val currentClass = if (inlineBlockStack.isEmpty()) {
+//                expressionCodegen.classCodegen.irClass
+//            } else {
+//                inlineBlockStack.last().inlineDeclaration.parentClassOrNull!!
+//            }
+//            val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
+//                ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
+//
+//            val offset = inlinedBlock.inlineCall.startOffset
+//            val line = currentFile.fileEntry.getLineNumber(offset) + 1
+//
+//            val sourcePosition = SourcePosition(line, sourceFileName, type.internalName)
+//            sourcePosition
+//        }
+        var callSite: SourcePosition? = null
+        if (inlineBlockStack.isEmpty()) {
+            val currentFile = irFunction.fileParentBeforeInline
 
             val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
                 is MultifileFacadeFileEntry -> currentFileEntry.partFiles.single().name
                 else -> currentFile.name
             }
 
-            val currentClass = if (inlineBlockStack.isEmpty()) {
-                expressionCodegen.classCodegen.irClass
-            } else {
-                inlineBlockStack.last().inlineDeclaration.parentClassOrNull!!
-            }
+            val currentClass = expressionCodegen.classCodegen.irClass
             val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
                 ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
 
-            val offset = inlinedBlock.inlineCall.startOffset
-            val line = currentFile.fileEntry.getLineNumber(offset) + 1
-
-            val sourcePosition = SourcePosition(line, sourceFileName, type.internalName)
-            sourcePosition
+//            val offset = inlinedBlock.inlineCall.startOffset
+            val line = lastLineNumberBeforeInline//currentFile.fileEntry.getLineNumber(offset) + 1
+            callSite = SourcePosition(line, sourceFileName, type.internalName)
         }
 
         val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
