@@ -193,6 +193,10 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //            val offset = inlinedBlock.inlineCall.startOffset
             val line = lastLineNumberBeforeInline//currentFile.fileEntry.getLineNumber(offset) + 1
             callSite = SourcePosition(line, sourceFileName, type.internalName)
+        } else if (inlinedBlock.isLambdaInlining()) {
+            callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
+        } else {
+            callSite = sourceMapCopierStack.firstOrNull()?.callSite
         }
 
         val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
