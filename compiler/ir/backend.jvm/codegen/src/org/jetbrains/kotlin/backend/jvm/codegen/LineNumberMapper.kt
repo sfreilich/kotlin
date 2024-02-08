@@ -178,7 +178,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //            sourcePosition
 //        }
         var callSite: SourcePosition? = null
-        if (inlineBlockStack.isEmpty()) {
+        if (inlineBlockStack.isEmpty() && !inlinedBlock.isLambdaInlining()) {
             val currentFile = irFunction.fileParentBeforeInline
 
             val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
