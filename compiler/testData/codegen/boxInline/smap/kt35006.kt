@@ -8,9 +8,9 @@ inline fun g(x: () -> String) = x()
 import test.*
 
 fun box(): String {  // KotlinDebug:
-    return g {       // 2.kt:N   -> 2.kt:5
-        f()          // 2.kt:N+1 -> 2.kt:6, NOT 2.kt:5
-        f()          // 2.kt:N+2 -> 2.kt:7, NOT 2.kt:N+1 or 2.kt:5
+    return g {       // 2.kt:N   -> 2.kt:11
+        f()          // 2.kt:N+1 -> 2.kt:12, NOT 2.kt:11
+        f()          // 2.kt:N+2 -> 2.kt:13, NOT 2.kt:N+1 or 2.kt:11
         "OK"
     }
 }
