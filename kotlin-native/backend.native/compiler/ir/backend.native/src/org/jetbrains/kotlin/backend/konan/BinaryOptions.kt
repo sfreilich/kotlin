@@ -84,6 +84,10 @@ object BinaryOptions : BinaryOptionRegistry() {
     val cInterfaceMode by option<CInterfaceGenerationMode>()
 
     val globalDataLazyInit by booleanOption()
+
+    val eventTrackerFrequency by stringOption()
+
+    val eventTrackerBacktraceDepth by stringOption()
 }
 
 open class BinaryOption<T : Any>(

@@ -543,7 +543,7 @@ private fun parseOverrideKonanProperties(
         configuration: CompilerConfiguration
 ): Map<String, String>? = parseKeyValuePairs(arguments.overrideKonanProperties, configuration)
 
-private fun parseKeyValuePairs(
+fun parseKeyValuePairs(
         argumentValue: Array<String>?,
         configuration: CompilerConfiguration
 ): Map<String, String>? = argumentValue?.mapNotNull {
