@@ -196,7 +196,9 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         } /*else if (inlinedBlock.isLambdaInlining()) {
             callSite = sourceMapCopierStack.lastOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
         }*/ else {
-            if (inlineBlockStack.isNotEmpty() && inTheSameFileAsFirstCallee()) {
+            if (inlinedBlock.isLambdaInlining()) {
+                callSite = sourceMapCopierStack.lastOrNull()?.callSite
+            } else if (inlineBlockStack.isNotEmpty() && inTheSameFileAsFirstCallee(inlinedBlock)) {
                 // must find proper `theSameFile` function
                 sourceMapCopierStack.lastOrNull()?.callSite?.let { oldCallSite ->
                     val offset = inlinedBlock.inlineCall.startOffset
@@ -216,9 +218,14 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         sourceMapCopierStack.add(0, newCopier)
     }
 
-    private fun inTheSameFileAsFirstCallee(): Boolean {
+    private fun inTheSameFileAsFirstCallee(inlinedBlock: IrInlinedFunctionBlock): Boolean {
         if (inlineBlockStack.isEmpty()) return true
-        return inlineBlockStack.first().inlineDeclaration.parent == irFunction
+        val fileForFirstInlineCall = irFunction.fileParentBeforeInline
+        if (inlinedBlock.isLambdaInlining()) {
+            return false//inlinedBlock.inlineDeclaration.fileParentBeforeInline == fileForFirstInlineCall
+        } else {
+            return inlineBlockStack.first().inlineDeclaration.fileParentBeforeInline == fileForFirstInlineCall
+        }
     }
 
     private fun setUpAdditionalLineNumbersBeforeLambdaInlining(inlinedBlock: IrInlinedFunctionBlock) {
