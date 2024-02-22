@@ -178,7 +178,9 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //            sourcePosition
 //        }
         var callSite: SourcePosition? = null
-        if (inlineBlockStack.isEmpty() && !inlinedBlock.isLambdaInlining()) {
+        if (inlinedBlock.isLambdaInlining()) {
+            callSite = sourceMapCopierStack.lastOrNull()?.callSite
+        } else if (inlineBlockStack.isEmpty()) {
             val currentFile = irFunction.fileParentBeforeInline
 
             val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
@@ -193,12 +195,8 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //            val offset = inlinedBlock.inlineCall.startOffset
             val line = lastLineNumberBeforeInline//currentFile.fileEntry.getLineNumber(offset) + 1
             callSite = SourcePosition(line, sourceFileName, type.internalName)
-        } /*else if (inlinedBlock.isLambdaInlining()) {
-            callSite = sourceMapCopierStack.lastOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
-        }*/ else {
-            if (inlinedBlock.isLambdaInlining()) {
-                callSite = sourceMapCopierStack.lastOrNull()?.callSite
-            } else if (inlineBlockStack.isNotEmpty() && inTheSameFileAsFirstCallee(inlinedBlock)) {
+        } else {
+            if (inTheSameDeclarationAsFirstCallee(inlinedBlock)) {
                 // must find proper `theSameFile` function
                 sourceMapCopierStack.lastOrNull()?.callSite?.let { oldCallSite ->
                     val offset = inlinedBlock.inlineCall.startOffset
@@ -206,7 +204,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
                     callSite = SourcePosition(line, oldCallSite.file, oldCallSite.path)
                 }
             } else {
-                callSite = sourceMapCopierStack.lastOrNull()?.callSite
+//                callSite = sourceMapCopierStack.lastOrNull()?.callSite
             }
         }
 
@@ -218,13 +216,13 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         sourceMapCopierStack.add(0, newCopier)
     }
 
-    private fun inTheSameFileAsFirstCallee(inlinedBlock: IrInlinedFunctionBlock): Boolean {
+    private fun inTheSameDeclarationAsFirstCallee(inlinedBlock: IrInlinedFunctionBlock): Boolean {
         if (inlineBlockStack.isEmpty()) return true
-        val fileForFirstInlineCall = irFunction.fileParentBeforeInline
+        val declarationForFirstInlineCall = irFunction
         if (inlinedBlock.isLambdaInlining()) {
             return false//inlinedBlock.inlineDeclaration.fileParentBeforeInline == fileForFirstInlineCall
         } else {
-            return inlineBlockStack.first().inlineDeclaration.fileParentBeforeInline == fileForFirstInlineCall
+            return inlineBlockStack.first().inlineDeclaration.parents.any { it == declarationForFirstInlineCall }
         }
     }
 
