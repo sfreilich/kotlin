@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.codegen.inline.SourceMapCopier
 import org.jetbrains.kotlin.codegen.inline.SourceMapper
 import org.jetbrains.kotlin.codegen.inline.SourcePosition
 import org.jetbrains.kotlin.ir.IrElement
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.name
@@ -22,6 +23,9 @@ import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
 import org.jetbrains.kotlin.ir.expressions.IrInlinedFunctionBlock
 import org.jetbrains.kotlin.ir.util.*
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
+import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
+import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.util.OperatorNameConventions
 import org.jetbrains.org.objectweb.asm.Label
 import kotlin.contracts.ExperimentalContracts
@@ -147,40 +151,8 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock/*, classSMAP: SMAP, data: BlockInfo*/) {
-        // TODO can I do KotlinDebug to be the same as for bytecode inliner?
-//        val callSite = if (inlinedBlock.isLambdaInlining()) {
-//            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
-//            callSite
-//        } else {
-//            val currentFile = if (inlineBlockStack.isEmpty()) {
-//                irFunction.fileParentBeforeInline
-//            } else {
-//                inlineBlockStack.last().inlineDeclaration.fileParentBeforeInline
-//            }
-//
-//            val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
-//                is MultifileFacadeFileEntry -> currentFileEntry.partFiles.single().name
-//                else -> currentFile.name
-//            }
-//
-//            val currentClass = if (inlineBlockStack.isEmpty()) {
-//                expressionCodegen.classCodegen.irClass
-//            } else {
-//                inlineBlockStack.last().inlineDeclaration.parentClassOrNull!!
-//            }
-//            val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
-//                ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
-//
-//            val offset = inlinedBlock.inlineCall.startOffset
-//            val line = currentFile.fileEntry.getLineNumber(offset) + 1
-//
-//            val sourcePosition = SourcePosition(line, sourceFileName, type.internalName)
-//            sourcePosition
-//        }
         var callSite: SourcePosition? = null
-        if (inlinedBlock.isLambdaInlining()) {
-            callSite = sourceMapCopierStack.lastOrNull()?.callSite
-        } else if (inlineBlockStack.isEmpty()) {
+        if (inlinedBlock.isFunctionInlining()) {
             val currentFile = irFunction.fileParentBeforeInline
 
             val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
@@ -195,25 +167,12 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //            val offset = inlinedBlock.inlineCall.startOffset
             val line = lastLineNumberBeforeInline//currentFile.fileEntry.getLineNumber(offset) + 1
             callSite = SourcePosition(line, sourceFileName, type.internalName)
-        } else {
-            if (inTheSameDeclarationAsFirstCallee(inlinedBlock)) {
-                // must find proper `theSameFile` function
-                sourceMapCopierStack.lastOrNull()?.callSite?.let { oldCallSite ->
-                    val offset = inlinedBlock.inlineCall.startOffset
-                    val line = irFunction.fileParentBeforeInline.fileEntry.getLineNumber(offset) + 1
-                    callSite = SourcePosition(line, oldCallSite.file, oldCallSite.path)
-                }
-            } else {
-//                callSite = sourceMapCopierStack.lastOrNull()?.callSite
-            }
         }
 
-        val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
-        val emptySMAP = SMAP(emptySourceMapper.resultMappings)
-        val newCopier = SourceMapCopier(smap, emptySMAP, callSite)
-
+//        val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
+        val newSMAP = generateSMAPFor(inlinedBlock)
         inlineBlockStack.add(0, inlinedBlock)
-        sourceMapCopierStack.add(0, newCopier)
+        sourceMapCopierStack.add(0, SourceMapCopier(smap, newSMAP, callSite))
     }
 
     private fun inTheSameDeclarationAsFirstCallee(inlinedBlock: IrInlinedFunctionBlock): Boolean {
@@ -277,4 +236,99 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 
         return default?.function == expected
     }
+
+    /// ------------------------------------------------------ \\\
+    private fun generateSMAPFor(inlinedBlock: IrInlinedFunctionBlock, previousSourceMapper: SourceMapper? = null): SMAP {
+        val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
+        val emptySMAP = SMAP(emptySourceMapper.resultMappings)
+
+//        val callSite = if (inlinedBlock.isFunctionInlining()) {
+//            val currentFile = if (inlineBlockStack.isEmpty()) {
+//                irFunction.fileParentBeforeInline
+//            } else {
+//                inlinedBlock.inlineDeclaration.fileParentBeforeInline
+//            }
+//
+//            val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
+//                is MultifileFacadeFileEntry -> currentFileEntry.partFiles.single().name
+//                else -> currentFile.name
+//            }
+//
+//            val currentClass = if (inlineBlockStack.isEmpty()) {
+//                expressionCodegen.classCodegen.irClass
+//            } else {
+//                inlineBlockStack.last().inlineDeclaration.parentClassOrNull!!
+//            }
+//            val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
+//                ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
+//
+//            val offset = inlinedBlock.inlineCall.startOffset
+//            val line = currentFile.fileEntry.getLineNumber(offset) + 1
+//
+//            val sourcePosition = SourcePosition(line, sourceFileName, type.internalName)
+//            sourcePosition
+//        } else {
+//            null
+//        }
+//
+//        inlineBlockStack.add(0, inlinedBlock)
+
+        val newCopier = SourceMapCopier(/*previousSourceMapper ?: */emptySourceMapper, emptySMAP, )
+        inlinedBlock.inlineDeclaration.acceptVoid(SMAPVisitor2(inlinedBlock.inlineDeclaration, newCopier))
+        val newSMAP = SMAP(newCopier.parent.resultMappings)
+//        inlinedBlock.inlineDeclaration.let {
+//            val file = it.fileParentBeforeInline
+//            val offset = it.startOffset
+//            val line = file.fileEntry.getLineNumber(offset) + 1
+//            newCopier.mapLineNumber(line)
+//        }
+//        inlineBlockStack.removeFirst()
+        return newSMAP
+    }
+
+//    private inner class SMAPVisitor(
+//        private val inlinedBlock: IrInlinedFunctionBlock,
+//        private val sourceMapCopier: SourceMapCopier
+//    ) : IrElementVisitorVoid {
+//        override fun visitElement(element: IrElement) {
+//            val currentFileEntry = inlinedBlock.inlineDeclaration.fileParentBeforeInline.fileEntry //?: fileEntry
+//            val lineNumber = currentFileEntry.getLineNumber(element.startOffset) + 1
+//            sourceMapCopier.mapLineNumber(lineNumber)
+//
+//            element.acceptChildrenVoid(this)
+//        }
+//
+//        override fun visitInlinedFunctionBlock(inlinedBlock: IrInlinedFunctionBlock) {
+//            if (inlinedBlock != this.inlinedBlock) {
+//                val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
+//                val newCopier = SourceMapCopier(emptySourceMapper, SMAP(emptySourceMapper.resultMappings))
+//                SMAPVisitor2(inlinedBlock.inlineDeclaration, newCopier).visitElement(inlinedBlock.inlineDeclaration)
+//                val newSMAP = SMAP(emptySourceMapper.resultMappings)
+//                generateSMAPFor(inlinedBlock, newSMAP, sourceMapCopier.parent)
+//            } else {
+//                visitElement(inlinedBlock)
+//            }
+//        }
+//    }
+
+    private inner class SMAPVisitor2(
+        private val declaration: IrDeclaration,
+        private val sourceMapCopier: SourceMapCopier
+    ) : IrElementVisitorVoid {
+        override fun visitElement(element: IrElement) {
+//            val currentFileEntry = originalDeclaration.fileParentBeforeInline.fileEntry //?: fileEntry
+//            val lineNumber = currentFileEntry.getLineNumber(element.startOffset) + 1
+//            sourceMapCopier.mapLineNumber(lineNumber)
+
+            element.acceptChildrenVoid(this)
+        }
+
+        override fun visitInlinedFunctionBlock(inlinedBlock: IrInlinedFunctionBlock) {
+//            val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
+//            val newCopier = SourceMapCopier(emptySourceMapper, SMAP(emptySourceMapper.resultMappings))
+//            val newSMAP = SMAP(emptySourceMapper.resultMappings)
+            generateSMAPFor(inlinedBlock, sourceMapCopier.parent)
+        }
+    }
 }
+
