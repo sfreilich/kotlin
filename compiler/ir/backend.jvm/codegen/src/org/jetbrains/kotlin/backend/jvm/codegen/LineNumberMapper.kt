@@ -150,7 +150,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         return line
     }
 
-    fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP/*, data: BlockInfo*/) {
+    fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock/*, classSMAP: SMAP, data: BlockInfo*/) {
         // TODO can I do KotlinDebug to be the same as for bytecode inliner?
         inlineBlockStack.add(0, inlinedBlock)
         val callSite = if (inlinedBlock.isLambdaInlining()) {
@@ -204,7 +204,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 
         val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
         val emptySMAP = SMAP(emptySourceMapper.resultMappings)
-        val newCopier = SourceMapCopier(smap, classSMAP, callSite)
+        val newCopier = SourceMapCopier(smap, emptySMAP, callSite)
 
         sourceMapCopierStack.add(0, newCopier)
     }
