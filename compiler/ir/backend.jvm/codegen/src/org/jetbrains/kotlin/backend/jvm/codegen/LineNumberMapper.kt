@@ -173,10 +173,9 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
             callSite = SourcePosition(line, sourceFileName, type.internalName)
         }
 
-//        val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
-//        val emptySMAP = SMAP(emptySourceMapper.resultMappings)
-        val classSMAP = getSmapFor(inlinedBlock.inlineDeclaration)
-        val newCopier = SourceMapCopier(smap, classSMAP, callSite)
+        val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
+        val emptySMAP = SMAP(emptySourceMapper.resultMappings)
+        val newCopier = SourceMapCopier(smap, emptySMAP, callSite)
 
         inlineBlockStack.add(0, inlinedBlock)
         sourceMapCopierStack.add(0, newCopier)
