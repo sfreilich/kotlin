@@ -48,6 +48,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     private var noLineNumberScope: Boolean = false
 
     private val sourceMapCopierStack = mutableListOf<SourceMapCopier>()
+    private val SMAPStack = mutableListOf<SMAP>()
     private val inlineBlockStack = mutableListOf<IrInlinedFunctionBlock>()
 
     private data class DataForIrInlinedFunction(
@@ -137,6 +138,7 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     fun dropCurrentSmap() {
         sourceMapCopierStack.removeFirst()
         inlineBlockStack.removeFirst()
+        SMAPStack.removeFirst()
     }
 
     private fun getLineNumberForOffset(offset: Int): Int {
@@ -206,7 +208,13 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         val emptySMAP = SMAP(emptySourceMapper.resultMappings)
         val newCopier = SourceMapCopier(smap, emptySMAP, callSite)
 
-        sourceMapCopierStack.add(0, newCopier)
+        if (SMAPStack.isNotEmpty() && SMAPStack.first().fileMappings.zip(emptySourceMapper.resultMappings).all { it.first.name == it.second.name && it.first.path == it.second.path } ) {
+            sourceMapCopierStack.add(0, sourceMapCopierStack.first())
+            SMAPStack.add(0, emptySMAP)
+        } else {
+            sourceMapCopierStack.add(0, newCopier)
+            SMAPStack.add(0, emptySMAP)
+        }
     }
 
     private fun inTheSameDeclarationAsFirstCallee(inlinedBlock: IrInlinedFunctionBlock): Boolean {
