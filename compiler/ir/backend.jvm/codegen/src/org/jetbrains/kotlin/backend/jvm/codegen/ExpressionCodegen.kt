@@ -473,7 +473,7 @@ class ExpressionCodegen(
             inlineCall.markLineNumber(startOffset = true)
             mv.nop()
 
-            lineNumberMapper.buildSmapFor(inlinedBlock/*, inlinedBlock.buildOrGetClassSMAP(info), info*/)
+            lineNumberMapper.buildSmapFor(inlinedBlock, inlinedBlock.buildOrGetClassSMAP(info)/*, info*/)
 
             if (inlineCall.usesDefaultArguments()) {
                 // $default function has first LN pointing to original callee
@@ -531,34 +531,34 @@ class ExpressionCodegen(
         return parent.declarations.singleOrNull { it.origin == JvmLoweredDeclarationOrigin.DEFAULT_IMPLS } as IrClass
     }
 
-//    private fun IrInlinedFunctionBlock.buildOrGetClassSMAP(data: BlockInfo): SMAP {
-//        if (this.isLambdaInlining()) {
-//            return context.typeToCachedSMAP[context.getLocalClassType(this.inlinedElement as IrAttributeContainer)]!!
-//        }
-//
-//        val callee = this.inlineDeclaration
-//        val calleeFromActualClass = callee.getClassWithDeclaredFunction()!!.declarations
-//            .asSequence()
-//            .filterIsInstance<IrSimpleFunction>()
-//            .filter { it.attributeOwnerId == callee } // original callee could be transformed after lowerings, so we must get correct one
-//            .filter {
-//                if (inlineCall.usesDefaultArguments()) it.origin == IrDeclarationOrigin.FUNCTION_FOR_DEFAULT_PARAMETER
-//                else it.origin != IrDeclarationOrigin.FUNCTION_FOR_DEFAULT_PARAMETER
-//            }
-//            .filter { it.origin != JvmLoweredDeclarationOrigin.FOR_INLINE_STATE_MACHINE_TEMPLATE } // filter functions with $$forInline postfix
-//            .single()
-//
-//        val nodeAndSmap = calleeFromActualClass.let { actualCallee ->
-//            val callToActualCallee = IrCallImpl.fromSymbolOwner(
-//                inlineCall.startOffset, inlineCall.endOffset, inlineCall.type, actualCallee.symbol
-//            )
-//            val callable = methodSignatureMapper.mapToCallableMethod(callToActualCallee, null)
-//            val callGenerator = getOrCreateCallGenerator(callToActualCallee, data, callable.signature)
-//            (callGenerator as IrInlineCodegen).compileInline()
-//        }
-//
-//        return nodeAndSmap.classSMAP
-//    }
+    private fun IrInlinedFunctionBlock.buildOrGetClassSMAP(data: BlockInfo): SMAP {
+        if (this.isLambdaInlining()) {
+            return context.typeToCachedSMAP[context.getLocalClassType(this.inlinedElement as IrAttributeContainer)]!!
+        }
+
+        val callee = this.inlineDeclaration
+        val calleeFromActualClass = callee.getClassWithDeclaredFunction()!!.declarations
+            .asSequence()
+            .filterIsInstance<IrSimpleFunction>()
+            .filter { it.attributeOwnerId == callee } // original callee could be transformed after lowerings, so we must get correct one
+            .filter {
+                if (inlineCall.usesDefaultArguments()) it.origin == IrDeclarationOrigin.FUNCTION_FOR_DEFAULT_PARAMETER
+                else it.origin != IrDeclarationOrigin.FUNCTION_FOR_DEFAULT_PARAMETER
+            }
+            .filter { it.origin != JvmLoweredDeclarationOrigin.FOR_INLINE_STATE_MACHINE_TEMPLATE } // filter functions with $$forInline postfix
+            .single()
+
+        val nodeAndSmap = calleeFromActualClass.let { actualCallee ->
+            val callToActualCallee = IrCallImpl.fromSymbolOwner(
+                inlineCall.startOffset, inlineCall.endOffset, inlineCall.type, actualCallee.symbol
+            )
+            val callable = methodSignatureMapper.mapToCallableMethod(callToActualCallee, null)
+            val callGenerator = getOrCreateCallGenerator(callToActualCallee, data, callable.signature)
+            (callGenerator as IrInlineCodegen).compileInline()
+        }
+
+        return nodeAndSmap.classSMAP
+    }
 
     private fun visitStatementContainer(container: IrStatementContainer, data: BlockInfo): PromisedValue {
         return container.statements.fold(unitValue) { prev, exp ->

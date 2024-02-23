@@ -150,13 +150,13 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
         return line
     }
 
-    fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock/*, classSMAP: SMAP, data: BlockInfo*/) {
+    fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock, classSMAP: SMAP/*, data: BlockInfo*/) {
         // TODO can I do KotlinDebug to be the same as for bytecode inliner?
         inlineBlockStack.add(0, inlinedBlock)
-//        val callSite = if (inlinedBlock.isLambdaInlining()) {
-//            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
-//            callSite
-//        } else {
+        val callSite = if (inlinedBlock.isLambdaInlining()) {
+            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
+            callSite
+        } else {
 //            val currentFile = if (inlineBlockStack.size == 1) {
 //                irFunction.fileParentBeforeInline
 //            } else {
@@ -200,11 +200,11 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 //            val line = currentFile.fileEntry.getLineNumber(offset) + 1
 //            val callSite = SourcePosition(line, sourceFileName, type.internalName)
 //            callSite
-//        }
+        }
 
         val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
         val emptySMAP = SMAP(emptySourceMapper.resultMappings)
-        val newCopier = SourceMapCopier(smap, emptySMAP, callSite)
+        val newCopier = SourceMapCopier(smap, classSMAP, callSite)
 
         sourceMapCopierStack.add(0, newCopier)
     }
