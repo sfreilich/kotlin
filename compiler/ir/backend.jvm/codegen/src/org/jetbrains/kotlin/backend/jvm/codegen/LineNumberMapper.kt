@@ -153,34 +153,9 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
     }
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock/*, classSMAP: SMAP, data: BlockInfo*/) {
-        // TODO can I do KotlinDebug to be the same as for bytecode inliner?
         val callSite = if (inlinedBlock.isLambdaInlining()) {
             null
         } else {
-//            val currentFile = if (inlineBlockStack.size == 1) {
-//                irFunction.fileParentBeforeInline
-//            } else {
-//                inlineBlockStack[inlineBlockStack.size - 2].inlineDeclaration.fileParentBeforeInline
-//            }
-//
-//            val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
-//                is MultifileFacadeFileEntry -> currentFileEntry.partFiles.single().name
-//                else -> currentFile.name
-//            }
-//
-//            val currentClass = if (inlineBlockStack.size == 1) {
-//                expressionCodegen.classCodegen.irClass
-//            } else {
-//                inlineBlockStack[inlineBlockStack.size - 2].inlineDeclaration.parentClassOrNull!!
-//            }
-//            val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
-//                ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
-//
-//            val offset = inlinedBlock.inlineCall.startOffset
-//            val line = currentFile.fileEntry.getLineNumber(offset) + 1
-//
-//            val sourcePosition = SourcePosition(line, sourceFileName, type.internalName)
-//            sourcePosition
             val currentFile = irFunction.fileParentBeforeInline
 
             val sourceFileName = when (val currentFileEntry = currentFile.fileEntry) {
