@@ -154,10 +154,8 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 
     fun buildSmapFor(inlinedBlock: IrInlinedFunctionBlock/*, classSMAP: SMAP, data: BlockInfo*/) {
         // TODO can I do KotlinDebug to be the same as for bytecode inliner?
-        inlineBlockStack.add(0, inlinedBlock)
         val callSite = if (inlinedBlock.isLambdaInlining()) {
-            val callSite = sourceMapCopierStack.firstOrNull()?.callSite?.takeIf { inlinedBlock.isInvokeOnDefaultArg() }
-            callSite
+            null
         } else {
 //            val currentFile = if (inlineBlockStack.size == 1) {
 //                irFunction.fileParentBeforeInline
@@ -194,14 +192,16 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
             val type = currentClass.getAttributeOwnerBeforeInline()?.let { expressionCodegen.context.getLocalClassType(it) }
                 ?: expressionCodegen.context.defaultTypeMapper.mapClass(currentClass)
 
-            val line = lastLineNumberBeforeInline
-            val callSite = SourcePosition(line, sourceFileName, type.internalName)
-            callSite
-
-//            val offset = inlinedBlock.inlineCall.startOffset
-//            val line = currentFile.fileEntry.getLineNumber(offset) + 1
-//            val callSite = SourcePosition(line, sourceFileName, type.internalName)
-//            callSite
+            if (inTheSameDeclarationAsFirstCallee(inlinedBlock)) {
+                val offset = inlinedBlock.inlineCall.startOffset
+                val line = (currentFile.fileEntry.getLineNumber(offset) + 1).takeIf { it != 0 } ?: lastLineNumberBeforeInline
+                val callSite = SourcePosition(line, sourceFileName, type.internalName)
+                callSite
+            } else {
+                val line = lastLineNumberBeforeInline
+                val callSite = SourcePosition(line, sourceFileName, type.internalName)
+                callSite
+            }
         }
 
         val emptySourceMapper = expressionCodegen.context.getSourceMapper(inlinedBlock.inlineDeclaration.parentClassOrNull!!)
@@ -210,11 +210,11 @@ class LineNumberMapper(private val expressionCodegen: ExpressionCodegen) {
 
         if (SMAPStack.isNotEmpty() && SMAPStack.first().fileMappings.zip(emptySourceMapper.resultMappings).all { it.first.name == it.second.name && it.first.path == it.second.path } ) {
             sourceMapCopierStack.add(0, sourceMapCopierStack.first())
-            SMAPStack.add(0, emptySMAP)
         } else {
             sourceMapCopierStack.add(0, newCopier)
-            SMAPStack.add(0, emptySMAP)
         }
+        inlineBlockStack.add(0, inlinedBlock)
+        SMAPStack.add(0, emptySMAP)
     }
 
     private fun inTheSameDeclarationAsFirstCallee(inlinedBlock: IrInlinedFunctionBlock): Boolean {
