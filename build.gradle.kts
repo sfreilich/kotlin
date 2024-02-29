@@ -814,6 +814,9 @@ tasks {
         dependsOn(":native:native.tests:test")
         dependsOn(":native:objcexport-header-generator:check")
         dependsOn(":kotlin-atomicfu-compiler-plugin:nativeTest")
+        // :native:swift:swift-export-standalone:test are run in their own separate build
+        dependsOn(":analysis:analysis-api-standalone:analysis-api-standalone-native:test")
+        dependsOn(":analysis:low-level-api-fir:low-level-api-fir-native:llFirNativeTests")
     }
 
     // These are unit tests of Native compiler
