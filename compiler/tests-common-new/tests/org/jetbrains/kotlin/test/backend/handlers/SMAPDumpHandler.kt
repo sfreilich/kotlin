@@ -80,7 +80,9 @@ class SMAPDumpHandler(testServices: TestServices) : JvmBinaryArtifactHandler(tes
         val expectedFile = testDataFile.withExtension(extension)
         assertions.assertEqualsToFile(expectedFile, dumper.generateResultingDump())
 
+        // TODO `isSeparateCompilation` always false
         if (separateDumpEnabled && isSeparateCompilation) {
+            // TODO `if` below can be simplified
             val otherExtension = if (isSeparateCompilation) SMAP_NON_SEP_EXT else SMAP_SEP_EXT
             val otherFile = expectedFile.withExtension(otherExtension)
             if (!otherFile.exists()) return
