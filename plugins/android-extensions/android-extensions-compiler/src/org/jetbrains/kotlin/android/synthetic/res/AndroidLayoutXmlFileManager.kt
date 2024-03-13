@@ -146,6 +146,7 @@ abstract class AndroidLayoutXmlFileManager(val project: Project) {
         fun getInstance(module: Module): AndroidLayoutXmlFileManager? {
             @Suppress("DEPRECATION")
             val service = com.intellij.openapi.module.ModuleServiceManager.getService(module, AndroidLayoutXmlFileManager::class.java)
+            @Suppress("DEPRECATION")
             return service ?: module.getComponent(AndroidLayoutXmlFileManager::class.java)
         }
     }
