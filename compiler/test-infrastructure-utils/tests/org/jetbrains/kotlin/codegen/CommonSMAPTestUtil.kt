@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.codegen
 import com.intellij.openapi.util.io.FileUtil
 import org.jetbrains.kotlin.backend.common.output.OutputFile
 import org.jetbrains.kotlin.codegen.inline.RangeMapping
+import org.jetbrains.kotlin.codegen.inline.SMAP
 import org.jetbrains.kotlin.codegen.inline.SMAPParser
 import org.jetbrains.kotlin.codegen.inline.toRange
 import org.jetbrains.kotlin.load.java.JvmAnnotationNames
@@ -89,6 +90,24 @@ object CommonSMAPTestUtil {
                 }
             }
         }
+    }
+
+    fun areEqual(smap1: List<SMAP>, smap2: List<SMAP>): Boolean {
+        if (smap1.size != smap2.size) return false
+        return smap1.zip(smap2).all { areEqual(it.first, it.second) }
+    }
+
+    fun areEqual(smap1: SMAP, smap2: SMAP): Boolean {
+        smap1.fileMappings.forEach { fileMapping ->
+            fileMapping.lineMappings
+        }
+        return false
+        //TODO
+    }
+
+    fun parseSmapFile(smapFileContent: String): List<SMAP> {
+        val smapAsText = "SMAP.+?\\*E".toRegex(RegexOption.DOT_MATCHES_ALL).findAll(smapFileContent).toList()
+        return smapAsText.mapNotNull { SMAPParser.parseOrNull(it.value) }
     }
 
     class SMAPAndFile(val smap: String?, val sourceFile: String, val outputFile: String) {

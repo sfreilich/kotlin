@@ -78,7 +78,11 @@ class SMAPDumpHandler(testServices: TestServices) : JvmBinaryArtifactHandler(tes
 
         val testDataFile = testServices.moduleStructure.originalTestDataFiles.first()
         val expectedFile = testDataFile.withExtension(extension)
-        assertions.assertEqualsToFile(expectedFile, dumper.generateResultingDump())
+        val expectedText = expectedFile.readText()
+        val actualText = dumper.generateResultingDump()
+        if (expectedText != actualText || !CommonSMAPTestUtil.areEqual(CommonSMAPTestUtil.parseSmapFile(expectedText), CommonSMAPTestUtil.parseSmapFile(actualText))) {
+            assertions.assertEqualsToFile(expectedFile, dumper.generateResultingDump())
+        }
 
         // TODO `isSeparateCompilation` always false
         if (separateDumpEnabled && isSeparateCompilation) {
