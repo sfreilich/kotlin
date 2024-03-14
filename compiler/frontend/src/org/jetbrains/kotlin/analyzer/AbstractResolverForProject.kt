@@ -143,8 +143,6 @@ abstract class AbstractResolverForProject<M : ModuleInfo>(
             resolverByModuleDescriptor.getOrPut(descriptor) {
                 checkModuleIsCorrect(module)
 
-                ResolverForModuleComputationTracker.getInstance(projectContext.project)?.onResolverComputed(module)
-
                 createResolverForModule(descriptor, module)
             }
         }

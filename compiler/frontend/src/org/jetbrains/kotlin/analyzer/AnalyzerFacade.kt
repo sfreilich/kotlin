@@ -113,9 +113,6 @@ fun ModuleInfo.flatten(): List<ModuleInfo> = when (this) {
 
 fun ModuleInfo.unwrapPlatform(): ModuleInfo = if (this is CombinedModuleInfo) platformModule else this
 
-interface LibraryModuleSourceInfoBase : ModuleInfo
-interface NonSourceModuleInfoBase : ModuleInfo
-
 abstract class ResolverForModuleFactory {
     open fun <M : ModuleInfo> createResolverForModule(
         moduleDescriptor: ModuleDescriptorImpl,
@@ -293,17 +290,6 @@ interface LanguageSettingsProvider {
         ) = LanguageVersionSettingsImpl.DEFAULT
 
         override fun getTargetPlatform(moduleInfo: ModuleInfo, project: Project): TargetPlatformVersion = TargetPlatformVersion.NoVersion
-    }
-}
-
-interface ResolverForModuleComputationTracker {
-
-    fun onResolverComputed(moduleInfo: ModuleInfo)
-
-    companion object {
-        @Suppress("DEPRECATION")
-        fun getInstance(project: Project): ResolverForModuleComputationTracker? =
-            project.getComponent(ResolverForModuleComputationTracker::class.java) ?: null
     }
 }
 
