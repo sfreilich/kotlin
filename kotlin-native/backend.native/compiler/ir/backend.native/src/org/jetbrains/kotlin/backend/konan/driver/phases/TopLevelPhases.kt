@@ -284,6 +284,7 @@ internal fun PhaseEngine<NativeGenerationState>.compileModule(module: IrModuleFr
         runPhase(SaveAdditionalCacheInfoPhase)
     }
     runPhase(WriteBitcodeFilePhase, WriteBitcodeFileInput(context.llvm.module, bitcodeFile))
+//    runPhase(PrintBitcodePhase, context.llvm.module)
 }
 
 
