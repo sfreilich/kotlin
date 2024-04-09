@@ -23,7 +23,8 @@ internal class FirResolvedErrorReferenceImpl(
     override val name: Name,
     override val resolvedSymbol: FirBasedSymbol<*>,
     override val diagnostic: ConeDiagnostic,
-) : FirResolvedErrorReference() {
+) : FirResolvedErrorReference(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

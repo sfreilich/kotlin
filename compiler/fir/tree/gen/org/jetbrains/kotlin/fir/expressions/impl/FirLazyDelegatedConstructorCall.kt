@@ -25,7 +25,8 @@ class FirLazyDelegatedConstructorCall @FirImplementationDetail constructor(
     override var constructedTypeRef: FirTypeRef,
     override var calleeReference: FirReference,
     override val isThis: Boolean,
-) : FirDelegatedConstructorCall() {
+) : FirDelegatedConstructorCall(
+) {
     override val annotations: List<FirAnnotation>
         get() = error("FirLazyDelegatedConstructorCall should be calculated before accessing")
     override val argumentList: FirArgumentList

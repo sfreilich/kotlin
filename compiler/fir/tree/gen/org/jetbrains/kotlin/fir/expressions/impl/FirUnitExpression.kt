@@ -32,7 +32,8 @@ import org.jetbrains.kotlin.name.StandardClassIds
 class FirUnitExpression @FirImplementationDetail constructor(
     override val source: KtSourceElement?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
-) : FirExpression() {
+) : FirExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override val coneTypeOrNull: ConeKotlinType? = StandardClassIds.Unit.constructClassLikeType()
 

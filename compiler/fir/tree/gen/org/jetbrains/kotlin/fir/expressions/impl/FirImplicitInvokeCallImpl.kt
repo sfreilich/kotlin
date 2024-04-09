@@ -39,7 +39,8 @@ internal class FirImplicitInvokeCallImpl(
     override var argumentList: FirArgumentList,
     override var calleeReference: FirNamedReference,
     override val isCallWithExplicitReceiver: Boolean,
-) : FirImplicitInvokeCall() {
+) : FirImplicitInvokeCall(
+) {
     override val origin: FirFunctionCallOrigin = FirFunctionCallOrigin.Operator
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

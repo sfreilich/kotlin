@@ -21,7 +21,8 @@ internal class FirImplicitThisReference(
     override val boundSymbol: FirBasedSymbol<*>?,
     override var contextReceiverNumber: Int,
     override var diagnostic: ConeDiagnostic?,
-) : FirThisReference() {
+) : FirThisReference(
+) {
     override val source: KtSourceElement?
         get() = null
     override val labelName: String?

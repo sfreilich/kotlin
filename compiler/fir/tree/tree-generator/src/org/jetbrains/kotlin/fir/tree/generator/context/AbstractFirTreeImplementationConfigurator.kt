@@ -16,6 +16,9 @@ import org.jetbrains.kotlin.generators.tree.config.AbstractImplementationConfigu
 abstract class AbstractFirTreeImplementationConfigurator :
     AbstractImplementationConfigurator<Implementation, Element, Field, FieldWithDefault>() {
 
+    override val doHoistFieldsInBaseClasses: Boolean
+        get() = false
+
     final override fun createImplementation(element: Element, name: String?) = Implementation(element, name)
 
     protected fun ImplementationContext.defaultNoReceivers() {

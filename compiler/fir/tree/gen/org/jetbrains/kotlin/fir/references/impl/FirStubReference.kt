@@ -11,11 +11,14 @@
 package org.jetbrains.kotlin.fir.references.impl
 
 import org.jetbrains.kotlin.KtSourceElement
+import org.jetbrains.kotlin.fir.FirImplementationDetail
 import org.jetbrains.kotlin.fir.references.FirReference
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.FirVisitor
 
-object FirStubReference : FirReference() {
+object FirStubReference @FirImplementationDetail constructor(
+) : FirReference(
+) {
     override val source: KtSourceElement?
         get() = null
 

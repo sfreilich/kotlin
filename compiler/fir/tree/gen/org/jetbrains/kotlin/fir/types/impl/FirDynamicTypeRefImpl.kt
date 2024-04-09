@@ -23,7 +23,8 @@ internal class FirDynamicTypeRefImpl(
     override val source: KtSourceElement?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val isMarkedNullable: Boolean,
-) : FirDynamicTypeRef() {
+) : FirDynamicTypeRef(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

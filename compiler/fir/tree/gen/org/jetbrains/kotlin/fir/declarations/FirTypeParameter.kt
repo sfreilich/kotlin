@@ -25,6 +25,8 @@ import org.jetbrains.kotlin.types.Variance
  */
 abstract class FirTypeParameter : FirDeclaration(), FirTypeParameterRef {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin
     abstract override val attributes: FirDeclarationAttributes

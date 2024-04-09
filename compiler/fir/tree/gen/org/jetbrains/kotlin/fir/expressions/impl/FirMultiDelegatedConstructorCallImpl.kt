@@ -21,7 +21,8 @@ import org.jetbrains.kotlin.fir.visitors.transformInplace
 
 class FirMultiDelegatedConstructorCallImpl @FirImplementationDetail constructor(
     override val delegatedConstructorCalls: MutableList<FirDelegatedConstructorCall>,
-) : FirMultiDelegatedConstructorCall() {
+) : FirMultiDelegatedConstructorCall(
+) {
     override val annotations: List<FirAnnotation>
         get() = delegatedConstructorCalls.last().annotations
     override val argumentList: FirArgumentList

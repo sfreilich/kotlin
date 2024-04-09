@@ -19,7 +19,8 @@ import org.jetbrains.kotlin.name.FqName
 internal class FirPackageDirectiveImpl(
     override val source: KtSourceElement?,
     override val packageFqName: FqName,
-) : FirPackageDirective() {
+) : FirPackageDirective(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

@@ -20,8 +20,9 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
 
 internal class FirLazyExpressionImpl(
     override val source: KtSourceElement?,
-) : FirLazyExpression() {
-    @OptIn(UnresolvedExpressionTypeAccess::class)
+) : FirLazyExpression(
+) {
+    @UnresolvedExpressionTypeAccess
     override val coneTypeOrNull: ConeKotlinType?
         get() = error("FirLazyExpression should be calculated before accessing")
     override val annotations: List<FirAnnotation>

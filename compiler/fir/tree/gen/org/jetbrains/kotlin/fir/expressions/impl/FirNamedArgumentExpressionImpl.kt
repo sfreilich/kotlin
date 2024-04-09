@@ -29,8 +29,9 @@ internal class FirNamedArgumentExpressionImpl(
     override var expression: FirExpression,
     override val isSpread: Boolean,
     override val name: Name,
-) : FirNamedArgumentExpression() {
-    @OptIn(UnresolvedExpressionTypeAccess::class)
+) : FirNamedArgumentExpression(
+) {
+    @UnresolvedExpressionTypeAccess
     override val coneTypeOrNull: ConeKotlinType?
         get() = expression.coneTypeOrNull
 

@@ -73,6 +73,7 @@ open class FirFieldBuilder : FirVariableBuilder, FirAnnotationContainerBuilder {
     }
 
 
+
     @Deprecated("Modification of 'receiverParameter' has no impact for FirFieldBuilder", level = DeprecationLevel.HIDDEN)
     override var receiverParameter: FirReceiverParameter?
         get() = throw IllegalStateException()

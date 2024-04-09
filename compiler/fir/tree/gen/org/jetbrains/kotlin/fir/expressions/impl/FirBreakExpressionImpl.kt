@@ -30,7 +30,8 @@ internal class FirBreakExpressionImpl(
     override val source: KtSourceElement?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val target: FirTarget<FirLoop>,
-) : FirBreakExpression() {
+) : FirBreakExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override val coneTypeOrNull: ConeKotlinType? = StandardClassIds.Nothing.constructClassLikeType()
 

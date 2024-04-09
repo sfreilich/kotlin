@@ -36,7 +36,8 @@ internal class FirSmartCastExpressionImpl(
     override var smartcastType: FirTypeRef,
     override var smartcastTypeWithoutNullableNothing: FirTypeRef?,
     override val smartcastStability: SmartcastStability,
-) : FirSmartCastExpression() {
+) : FirSmartCastExpression(
+) {
     override val source: KtSourceElement? = originalExpression.source?.fakeElement(KtFakeSourceElementKind.SmartCastExpression)
     override val isStable: Boolean
         get() = smartcastStability == SmartcastStability.STABLE_VALUE

@@ -24,8 +24,9 @@ internal class FirWrappedDelegateExpressionImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var expression: FirExpression,
     override var provideDelegateCall: FirFunctionCall,
-) : FirWrappedDelegateExpression() {
-    @OptIn(UnresolvedExpressionTypeAccess::class)
+) : FirWrappedDelegateExpression(
+) {
+    @UnresolvedExpressionTypeAccess
     override val coneTypeOrNull: ConeKotlinType?
         get() = expression.coneTypeOrNull
 

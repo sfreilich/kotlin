@@ -21,7 +21,8 @@ internal class FirCatchImpl(
     override val source: KtSourceElement?,
     override var parameter: FirProperty,
     override var block: FirBlock,
-) : FirCatch() {
+) : FirCatch(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         parameter.accept(visitor, data)

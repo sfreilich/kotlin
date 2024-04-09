@@ -19,7 +19,8 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
 internal class FirEffectDeclarationImpl(
     override val source: KtSourceElement?,
     override val effect: ConeEffectDeclaration,
-) : FirEffectDeclaration() {
+) : FirEffectDeclaration(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

@@ -41,7 +41,8 @@ internal class FirResolvedQualifierImpl(
     override val isFullyQualified: Boolean,
     override var nonFatalDiagnostics: MutableOrEmptyList<ConeDiagnostic>,
     override var typeArguments: MutableOrEmptyList<FirTypeProjection>,
-) : FirResolvedQualifier() {
+) : FirResolvedQualifier(
+) {
     override val classId: ClassId?
         get() = relativeClassFqName?.let {
     ClassId(packageFqName, it, isLocal = false)

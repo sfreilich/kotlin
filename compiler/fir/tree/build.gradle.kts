@@ -47,8 +47,7 @@ val generateTree by tasks.registering(NoDebugJavaExec::class) {
 sourceSets {
     "main" {
         projectDefault()
-        //java.srcDir(generateTree)
-        java.srcDir(generationRoot)
+        java.srcDir(generateTree)
     }
 }
 

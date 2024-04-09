@@ -20,7 +20,9 @@ private val elementsWithReplaceSource = setOf(
 
 internal class ElementPrinter(printer: SmartPrinter) : AbstractElementPrinter<Element, Field>(printer) {
 
-    override fun makeFieldPrinter(printer: SmartPrinter) = object : AbstractFieldPrinter<Field>(printer) {}
+    override fun makeFieldPrinter(printer: SmartPrinter) = object : AbstractFieldPrinter<Field>(printer) {
+        override fun allowMutable(field: Field): Boolean = false
+    }
 
     context(ImportCollector)
     override fun SmartPrinter.printAdditionalMethods(element: Element) {

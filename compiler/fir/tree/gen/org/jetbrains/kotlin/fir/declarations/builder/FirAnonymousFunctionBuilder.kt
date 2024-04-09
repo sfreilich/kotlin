@@ -89,6 +89,7 @@ class FirAnonymousFunctionBuilder : FirFunctionBuilder, FirAnnotationContainerBu
         )
     }
 
+
 }
 
 @OptIn(ExperimentalContracts::class)

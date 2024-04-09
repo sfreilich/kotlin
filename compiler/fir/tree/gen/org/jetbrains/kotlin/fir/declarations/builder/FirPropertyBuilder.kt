@@ -85,6 +85,7 @@ class FirPropertyBuilder : FirVariableBuilder, FirTypeParametersOwnerBuilder, Fi
         )
     }
 
+
 }
 
 @OptIn(ExperimentalContracts::class)

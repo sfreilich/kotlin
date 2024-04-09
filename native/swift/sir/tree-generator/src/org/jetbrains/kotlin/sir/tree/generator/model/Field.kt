@@ -23,11 +23,6 @@ abstract class Field(
     override val isVolatile: Boolean
         get() = false
 
-    override var isFinal: Boolean = false
-
-    override val isParameter: Boolean
-        get() = false
-
     abstract fun internalCopy(): Field
 
     override fun copy() = internalCopy().also(::updateFieldsInCopy)
@@ -35,7 +30,6 @@ abstract class Field(
     override fun updateFieldsInCopy(copy: Field) {
         super.updateFieldsInCopy(copy)
         copy.customSetter = customSetter
-        copy.isFinal = isFinal
     }
 }
 

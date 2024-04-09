@@ -30,7 +30,8 @@ internal class FirContinueExpressionImpl(
     override val source: KtSourceElement?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val target: FirTarget<FirLoop>,
-) : FirContinueExpression() {
+) : FirContinueExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override val coneTypeOrNull: ConeKotlinType? = StandardClassIds.Nothing.constructClassLikeType()
 

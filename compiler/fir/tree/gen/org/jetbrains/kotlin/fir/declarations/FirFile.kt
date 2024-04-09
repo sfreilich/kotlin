@@ -25,6 +25,8 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
  */
 abstract class FirFile : FirDeclaration(), FirControlFlowGraphOwner {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val annotations: List<FirAnnotation>
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin

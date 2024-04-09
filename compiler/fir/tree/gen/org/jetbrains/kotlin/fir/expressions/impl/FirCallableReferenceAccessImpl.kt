@@ -41,7 +41,8 @@ internal class FirCallableReferenceAccessImpl(
     override var nonFatalDiagnostics: MutableOrEmptyList<ConeDiagnostic>,
     override var calleeReference: FirNamedReference,
     override var hasQuestionMarkAtLHS: Boolean,
-) : FirCallableReferenceAccess() {
+) : FirCallableReferenceAccess(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

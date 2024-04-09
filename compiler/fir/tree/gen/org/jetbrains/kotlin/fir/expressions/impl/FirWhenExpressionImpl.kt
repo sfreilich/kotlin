@@ -33,7 +33,8 @@ internal class FirWhenExpressionImpl(
     override val branches: MutableList<FirWhenBranch>,
     override var exhaustivenessStatus: ExhaustivenessStatus?,
     override val usedAsExpression: Boolean,
-) : FirWhenExpression() {
+) : FirWhenExpression(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

@@ -29,6 +29,8 @@ import org.jetbrains.kotlin.serialization.deserialization.descriptors.Deserializ
  */
 abstract class FirAnonymousFunction : FirFunction(), FirTypeParametersOwner, FirContractDescriptionOwner {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val annotations: List<FirAnnotation>
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin

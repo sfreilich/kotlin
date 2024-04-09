@@ -32,7 +32,8 @@ internal class FirElvisExpressionImpl(
     override var calleeReference: FirReference,
     override var lhs: FirExpression,
     override var rhs: FirExpression,
-) : FirElvisExpression() {
+) : FirElvisExpression(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

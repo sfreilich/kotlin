@@ -30,7 +30,8 @@ internal class FirInaccessibleReceiverExpressionImpl(
     override var coneTypeOrNull: ConeKotlinType?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var calleeReference: FirThisReference,
-) : FirInaccessibleReceiverExpression() {
+) : FirInaccessibleReceiverExpression(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

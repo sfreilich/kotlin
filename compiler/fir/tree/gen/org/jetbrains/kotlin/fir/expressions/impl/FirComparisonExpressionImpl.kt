@@ -26,7 +26,8 @@ internal class FirComparisonExpressionImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val operation: FirOperation,
     override var compareToCall: FirFunctionCall,
-) : FirComparisonExpression() {
+) : FirComparisonExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override var coneTypeOrNull: ConeKotlinType? = StandardClassIds.Boolean.constructClassLikeType()
 

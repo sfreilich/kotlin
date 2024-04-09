@@ -13,7 +13,6 @@ package org.jetbrains.kotlin.fir.declarations.impl
 import org.jetbrains.kotlin.KtSourceElement
 import org.jetbrains.kotlin.KtSourceFile
 import org.jetbrains.kotlin.KtSourceFileLinesMapping
-import org.jetbrains.kotlin.fir.FirImplementationDetail
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.FirPackageDirective
 import org.jetbrains.kotlin.fir.MutableOrEmptyList
@@ -26,10 +25,9 @@ import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.FirVisitor
 import org.jetbrains.kotlin.fir.visitors.transformInplace
 
-@OptIn(FirImplementationDetail::class, ResolveStateAccess::class)
 internal class FirFileImpl(
     override val source: KtSourceElement?,
-    resolvePhase: FirResolvePhase,
+    override val resolvePhase: FirResolvePhase,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val moduleData: FirModuleData,
     override val origin: FirDeclarationOrigin,
@@ -41,12 +39,15 @@ internal class FirFileImpl(
     override val sourceFile: KtSourceFile?,
     override val sourceFileLinesMapping: KtSourceFileLinesMapping?,
     override val symbol: FirFileSymbol,
-) : FirFile() {
+) : FirFile(
+) {
+    @Volatile
+    @ResolveStateAccess
+    override lateinit var resolveState: FirResolveState
     override var controlFlowGraphReference: FirControlFlowGraphReference? = null
 
     init {
         symbol.bind(this)
-        resolveState = resolvePhase.asResolveState()
     }
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

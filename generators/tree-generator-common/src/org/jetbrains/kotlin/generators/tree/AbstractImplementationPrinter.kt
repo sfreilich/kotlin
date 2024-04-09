@@ -87,7 +87,9 @@ abstract class AbstractImplementationPrinter<Implementation, Element, Implementa
                     printAdditionalConstructorParameters(implementation)
                     for (field in implementation.allFields.reorderFieldsIfNecessary(implementation.constructorParameterOrderOverride)) {
                         val fieldImplementation = field.implementation
-                        if (field.isParameter || fieldImplementation is AbstractField.ImplementationStrategy.ForwardValueToParent && fieldImplementation.defaultValue == null) {
+                        if (fieldImplementation is AbstractField.ImplementationStrategy.Parameter
+                            || fieldImplementation is AbstractField.ImplementationStrategy.ForwardValueToParent && fieldImplementation.defaultValue == null
+                        ) {
                             printPropertyDeclaration(field.name, field.typeRef, VariableKind.PARAMETER, inConstructor = true)
                             println()
                         } else if (fieldImplementation is AbstractField.ImplementationStrategy.RegularField && fieldImplementation.defaultValue == null) {

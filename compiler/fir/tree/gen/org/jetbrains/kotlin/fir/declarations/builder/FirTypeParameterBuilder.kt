@@ -16,7 +16,10 @@ import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.builder.FirAnnotationContainerBuilder
 import org.jetbrains.kotlin.fir.builder.FirBuilderDsl
 import org.jetbrains.kotlin.fir.builder.toMutableOrEmpty
-import org.jetbrains.kotlin.fir.declarations.*
+import org.jetbrains.kotlin.fir.declarations.FirDeclarationAttributes
+import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
+import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
+import org.jetbrains.kotlin.fir.declarations.FirTypeParameter
 import org.jetbrains.kotlin.fir.declarations.impl.FirTypeParameterImpl
 import org.jetbrains.kotlin.fir.expressions.FirAnnotation
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol

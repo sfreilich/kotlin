@@ -52,6 +52,7 @@ class FirAnonymousInitializerBuilder : FirDeclarationBuilder, FirAnnotationConta
         )
     }
 
+
 }
 
 @OptIn(ExperimentalContracts::class)

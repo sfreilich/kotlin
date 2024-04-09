@@ -20,7 +20,8 @@ import org.jetbrains.kotlin.name.Name
 class FirSimpleNamedReference @FirImplementationDetail constructor(
     override val source: KtSourceElement?,
     override val name: Name,
-) : FirNamedReference() {
+) : FirNamedReference(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

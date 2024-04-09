@@ -29,7 +29,8 @@ internal class FirSafeCallExpressionImpl(
     override var receiver: FirExpression,
     override val checkedSubjectRef: FirExpressionRef<FirCheckedSafeCallSubject>,
     override var selector: FirStatement,
-) : FirSafeCallExpression() {
+) : FirSafeCallExpression(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

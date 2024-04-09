@@ -19,9 +19,8 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
  */
 abstract class FirElementWithResolveState : FirPureAbstractElement(), FirElement {
     abstract override val source: KtSourceElement?
-    @Volatile
     @ResolveStateAccess
-    lateinit var resolveState: FirResolveState
+    abstract val resolveState: FirResolveState
     abstract val moduleData: FirModuleData
 
     override fun <R, D> accept(visitor: FirVisitor<R, D>, data: D): R =

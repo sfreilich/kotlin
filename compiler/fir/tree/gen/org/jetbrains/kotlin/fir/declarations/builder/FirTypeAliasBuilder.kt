@@ -55,6 +55,7 @@ class FirTypeAliasBuilder : FirDeclarationBuilder, FirTypeParametersOwnerBuilder
         )
     }
 
+
 }
 
 @OptIn(ExperimentalContracts::class)

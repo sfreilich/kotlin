@@ -25,6 +25,8 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
  */
 abstract class FirAnonymousObject : FirClass() {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin
     abstract override val attributes: FirDeclarationAttributes

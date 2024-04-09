@@ -29,7 +29,8 @@ internal class FirTypeOperatorCallImpl(
     override var argumentList: FirArgumentList,
     override val operation: FirOperation,
     override var conversionTypeRef: FirTypeRef,
-) : FirTypeOperatorCall() {
+) : FirTypeOperatorCall(
+) {
     override var argFromStubType: Boolean = false
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

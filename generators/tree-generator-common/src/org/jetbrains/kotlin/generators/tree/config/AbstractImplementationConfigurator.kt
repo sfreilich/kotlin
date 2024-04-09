@@ -25,6 +25,9 @@ abstract class AbstractImplementationConfigurator<Implementation, Element, Eleme
     protected open val doHoistFieldsInBaseClasses: Boolean
         get() = false
 
+    protected open val printAllAbstractProperties: Boolean
+        get() = true
+
     protected abstract fun createImplementation(element: Element, name: String?): Implementation
 
     open fun configureImplementations(model: Model<Element>) {
@@ -33,6 +36,7 @@ abstract class AbstractImplementationConfigurator<Implementation, Element, Eleme
         inheritImplementationFieldSpecifications(model.elements)
         configureAllImplementations(model)
 
+        setupBasicFieldImplementations(model)
         if (doHoistFieldsInBaseClasses) {
             hoistFieldsInAbstractClasses(model)
         }
@@ -159,16 +163,18 @@ abstract class AbstractImplementationConfigurator<Implementation, Element, Eleme
         }
     }
 
-    protected fun hoistFieldsInAbstractClasses(model: Model<Element>) {
+    private fun setupBasicFieldImplementations(model: Model<Element>) {
         for (element in model.elements) {
             for (field in element.allFields) {
-                field.implementation = AbstractField.ImplementationStrategy.Abstract(field.isMutable)
+                if (field.implementation == null) {
+                    field.implementation = AbstractField.ImplementationStrategy.Abstract(field.isMutable)
+                }
             }
 
             for (impl in element.implementations) {
                 for (field in impl.allFields) {
-                    field.implementation =
-                        when (val default = field.implementationDefaultStrategy) {
+                    if (field.implementation == null) {
+                        field.implementation = when (val default = field.implementationDefaultStrategy) {
                             is AbstractField.ImplementationDefaultStrategy.Lateinit ->
                                 AbstractField.ImplementationStrategy.LateinitField
                             is AbstractField.ImplementationDefaultStrategy.Required ->
@@ -180,12 +186,13 @@ abstract class AbstractImplementationConfigurator<Implementation, Element, Eleme
                             null ->
                                 AbstractField.ImplementationStrategy.RegularField(field.isMutable, null)
                         }
+                    }
                 }
             }
         }
+    }
 
-
-
+    protected fun hoistFieldsInAbstractClasses(model: Model<Element>) {
         val subclassesPerElement = model.elements.associateWith { mutableListOf<FieldContainer<AbstractField<*>>>() }
         for (element in model.elements) {
             for (parent in element.elementParents) {
@@ -211,16 +218,18 @@ abstract class AbstractImplementationConfigurator<Implementation, Element, Eleme
             }
         }
 
-        for (parent in model.elements) {
-            val subClasses = subclassesPerElement.getValue(parent)
-            for (subClass in subClasses) {
-                for (fieldInParent in parent.allFields) {
-                    val field = subClass[fieldInParent.name]
-                    if (field.implementation is AbstractField.ImplementationStrategy.Abstract
-                        && field.typeRef == fieldInParent.typeRef
-                        && field.isMutable == fieldInParent.isMutable
-                    ) {
-                        field.implementation = AbstractField.ImplementationStrategy.HandledByParent
+        if (!printAllAbstractProperties) {
+            for (parent in model.elements) {
+                val subClasses = subclassesPerElement.getValue(parent)
+                for (subClass in subClasses) {
+                    for (fieldInParent in parent.allFields) {
+                        val field = subClass[fieldInParent.name]
+                        if (field.implementation is AbstractField.ImplementationStrategy.Abstract
+                            && field.typeRef == fieldInParent.typeRef
+                            && field.isMutable == fieldInParent.isMutable
+                        ) {
+                            field.implementation = AbstractField.ImplementationStrategy.HandledByParent
+                        }
                     }
                 }
             }

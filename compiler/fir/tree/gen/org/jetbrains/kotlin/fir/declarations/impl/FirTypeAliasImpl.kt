@@ -11,7 +11,6 @@
 package org.jetbrains.kotlin.fir.declarations.impl
 
 import org.jetbrains.kotlin.KtSourceElement
-import org.jetbrains.kotlin.fir.FirImplementationDetail
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.MutableOrEmptyList
 import org.jetbrains.kotlin.fir.builder.toMutableOrEmpty
@@ -24,10 +23,9 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
 import org.jetbrains.kotlin.fir.visitors.transformInplace
 import org.jetbrains.kotlin.name.Name
 
-@OptIn(FirImplementationDetail::class, ResolveStateAccess::class)
 internal class FirTypeAliasImpl(
     override val source: KtSourceElement?,
-    resolvePhase: FirResolvePhase,
+    override val resolvePhase: FirResolvePhase,
     override val moduleData: FirModuleData,
     override val origin: FirDeclarationOrigin,
     override val attributes: FirDeclarationAttributes,
@@ -38,11 +36,14 @@ internal class FirTypeAliasImpl(
     override val symbol: FirTypeAliasSymbol,
     override var expandedTypeRef: FirTypeRef,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
-) : FirTypeAlias() {
+) : FirTypeAlias(
+) {
+    @Volatile
+    @ResolveStateAccess
+    override lateinit var resolveState: FirResolveState
 
     init {
         symbol.bind(this)
-        resolveState = resolvePhase.asResolveState()
     }
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

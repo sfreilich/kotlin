@@ -18,6 +18,9 @@ abstract class AbstractIrTreeImplementationConfigurator : AbstractImplementation
     override val doHoistFieldsInBaseClasses: Boolean
         get() = true
 
+    override val printAllAbstractProperties: Boolean
+        get() = false
+
     protected fun ImplementationContext.undefinedOffset(): String =
         "UNDEFINED_OFFSET".also {
             additionalImports(ArbitraryImportable(Packages.tree, it))

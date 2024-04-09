@@ -30,7 +30,8 @@ internal class FirVarargArgumentsExpressionImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val arguments: MutableList<FirExpression>,
     override val coneElementTypeOrNull: ConeKotlinType?,
-) : FirVarargArgumentsExpression() {
+) : FirVarargArgumentsExpression(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

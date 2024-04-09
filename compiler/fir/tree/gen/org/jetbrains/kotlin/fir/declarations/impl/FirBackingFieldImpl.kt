@@ -28,10 +28,9 @@ import org.jetbrains.kotlin.fir.visitors.transformInplace
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedContainerSource
 
-@OptIn(FirImplementationDetail::class, ResolveStateAccess::class)
 open class FirBackingFieldImpl @FirImplementationDetail constructor(
     override val source: KtSourceElement?,
-    resolvePhase: FirResolvePhase,
+    override val resolvePhase: FirResolvePhase,
     override val moduleData: FirModuleData,
     override val origin: FirDeclarationOrigin,
     override val attributes: FirDeclarationAttributes,
@@ -54,11 +53,14 @@ open class FirBackingFieldImpl @FirImplementationDetail constructor(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val typeParameters: MutableList<FirTypeParameter>,
     override var status: FirDeclarationStatus,
-) : FirBackingField() {
+) : FirBackingField(
+) {
+    @Volatile
+    @ResolveStateAccess
+    override lateinit var resolveState: FirResolveState
 
     init {
         symbol.bind(this)
-        resolveState = resolvePhase.asResolveState()
     }
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

@@ -23,7 +23,8 @@ internal class FirImportImpl(
     override val isAllUnder: Boolean,
     override val aliasName: Name?,
     override val aliasSource: KtSourceElement?,
-) : FirImport() {
+) : FirImport(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

@@ -80,6 +80,7 @@ class FirErrorPrimaryConstructorBuilder : FirAbstractConstructorBuilder, FirAnno
     }
 
 
+
     @Deprecated("Modification of 'controlFlowGraphReference' has no impact for FirErrorPrimaryConstructorBuilder", level = DeprecationLevel.HIDDEN)
     override var controlFlowGraphReference: FirControlFlowGraphReference?
         get() = throw IllegalStateException()

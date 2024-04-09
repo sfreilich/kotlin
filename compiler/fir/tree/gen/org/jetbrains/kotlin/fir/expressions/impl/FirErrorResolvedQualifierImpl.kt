@@ -41,7 +41,8 @@ internal class FirErrorResolvedQualifierImpl(
     override var nonFatalDiagnostics: MutableOrEmptyList<ConeDiagnostic>,
     override var typeArguments: MutableOrEmptyList<FirTypeProjection>,
     override val diagnostic: ConeDiagnostic,
-) : FirErrorResolvedQualifier() {
+) : FirErrorResolvedQualifier(
+) {
     override val classId: ClassId?
         get() = relativeClassFqName?.let {
     ClassId(packageFqName, it, isLocal = false)

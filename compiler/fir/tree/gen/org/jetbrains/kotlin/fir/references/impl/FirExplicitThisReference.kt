@@ -22,7 +22,8 @@ internal class FirExplicitThisReference(
     override val labelName: String?,
     override var contextReceiverNumber: Int,
     override var diagnostic: ConeDiagnostic?,
-) : FirThisReference() {
+) : FirThisReference(
+) {
     override var boundSymbol: FirBasedSymbol<*>? = null
     override val isImplicit: Boolean = false
 

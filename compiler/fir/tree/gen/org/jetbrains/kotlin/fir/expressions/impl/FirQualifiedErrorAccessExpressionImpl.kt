@@ -28,7 +28,8 @@ internal class FirQualifiedErrorAccessExpressionImpl(
     override val diagnostic: ConeDiagnostic,
     override var selector: FirErrorExpression,
     override var receiver: FirExpression,
-) : FirQualifiedErrorAccessExpression() {
+) : FirQualifiedErrorAccessExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override var coneTypeOrNull: ConeKotlinType? = ConeErrorType(ConeUnreportedDuplicateDiagnostic(diagnostic))
 

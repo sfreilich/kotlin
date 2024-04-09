@@ -23,7 +23,8 @@ internal class FirResolvedImportImpl(
     override var delegate: FirImport,
     override val packageFqName: FqName,
     override val relativeParentClassName: FqName?,
-) : FirResolvedImport() {
+) : FirResolvedImport(
+) {
     override val source: KtSourceElement?
         get() = delegate.source
     override val importedFqName: FqName?

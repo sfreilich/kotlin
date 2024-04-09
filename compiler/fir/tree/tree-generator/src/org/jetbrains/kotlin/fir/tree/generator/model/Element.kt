@@ -76,6 +76,10 @@ class Element(name: String, override val propertyName: String, kind: Kind) : Abs
 
     val needTransformOtherChildren: Boolean get() = _needTransformOtherChildren || elementParents.any { it.element.needTransformOtherChildren }
 
+    override val allFields: List<Field> by lazy {
+        super.allFields.map { if (it in fields) it else it.copy() }
+    }
+
     override fun toString(): String {
         return with(ImportCollector("")) { render() }
     }

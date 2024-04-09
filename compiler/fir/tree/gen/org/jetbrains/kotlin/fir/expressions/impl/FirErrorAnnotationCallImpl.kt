@@ -36,8 +36,9 @@ internal class FirErrorAnnotationCallImpl(
     override val containingDeclarationSymbol: FirBasedSymbol<*>,
     override val diagnostic: ConeDiagnostic,
     override var argumentMapping: FirAnnotationArgumentMapping,
-) : FirErrorAnnotationCall() {
-    @OptIn(UnresolvedExpressionTypeAccess::class)
+) : FirErrorAnnotationCall(
+) {
+    @UnresolvedExpressionTypeAccess
     override val coneTypeOrNull: ConeKotlinType?
         get() = annotationTypeRef.coneTypeOrNull
     override val annotations: List<FirAnnotation>

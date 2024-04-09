@@ -20,7 +20,8 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
 class FirOuterClassTypeParameterRefImpl @FirImplementationDetail constructor(
     override val source: KtSourceElement?,
     override val symbol: FirTypeParameterSymbol,
-) : FirOuterClassTypeParameterRef() {
+) : FirOuterClassTypeParameterRef(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

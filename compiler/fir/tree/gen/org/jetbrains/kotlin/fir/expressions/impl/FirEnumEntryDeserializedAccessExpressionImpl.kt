@@ -29,7 +29,8 @@ internal class FirEnumEntryDeserializedAccessExpressionImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val enumClassId: ClassId,
     override val enumEntryName: Name,
-) : FirEnumEntryDeserializedAccessExpression() {
+) : FirEnumEntryDeserializedAccessExpression(
+) {
     override val source: KtSourceElement?
         get() = null
     @OptIn(UnresolvedExpressionTypeAccess::class)

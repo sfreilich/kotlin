@@ -12,7 +12,6 @@ package org.jetbrains.kotlin.fir.declarations.impl
 
 import org.jetbrains.kotlin.KtSourceElement
 import org.jetbrains.kotlin.descriptors.ClassKind
-import org.jetbrains.kotlin.fir.FirImplementationDetail
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.MutableOrEmptyList
 import org.jetbrains.kotlin.fir.builder.toMutableOrEmpty
@@ -26,10 +25,9 @@ import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.FirVisitor
 import org.jetbrains.kotlin.fir.visitors.transformInplace
 
-@OptIn(FirImplementationDetail::class, ResolveStateAccess::class)
 internal class FirAnonymousObjectImpl(
     override val source: KtSourceElement?,
-    resolvePhase: FirResolvePhase,
+    override val resolvePhase: FirResolvePhase,
     override val moduleData: FirModuleData,
     override val origin: FirDeclarationOrigin,
     override val attributes: FirDeclarationAttributes,
@@ -42,12 +40,15 @@ internal class FirAnonymousObjectImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val scopeProvider: FirScopeProvider,
     override val symbol: FirAnonymousObjectSymbol,
-) : FirAnonymousObject() {
+) : FirAnonymousObject(
+) {
+    @Volatile
+    @ResolveStateAccess
+    override lateinit var resolveState: FirResolveState
     override var controlFlowGraphReference: FirControlFlowGraphReference? = null
 
     init {
         symbol.bind(this)
-        resolveState = resolvePhase.asResolveState()
     }
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

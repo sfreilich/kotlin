@@ -28,7 +28,8 @@ import org.jetbrains.kotlin.name.StandardClassIds
 class FirElseIfTrueCondition @FirImplementationDetail constructor(
     override val source: KtSourceElement?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
-) : FirExpression() {
+) : FirExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override val coneTypeOrNull: ConeKotlinType? = StandardClassIds.Boolean.constructClassLikeType()
 

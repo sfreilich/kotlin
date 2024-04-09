@@ -38,7 +38,8 @@ internal class FirThisReceiverExpressionImpl(
     override var nonFatalDiagnostics: MutableOrEmptyList<ConeDiagnostic>,
     override var calleeReference: FirThisReference,
     override val isImplicit: Boolean,
-) : FirThisReceiverExpression() {
+) : FirThisReceiverExpression(
+) {
     override var explicitReceiver: FirExpression? = null
     override var dispatchReceiver: FirExpression? = null
     override var extensionReceiver: FirExpression? = null

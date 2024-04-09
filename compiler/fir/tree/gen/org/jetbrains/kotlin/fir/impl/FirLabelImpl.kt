@@ -18,7 +18,8 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
 internal class FirLabelImpl(
     override val source: KtSourceElement?,
     override val name: String,
-) : FirLabel() {
+) : FirLabel(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

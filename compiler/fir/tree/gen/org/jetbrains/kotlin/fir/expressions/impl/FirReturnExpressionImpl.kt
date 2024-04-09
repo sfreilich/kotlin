@@ -32,7 +32,8 @@ internal class FirReturnExpressionImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val target: FirTarget<FirFunction>,
     override var result: FirExpression,
-) : FirReturnExpression() {
+) : FirReturnExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override val coneTypeOrNull: ConeKotlinType? = StandardClassIds.Nothing.constructClassLikeType()
 

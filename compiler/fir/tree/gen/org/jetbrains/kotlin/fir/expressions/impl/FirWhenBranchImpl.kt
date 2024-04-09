@@ -21,7 +21,8 @@ internal class FirWhenBranchImpl(
     override val source: KtSourceElement?,
     override var condition: FirExpression,
     override var result: FirBlock,
-) : FirWhenBranch() {
+) : FirWhenBranch(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         condition.accept(visitor, data)

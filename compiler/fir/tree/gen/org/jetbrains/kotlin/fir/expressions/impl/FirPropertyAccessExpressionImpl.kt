@@ -39,7 +39,8 @@ class FirPropertyAccessExpressionImpl @FirImplementationDetail constructor(
     override var extensionReceiver: FirExpression?,
     override var source: KtSourceElement?,
     override var nonFatalDiagnostics: MutableOrEmptyList<ConeDiagnostic>,
-) : FirPropertyAccessExpression() {
+) : FirPropertyAccessExpression(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

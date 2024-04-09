@@ -614,6 +614,10 @@ object ImplementationConfigurator : AbstractFirTreeImplementationConfigurator() 
             defaultEmptyList(it, withGetter = true)
             additionalImports(resolvedDeclarationStatusImplType)
         }
+
+        allImplOf(elementWithResolveState) {
+            isLateinit("resolveState")
+        }
     }
 
     override fun configureAllImplementations(model: Model) {

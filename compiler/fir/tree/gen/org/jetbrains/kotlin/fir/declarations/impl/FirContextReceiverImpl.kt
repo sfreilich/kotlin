@@ -22,7 +22,8 @@ internal class FirContextReceiverImpl(
     override var typeRef: FirTypeRef,
     override val customLabelName: Name?,
     override val labelNameFromTypeRef: Name?,
-) : FirContextReceiver() {
+) : FirContextReceiver(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         typeRef.accept(visitor, data)

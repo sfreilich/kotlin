@@ -24,7 +24,8 @@ internal class FirReceiverParameterImpl(
     override val source: KtSourceElement?,
     override var typeRef: FirTypeRef,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
-) : FirReceiverParameter() {
+) : FirReceiverParameter(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         typeRef.accept(visitor, data)

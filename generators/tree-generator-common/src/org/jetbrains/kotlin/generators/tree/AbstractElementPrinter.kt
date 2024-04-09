@@ -25,8 +25,6 @@ abstract class AbstractElementPrinter<Element : AbstractElement<Element, Field, 
     protected open val separateFieldsWithBlankLine: Boolean
         get() = false
 
-    protected open fun filterFields(element: Element): Collection<Field> = element.allFields
-
     context(ImportCollector)
     fun printElement(element: Element) {
         addAllImports(element.additionalImports)
@@ -40,21 +38,23 @@ abstract class AbstractElementPrinter<Element : AbstractElement<Element, Field, 
             val fieldPrinter = makeFieldPrinter(this)
 
             if (kind.typeKind == TypeKind.Class) {
-                val optInsForParameters = filterFields(element)
+                val optInsForParameters = element.allFields
                     .filter { it.implementation is AbstractField.ImplementationStrategy.RegularField }
                     .mapNotNull { it.optInAnnotation }.toSet()
                 if (optInsForParameters.isNotEmpty()) {
                     print(" @OptIn(${optInsForParameters.joinToString { it.render() + "::class" }}) constructor")
                 }
 
-                println("(")
+                var lines = 0
                 withIndent {
-                    for (field in filterFields(element)) {
+                    for (field in element.allFields) {
                         val fieldImplementation = field.implementation
                         if (fieldImplementation is AbstractField.ImplementationStrategy.ForwardValueToParent && fieldImplementation.defaultValue == null) {
+                            if (lines++ == 0) println("(")
                             printPropertyDeclaration(field.name, field.typeRef, VariableKind.PARAMETER, inConstructor = true)
                             println()
                         } else if (fieldImplementation is AbstractField.ImplementationStrategy.RegularField && fieldImplementation.defaultValue == null) {
+                            if (lines++ == 0) println("(")
                             fieldPrinter.printField(
                                 field,
                                 inImplementation = false,
@@ -64,7 +64,9 @@ abstract class AbstractElementPrinter<Element : AbstractElement<Element, Field, 
                         }
                     }
                 }
-                print(")")
+                if (lines > 0) {
+                    print(")")
+                }
             }
 
             val parentRefs = element.parentRefs
@@ -76,11 +78,12 @@ abstract class AbstractElementPrinter<Element : AbstractElement<Element, Field, 
 
                     if (parent is ElementOrRef<*> && parent.element.kind!!.typeKind == TypeKind.Class) {
                         print("(")
-                        println()
                         withIndent {
-                            for (field in filterFields(element)) {
+                            var line = 0
+                            for (field in element.allFields) {
                                 val fieldImplementation = field.implementation
                                 if (fieldImplementation is AbstractField.ImplementationStrategy.ForwardValueToParent) {
+                                    if (line++ == 0) println()
                                     print("${field.name} = ")
                                     if (fieldImplementation.defaultValue != null) {
                                         print(fieldImplementation.defaultValue)
@@ -101,7 +104,7 @@ abstract class AbstractElementPrinter<Element : AbstractElement<Element, Field, 
 
             printBlock {
                 var index = 0
-                for (field in filterFields(element)) {
+                for (field in element.allFields) {
                     val fieldImplementation = field.implementation
                     if (fieldImplementation is AbstractField.ImplementationStrategy.LateinitField
                         || fieldImplementation is AbstractField.ImplementationStrategy.Abstract

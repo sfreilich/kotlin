@@ -27,6 +27,8 @@ import org.jetbrains.kotlin.serialization.deserialization.descriptors.Deserializ
  */
 abstract class FirField : FirVariable(), FirControlFlowGraphOwner {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin
     abstract override val attributes: FirDeclarationAttributes

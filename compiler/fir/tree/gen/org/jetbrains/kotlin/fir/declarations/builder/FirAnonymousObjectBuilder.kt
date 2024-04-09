@@ -60,6 +60,7 @@ class FirAnonymousObjectBuilder : FirDeclarationBuilder, FirClassBuilder, FirAnn
         )
     }
 
+
 }
 
 @OptIn(ExperimentalContracts::class)

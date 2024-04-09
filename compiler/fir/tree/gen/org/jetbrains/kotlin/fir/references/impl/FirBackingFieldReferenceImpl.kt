@@ -20,7 +20,8 @@ import org.jetbrains.kotlin.name.Name
 internal class FirBackingFieldReferenceImpl(
     override val source: KtSourceElement?,
     override val resolvedSymbol: FirBackingFieldSymbol,
-) : FirBackingFieldReference() {
+) : FirBackingFieldReference(
+) {
     override val name: Name
         get() = Name.identifier("\$field")
 

@@ -29,7 +29,8 @@ internal class FirResolvedReifiedParameterReferenceImpl(
     override var coneTypeOrNull: ConeKotlinType?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val symbol: FirTypeParameterSymbol,
-) : FirResolvedReifiedParameterReference() {
+) : FirResolvedReifiedParameterReference(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

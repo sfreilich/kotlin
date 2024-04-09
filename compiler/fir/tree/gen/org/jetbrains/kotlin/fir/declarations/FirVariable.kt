@@ -27,6 +27,8 @@ import org.jetbrains.kotlin.serialization.deserialization.descriptors.Deserializ
  */
 sealed class FirVariable : FirCallableDeclaration(), FirStatement {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin
     abstract override val attributes: FirDeclarationAttributes

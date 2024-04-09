@@ -11,7 +11,6 @@
 package org.jetbrains.kotlin.fir.declarations.impl
 
 import org.jetbrains.kotlin.KtSourceElement
-import org.jetbrains.kotlin.fir.FirImplementationDetail
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.MutableOrEmptyList
 import org.jetbrains.kotlin.fir.builder.toMutableOrEmpty
@@ -29,10 +28,9 @@ import org.jetbrains.kotlin.fir.visitors.transformInplace
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedContainerSource
 
-@OptIn(FirImplementationDetail::class, ResolveStateAccess::class)
 internal class FirDefaultSetterValueParameter(
     override val source: KtSourceElement?,
-    resolvePhase: FirResolvePhase,
+    override val resolvePhase: FirResolvePhase,
     override val moduleData: FirModuleData,
     override val origin: FirDeclarationOrigin,
     override val attributes: FirDeclarationAttributes,
@@ -56,7 +54,11 @@ internal class FirDefaultSetterValueParameter(
     override val isCrossinline: Boolean,
     override val isNoinline: Boolean,
     override val isVararg: Boolean,
-) : FirValueParameter() {
+) : FirValueParameter(
+) {
+    @Volatile
+    @ResolveStateAccess
+    override lateinit var resolveState: FirResolveState
     override val typeParameters: List<FirTypeParameterRef>
         get() = emptyList()
     override var status: FirDeclarationStatus = FirResolvedDeclarationStatusImpl.DEFAULT_STATUS_FOR_STATUSLESS_DECLARATIONS
@@ -65,7 +67,6 @@ internal class FirDefaultSetterValueParameter(
 
     init {
         symbol.bind(this)
-        resolveState = resolvePhase.asResolveState()
     }
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

@@ -67,6 +67,7 @@ open class FirRegularClassBuilder : FirClassBuilder, FirTypeParameterRefsOwnerBu
         )
     }
 
+
 }
 
 @OptIn(ExperimentalContracts::class)

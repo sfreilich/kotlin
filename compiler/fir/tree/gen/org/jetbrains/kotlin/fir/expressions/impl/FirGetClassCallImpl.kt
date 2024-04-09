@@ -26,7 +26,8 @@ internal class FirGetClassCallImpl(
     override var coneTypeOrNull: ConeKotlinType?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var argumentList: FirArgumentList,
-) : FirGetClassCall() {
+) : FirGetClassCall(
+) {
     override val argument: FirExpression
         get() = argumentList.arguments.first()
 

@@ -30,10 +30,9 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
 import org.jetbrains.kotlin.fir.visitors.transformInplace
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedContainerSource
 
-@OptIn(FirImplementationDetail::class, ResolveStateAccess::class)
 open class FirPropertyAccessorImpl @FirImplementationDetail constructor(
     override val source: KtSourceElement?,
-    resolvePhase: FirResolvePhase,
+    override val resolvePhase: FirResolvePhase,
     override val moduleData: FirModuleData,
     override val origin: FirDeclarationOrigin,
     override val attributes: FirDeclarationAttributes,
@@ -51,7 +50,11 @@ open class FirPropertyAccessorImpl @FirImplementationDetail constructor(
     override val isGetter: Boolean,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val typeParameters: MutableList<FirTypeParameter>,
-) : FirPropertyAccessor() {
+) : FirPropertyAccessor(
+) {
+    @Volatile
+    @ResolveStateAccess
+    override lateinit var resolveState: FirResolveState
     override val receiverParameter: FirReceiverParameter?
         get() = null
     override var controlFlowGraphReference: FirControlFlowGraphReference? = null
@@ -60,7 +63,6 @@ open class FirPropertyAccessorImpl @FirImplementationDetail constructor(
 
     init {
         symbol.bind(this)
-        resolveState = resolvePhase.asResolveState()
     }
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {

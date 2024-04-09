@@ -29,7 +29,8 @@ internal class FirThrowExpressionImpl(
     override val source: KtSourceElement?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var exception: FirExpression,
-) : FirThrowExpression() {
+) : FirThrowExpression(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override val coneTypeOrNull: ConeKotlinType? = StandardClassIds.Nothing.constructClassLikeType()
 

@@ -21,6 +21,9 @@ abstract class AbstractFieldPrinter<Field : AbstractField<*>>(
      */
     protected open fun forceMutable(field: Field): Boolean = false
 
+    protected open fun allowMutable(field: Field): Boolean = true
+
+
     /**
      * Allows to override the printed type of [field]. For example, for list fields we may want to use [MutableList] instead of [List]
      * in implementation classes.
@@ -43,14 +46,15 @@ abstract class AbstractFieldPrinter<Field : AbstractField<*>>(
             printPropertyDeclaration(
                 name = field.name,
                 type = actualTypeOfField(field),
-                kind = if ((fieldImplementation as? AbstractField.ImplementationStrategy.Property)?.isMutable == true)
+                kind = if ((fieldImplementation as? AbstractField.ImplementationStrategy.Property)?.isMutable == true && allowMutable(field))
                     VariableKind.VAR else VariableKind.VAL,
                 inConstructor = inConstructor,
                 visibility = field.visibility,
                 modality = modality,
                 override = override,
                 isLateinit = fieldImplementation is AbstractField.ImplementationStrategy.LateinitField,
-                isVolatile = fieldImplementation is AbstractField.ImplementationStrategy.Property && field.isVolatile,
+                isVolatile = field.isVolatile &&
+                        (fieldImplementation is AbstractField.ImplementationStrategy.RegularField || fieldImplementation is AbstractField.ImplementationStrategy.LateinitField),
                 optInAnnotation = field.optInAnnotation,
                 printOptInWrapped = wrapOptInAnnotations &&
                         fieldImplementation is AbstractField.ImplementationStrategy.RegularField && fieldImplementation.defaultValue != null,

@@ -19,10 +19,12 @@ import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.FirVisitor
 
-internal class FirLazyBlockImpl : FirLazyBlock() {
+internal class FirLazyBlockImpl(
+) : FirLazyBlock(
+) {
     override val source: KtSourceElement?
         get() = error("FirLazyBlock should be calculated before accessing")
-    @OptIn(UnresolvedExpressionTypeAccess::class)
+    @UnresolvedExpressionTypeAccess
     override val coneTypeOrNull: ConeKotlinType?
         get() = error("FirLazyBlock should be calculated before accessing")
     override val annotations: List<FirAnnotation>

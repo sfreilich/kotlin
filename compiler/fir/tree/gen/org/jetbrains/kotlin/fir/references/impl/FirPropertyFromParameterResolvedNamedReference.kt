@@ -22,7 +22,8 @@ class FirPropertyFromParameterResolvedNamedReference @FirImplementationDetail co
     override val source: KtSourceElement?,
     override val name: Name,
     override val resolvedSymbol: FirBasedSymbol<*>,
-) : FirResolvedNamedReference() {
+) : FirResolvedNamedReference(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {}
 

@@ -26,7 +26,8 @@ internal class FirEqualityOperatorCallImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var argumentList: FirArgumentList,
     override val operation: FirOperation,
-) : FirEqualityOperatorCall() {
+) : FirEqualityOperatorCall(
+) {
     @OptIn(UnresolvedExpressionTypeAccess::class)
     override var coneTypeOrNull: ConeKotlinType? = StandardClassIds.Boolean.constructClassLikeType()
 

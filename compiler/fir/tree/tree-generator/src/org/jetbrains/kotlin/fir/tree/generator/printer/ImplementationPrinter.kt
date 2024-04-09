@@ -26,6 +26,8 @@ private class ImplementationFieldPrinter(printer: SmartPrinter) : AbstractFieldP
 
     override fun forceMutable(field: FieldWithDefault): Boolean = field.isMutable && field.isMutableOrEmptyIfList()
 
+    override fun allowMutable(field: FieldWithDefault): Boolean = field.isMutableOrEmptyIfList()
+
     override fun actualTypeOfField(field: FieldWithDefault) = field.getMutableType()
 
     override val wrapOptInAnnotations
@@ -33,7 +35,7 @@ private class ImplementationFieldPrinter(printer: SmartPrinter) : AbstractFieldP
 }
 
 internal class ImplementationPrinter(
-    printer: SmartPrinter
+    printer: SmartPrinter,
 ) : AbstractImplementationPrinter<Implementation, Element, FieldWithDefault>(printer) {
 
     override val implementationOptInAnnotation: ClassRef<*>

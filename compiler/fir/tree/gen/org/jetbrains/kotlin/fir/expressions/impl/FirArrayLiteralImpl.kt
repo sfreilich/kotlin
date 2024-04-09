@@ -29,7 +29,8 @@ internal class FirArrayLiteralImpl(
     override var coneTypeOrNull: ConeKotlinType?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var argumentList: FirArgumentList,
-) : FirArrayLiteral() {
+) : FirArrayLiteral(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

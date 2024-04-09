@@ -32,7 +32,8 @@ internal class FirBinaryLogicExpressionImpl(
     override var leftOperand: FirExpression,
     override var rightOperand: FirExpression,
     override val kind: LogicOperationKind,
-) : FirBinaryLogicExpression() {
+) : FirBinaryLogicExpression(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

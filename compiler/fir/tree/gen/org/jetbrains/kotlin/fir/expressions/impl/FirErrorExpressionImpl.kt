@@ -32,8 +32,9 @@ internal class FirErrorExpressionImpl(
     override val diagnostic: ConeDiagnostic,
     override var expression: FirExpression?,
     override var nonExpressionElement: FirElement?,
-) : FirErrorExpression() {
-    @OptIn(UnresolvedExpressionTypeAccess::class)
+) : FirErrorExpression(
+) {
+    @UnresolvedExpressionTypeAccess
     override val coneTypeOrNull: ConeKotlinType?
         get() = expression?.coneTypeOrNull ?: ConeErrorType(ConeUnreportedDuplicateDiagnostic(diagnostic))
 

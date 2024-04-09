@@ -20,7 +20,8 @@ import org.jetbrains.kotlin.name.Name
 internal class FirDelegateFieldReferenceImpl(
     override val source: KtSourceElement?,
     override val resolvedSymbol: FirDelegateFieldSymbol,
-) : FirDelegateFieldReference() {
+) : FirDelegateFieldReference(
+) {
     override val name: Name
         get() = Name.identifier("\$delegate")
 

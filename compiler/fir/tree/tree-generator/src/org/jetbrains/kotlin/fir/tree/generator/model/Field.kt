@@ -33,10 +33,6 @@ sealed class Field : AbstractField<Field>() {
 
     abstract override var isVolatile: Boolean
 
-    abstract override var isFinal: Boolean
-
-    abstract override var isParameter: Boolean
-
     abstract override var isMutable: Boolean
 
     override fun replaceType(newType: TypeRefWithNullability): Field = copy()
@@ -51,7 +47,6 @@ sealed class Field : AbstractField<Field>() {
             copy.needsSeparateTransform = needsSeparateTransform
             copy.needTransformInOtherChildren = needTransformInOtherChildren
             copy.useNullableForReplace = useNullableForReplace
-            copy.customInitializationCall = customInitializationCall
         }
         copy.parentHasSeparateTransform = parentHasSeparateTransform
     }
@@ -88,14 +83,6 @@ class FieldWithDefault(override val origin: Field) : Field() {
 
     override var needTransformInOtherChildren: Boolean
         get() = origin.needTransformInOtherChildren
-        set(_) {}
-
-    override var isFinal: Boolean
-        get() = origin.isFinal
-        set(_) {}
-
-    override var isParameter: Boolean
-        get() = origin.isParameter
         set(_) {}
 
     override var customInitializationCall: String?
@@ -144,8 +131,6 @@ class SimpleField(
     override var isMutable: Boolean,
     override var withReplace: Boolean,
     override var isVolatile: Boolean = false,
-    override var isFinal: Boolean = false,
-    override var isParameter: Boolean = false,
 ) : Field() {
 
     override fun internalCopy(): Field {
@@ -156,8 +141,6 @@ class SimpleField(
             isMutable = isMutable,
             withReplace = withReplace,
             isVolatile = isVolatile,
-            isFinal = isFinal,
-            isParameter = isParameter,
         ).apply {
             withBindThis = this@SimpleField.withBindThis
         }
@@ -170,8 +153,6 @@ class SimpleField(
         isMutable = isMutable,
         withReplace = withReplace,
         isVolatile = isVolatile,
-        isFinal = isFinal,
-        isParameter = isParameter
     ).also {
         it.withBindThis = withBindThis
         updateFieldsInCopy(it)
@@ -193,10 +174,8 @@ class FieldList(
         get() = StandardTypes.list
 
     override var isVolatile: Boolean = false
-    override var isFinal: Boolean = false
     override var isMutable: Boolean = true
     override val isMutableOrEmptyList: Boolean = useMutableOrEmpty
-    override var isParameter: Boolean = false
 
     override fun internalCopy(): Field {
         return FieldList(

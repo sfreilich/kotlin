@@ -29,8 +29,9 @@ internal class FirWhenSubjectExpressionImpl(
     override val source: KtSourceElement?,
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override val whenRef: FirExpressionRef<FirWhenExpression>,
-) : FirWhenSubjectExpression() {
-    @OptIn(UnresolvedExpressionTypeAccess::class)
+) : FirWhenSubjectExpression(
+) {
+    @UnresolvedExpressionTypeAccess
     override val coneTypeOrNull: ConeKotlinType?
         get() = whenRef.value.subject?.coneTypeOrNull ?: StandardClassIds.Unit.constructClassLikeType()
 

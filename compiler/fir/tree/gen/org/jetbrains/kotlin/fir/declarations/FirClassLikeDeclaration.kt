@@ -22,6 +22,8 @@ import org.jetbrains.kotlin.fir.visitors.FirVisitor
  */
 sealed class FirClassLikeDeclaration : FirMemberDeclaration(), FirStatement {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val annotations: List<FirAnnotation>
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin

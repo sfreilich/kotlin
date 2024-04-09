@@ -35,7 +35,8 @@ internal class FirDelegatedConstructorCallImpl(
     override var calleeReference: FirReference,
     override var source: KtSourceElement?,
     override val isThis: Boolean,
-) : FirDelegatedConstructorCall() {
+) : FirDelegatedConstructorCall(
+) {
     override val isSuper: Boolean
         get() = !isThis
 

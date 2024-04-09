@@ -23,6 +23,8 @@ import org.jetbrains.kotlin.name.Name
  */
 abstract class FirTypeAlias : FirClassLikeDeclaration(), FirTypeParametersOwner {
     abstract override val source: KtSourceElement?
+    @ResolveStateAccess
+    abstract override val resolveState: FirResolveState
     abstract override val moduleData: FirModuleData
     abstract override val origin: FirDeclarationOrigin
     abstract override val attributes: FirDeclarationAttributes

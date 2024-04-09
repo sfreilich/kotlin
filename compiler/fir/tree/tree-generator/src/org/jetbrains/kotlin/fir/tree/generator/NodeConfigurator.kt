@@ -82,10 +82,11 @@ object NodeConfigurator : AbstractFieldConfigurator<FirTreeBuilder>(FirTreeBuild
         }
 
         elementWithResolveState.configure {
-            +field("resolvePhase", resolvePhaseType).apply { isParameter = true; }
+            +field("resolvePhase", resolvePhaseType).apply {
+                implementation = AbstractField.ImplementationStrategy.Parameter
+            }
             +field("resolveState", resolveStateType).apply {
-                isMutable = true; isVolatile = true; isFinal = true;
-                implementationDefaultStrategy = AbstractField.ImplementationDefaultStrategy.Lateinit
+                isMutable = true; isVolatile = true;
                 customInitializationCall = "resolvePhase.asResolveState()"
                 arbitraryImportables += phaseAsResolveStateExtentionImport
                 optInAnnotation = resolveStateAccessAnnotation

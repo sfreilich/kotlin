@@ -19,10 +19,6 @@ abstract class AbstractField<Field : AbstractField<Field>> {
 
     abstract val isVolatile: Boolean
 
-    abstract val isFinal: Boolean
-
-    abstract val isParameter: Boolean
-
     open val arbitraryImportables: MutableList<Importable> = mutableListOf()
 
     open var optInAnnotation: ClassRef<*>? = null
@@ -119,6 +115,8 @@ abstract class AbstractField<Field : AbstractField<Field>> {
         copy.useInBaseTransformerDetection = useInBaseTransformerDetection
         copy.overriddenTypes += overriddenTypes
         copy.implementationDefaultStrategy = implementationDefaultStrategy
+        copy.implementation = implementation
+        copy.customInitializationCall = customInitializationCall
     }
 
     sealed interface ImplementationDefaultStrategy {
@@ -155,6 +153,8 @@ abstract class AbstractField<Field : AbstractField<Field>> {
         data object HandledByParent : ImplementationStrategy
 
         data class ForwardValueToParent(val defaultValue: String?) : ImplementationStrategy
+
+        data object Parameter : ImplementationStrategy
 
         sealed interface Property : ImplementationStrategy {
             val isMutable: Boolean

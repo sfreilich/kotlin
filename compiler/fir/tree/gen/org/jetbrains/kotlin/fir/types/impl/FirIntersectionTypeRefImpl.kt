@@ -26,7 +26,8 @@ internal class FirIntersectionTypeRefImpl(
     override val isMarkedNullable: Boolean,
     override var leftType: FirTypeRef,
     override var rightType: FirTypeRef,
-) : FirIntersectionTypeRef() {
+) : FirIntersectionTypeRef(
+) {
 
     override fun <R, D> acceptChildren(visitor: FirVisitor<R, D>, data: D) {
         annotations.forEach { it.accept(visitor, data) }

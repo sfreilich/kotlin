@@ -29,7 +29,8 @@ internal class FirErrorLoopImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var label: FirLabel?,
     override val diagnostic: ConeDiagnostic,
-) : FirErrorLoop() {
+) : FirErrorLoop(
+) {
     override var block: FirBlock = FirEmptyExpressionBlock()
     override var condition: FirExpression = FirErrorExpressionImpl(source, MutableOrEmptyList.empty(), ConeUnreportedDuplicateDiagnostic(diagnostic), null, null)
 
