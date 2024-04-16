@@ -15,15 +15,20 @@ import org.jetbrains.kotlin.backend.common.actualizer.SpecialFakeOverrideSymbols
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
+import org.jetbrains.kotlin.config.AnalysisFlags
 import org.jetbrains.kotlin.diagnostics.impl.BaseDiagnosticsCollector
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.backend.*
+import org.jetbrains.kotlin.fir.backend.jvm.FirJvmBuiltinProviderActualClassExtractor
 import org.jetbrains.kotlin.fir.declarations.FirFile
 import org.jetbrains.kotlin.fir.lazy.Fir2IrLazyClass
 import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
+import org.jetbrains.kotlin.fir.resolve.providers.dependenciesSymbolProvider
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirBuiltinSymbolProvider
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirCachingCompositeSymbolProvider
 import org.jetbrains.kotlin.fir.signaturer.FirBasedSignatureComposer
 import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.IrElement
@@ -39,6 +44,7 @@ import org.jetbrains.kotlin.ir.util.KotlinMangler
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
+import org.jetbrains.kotlin.platform.jvm.isJvm
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
 
 data class FirResult(val outputs: List<ModuleCompilerAnalyzedOutput>)
@@ -140,15 +146,13 @@ fun FirResult.convertToIrAndActualize(
     }
 
     val irActualizer = if (dependentIrFragments.isEmpty()) null else IrActualizer(
-        KtDiagnosticReporterWithImplicitIrBasedContext(
-            fir2IrConfiguration.diagnosticReporter,
-            fir2IrConfiguration.languageVersionSettings
-        ),
+        KtDiagnosticReporterWithImplicitIrBasedContext(fir2IrConfiguration.diagnosticReporter, fir2IrConfiguration.languageVersionSettings),
         actualizerTypeContextProvider(mainIrFragment.irBuiltins),
         fir2IrConfiguration.expectActualTracker,
         fir2IrConfiguration.useFirBasedFakeOverrideGenerator,
         mainIrFragment,
         dependentIrFragments,
+        createActualClassExtractorIfNeeded(fir2IrConfiguration, platformFirOutput, platformComponentsStorage),
     )
 
     if (!fir2IrConfiguration.useFirBasedFakeOverrideGenerator) {
@@ -178,6 +182,19 @@ fun FirResult.convertToIrAndActualize(
     return Fir2IrActualizedResult(mainIrFragment, platformComponentsStorage, pluginContext, actualizationResult)
 }
 
+private fun createActualClassExtractorIfNeeded(
+    fir2IrConfiguration: Fir2IrConfiguration,
+    platformFirOutput: ModuleCompilerAnalyzedOutput,
+    platformComponentsStorage: Fir2IrComponentsStorage,
+): FirJvmBuiltinProviderActualClassExtractor? {
+    return runIf(
+        platformFirOutput.session.moduleData.platform.isJvm() && fir2IrConfiguration.languageVersionSettings.getFlag(AnalysisFlags.stdlibCompilation)
+    ) {
+        val dependencyProviders = (platformFirOutput.session.dependenciesSymbolProvider as FirCachingCompositeSymbolProvider).providers
+        val builtinsSymbolProvider = dependencyProviders.filterIsInstance<FirBuiltinSymbolProvider>().single()
+        FirJvmBuiltinProviderActualClassExtractor(builtinsSymbolProvider, platformComponentsStorage.classifierStorage)
+    }
+}
 
 private fun resolveOverridenSymbolsInLazyClass(
     clazz: Fir2IrLazyClass,

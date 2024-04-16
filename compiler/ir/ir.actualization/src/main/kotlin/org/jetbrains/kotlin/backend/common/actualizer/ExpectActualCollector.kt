@@ -48,11 +48,12 @@ internal class ExpectActualCollector(
     private val typeSystemContext: IrTypeSystemContext,
     private val diagnosticsReporter: IrDiagnosticReporter,
     private val expectActualTracker: ExpectActualTracker?,
+    private val actualClassExtractor: IrActualClassExtractor?,
 ) {
     fun collectClassActualizationInfo(): ClassActualizationInfo {
         val expectTopLevelClasses = ExpectTopLevelClassesCollector.collect(dependentFragments)
         val fragmentsWithActuals = dependentFragments.drop(1) + mainFragment
-        return ActualDeclarationsCollector.collectActualsFromFragments(fragmentsWithActuals, expectTopLevelClasses)
+        return ActualDeclarationsCollector.collectActualsFromFragments(fragmentsWithActuals, expectTopLevelClasses, actualClassExtractor)
     }
 
     fun matchAllExpectDeclarations(classActualizationInfo: ClassActualizationInfo): MutableMap<IrSymbol, IrSymbol> {
@@ -108,12 +109,20 @@ private class ExpectTopLevelClassesCollector {
 
 private class ActualDeclarationsCollector(
     private val expectTopLevelClasses: Map<ClassId, IrClassSymbol>,
+    private val actualClassExtractor: IrActualClassExtractor?,
 ) {
     companion object {
-        fun collectActualsFromFragments(fragments: List<IrModuleFragment>, expectTopLevelClasses: Map<ClassId, IrClassSymbol>): ClassActualizationInfo {
-            val collector = ActualDeclarationsCollector(expectTopLevelClasses)
+        fun collectActualsFromFragments(
+            fragments: List<IrModuleFragment>,
+            expectTopLevelClasses: Map<ClassId, IrClassSymbol>,
+            actualClassExtractor: IrActualClassExtractor?
+        ): ClassActualizationInfo {
+            val collector = ActualDeclarationsCollector(expectTopLevelClasses, actualClassExtractor)
             for (fragment in fragments) {
                 collector.collect(fragment)
+            }
+            if (actualClassExtractor != null) {
+                collector.collectExtraActualClasses()
             }
             return ClassActualizationInfo(
                 collector.actualClasses,
@@ -183,6 +192,27 @@ private class ActualDeclarationsCollector(
             is IrFunction -> {
                 if (element.isExpect) return
                 recordActualCallable(element, element.callableId)
+            }
+        }
+    }
+
+    private fun collectExtraActualClasses() {
+        for (classSymbol in expectTopLevelClasses.values) {
+            collectExtraActualClasses(classSymbol.owner)
+        }
+    }
+
+    private fun collectExtraActualClasses(expectClass: IrClass) {
+        val actualClassSymbol = actualClassExtractor!!.extract(expectClass) ?: return
+        val classId = expectClass.classIdOrFail
+        if (actualClasses.containsKey(classId)) return // TODO: report actual classes collision?
+
+        actualClasses[classId] = actualClassSymbol
+
+        // At least companion objects should be handled as well
+        for (declaration in expectClass.declarations) {
+            if (declaration is IrClass) {
+                collectExtraActualClasses(declaration)
             }
         }
     }
