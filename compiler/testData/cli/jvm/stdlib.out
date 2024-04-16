@@ -7,4 +7,10 @@ This mode is not recommended for production use,
 as no stability/compatibility guarantees are given on
 compiler or generated code. Use it at your own risk!
 
-OK
+compiler/testData/cli/jvm/stdlib/common.kt:31:1: error: no value passed for parameter 'name'.
+enum class TestEnumInCommon {
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+compiler/testData/cli/jvm/stdlib/common.kt:31:1: error: no value passed for parameter 'ordinal'.
+enum class TestEnumInCommon {
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+COMPILATION_ERROR
