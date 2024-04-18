@@ -57,3 +57,20 @@ annotation class AnnotationWithInt(val value: Int)
 
 @AnnotationWithInt(Int.MAX_VALUE)
 class TestClassInCommon
+
+@ActualizeByJvmBuiltinProvider
+public expect fun Any?.toString(): String
+
+@ActualizeByJvmBuiltinProvider
+public expect operator fun String?.plus(other: Any?): String
+
+@ActualizeByJvmBuiltinProvider
+@Suppress("EXPECT_ACTUAL_INCOMPATIBILITY") // Probably some backends require `inline` modifier
+public expect fun intArrayOf(vararg elements: Int): IntArray
+
+@ActualizeByJvmBuiltinProvider
+@SinceKotlin("1.1")
+public expect inline fun <reified T : Enum<T>> enumValues(): Array<T>
+
+fun testStringPlusInCommon() = "asdf" + 42
+fun testIntArrayOf() = intArrayOf(1, 2, 3)

@@ -36,7 +36,7 @@ class IrActualizer(
     val useFirBasedFakeOverrideGenerator: Boolean,
     val mainFragment: IrModuleFragment,
     val dependentFragments: List<IrModuleFragment>,
-    actualClassExtractor: IrActualClassExtractor? = null,
+    actualClassExtractor: IrActualDeclarationExtractor? = null,
 ) {
     private val collector = ExpectActualCollector(
         mainFragment,

@@ -5,25 +5,32 @@
 
 package org.jetbrains.kotlin.fir.backend.jvm
 
-import org.jetbrains.kotlin.backend.common.actualizer.IrActualClassExtractor
+import org.jetbrains.kotlin.backend.common.actualizer.IrActualDeclarationExtractor
 import org.jetbrains.kotlin.fir.backend.Fir2IrClassifierStorage
+import org.jetbrains.kotlin.fir.backend.Fir2IrDeclarationStorage
 import org.jetbrains.kotlin.fir.resolve.providers.getRegularClassSymbolByClassId
 import org.jetbrains.kotlin.fir.resolve.providers.impl.FirBuiltinSymbolProvider
+import org.jetbrains.kotlin.fir.symbols.impl.FirFunctionSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationWithName
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.util.classIdOrFail
 import org.jetbrains.kotlin.ir.util.isAnnotation
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
+import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.StandardClassIds
 
 /*
- * Extracts actual classes from the builtin symbol provider
- * But only for expect classes marked with `ActualizeByJvmBuiltinProvider` annotation
+ * Extracts actual top-level declarations from the builtin symbol provider
+ * But only for expect declarations marked with `ActualizeByJvmBuiltinProvider` annotation
  */
-class FirJvmBuiltinProviderActualClassExtractor(
+class FirJvmBuiltinProviderActualDeclarationExtractor(
     val provider: FirBuiltinSymbolProvider,
     private val classifierStorage: Fir2IrClassifierStorage,
-) : IrActualClassExtractor() {
+    private val declarationStorage: Fir2IrDeclarationStorage,
+) : IrActualDeclarationExtractor() {
     companion object {
         val ActualizeByJvmBuiltinProviderFqName = StandardClassIds.Annotations.ActualizeByJvmBuiltinProvider.asSingleFqName()
     }
@@ -38,5 +45,22 @@ class FirJvmBuiltinProviderActualClassExtractor(
 
         val regularClassSymbol = provider.getRegularClassSymbolByClassId(expectIrClass.classIdOrFail) ?: return null
         return classifierStorage.getIrClassSymbol(regularClassSymbol)
+    }
+
+    override fun extract(expectCallables: List<IrDeclarationWithName>, expectCallableId: CallableId): List<IrSymbol> {
+        if (expectCallables.none { expectCallable ->
+                expectCallable.annotations.any { it.isAnnotation(ActualizeByJvmBuiltinProviderFqName) }
+            }
+        ) {
+            return emptyList()
+        }
+
+        return provider.getTopLevelCallableSymbols(expectCallableId.packageName, expectCallableId.callableName).mapNotNull {
+            when (it) {
+                is FirPropertySymbol -> declarationStorage.getIrPropertySymbol(it)
+                is FirFunctionSymbol<*> -> declarationStorage.getIrFunctionSymbol(it)
+                else -> null
+            }
+        }
     }
 }
