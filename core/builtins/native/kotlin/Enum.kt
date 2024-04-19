@@ -35,7 +35,7 @@ public abstract class Enum<E : Enum<E>>(name: String, ordinal: Int): Comparable<
 
     public override final fun equals(other: Any?): Boolean
     public override final fun hashCode(): Int
-    public override fun toString(): String
+    public actual override fun toString(): String
 
     /**
      * Returns an array containing the constants of this enum type, in the order they're declared.

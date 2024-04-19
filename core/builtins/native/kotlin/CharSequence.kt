@@ -19,11 +19,11 @@ package kotlin
 /**
  * Represents a readable sequence of [Char] values.
  */
-public interface CharSequence {
+public actual interface CharSequence {
     /**
      * Returns the length of this character sequence.
      */
-    public val length: Int
+    public actual val length: Int
 
     /**
      * Returns the character at the specified [index] in this character sequence.
@@ -33,7 +33,7 @@ public interface CharSequence {
      * Note that the [String] implementation of this interface in Kotlin/JS has unspecified behavior
      * if the [index] is out of its bounds.
      */
-    public operator fun get(index: Int): Char
+    public actual operator fun get(index: Int): Char
 
     /**
      * Returns a new character sequence that is a subsequence of this character sequence,
@@ -42,5 +42,5 @@ public interface CharSequence {
      * @param startIndex the start index (inclusive).
      * @param endIndex the end index (exclusive).
      */
-    public fun subSequence(startIndex: Int, endIndex: Int): CharSequence
+    public actual fun subSequence(startIndex: Int, endIndex: Int): CharSequence
 }

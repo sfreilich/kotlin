@@ -13,7 +13,7 @@ package kotlin
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class ByteArray(size: Int) {
+public actual class ByteArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -23,7 +23,7 @@ public class ByteArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Byte)
+    public actual inline constructor(size: Int, init: (Int) -> Byte)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -31,7 +31,7 @@ public class ByteArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Byte
+    public actual operator fun get(index: Int): Byte
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -39,13 +39,13 @@ public class ByteArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Byte): Unit
+    public actual operator fun set(index: Int, value: Byte): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): ByteIterator
+    public actual operator fun iterator(): ByteIterator
 }
 
 /**
@@ -53,7 +53,7 @@ public class ByteArray(size: Int) {
  * @constructor Creates a new array of the specified [size], with all elements initialized to null char (`\u0000').
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class CharArray(size: Int) {
+public actual class CharArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -63,7 +63,7 @@ public class CharArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Char)
+    public actual inline constructor(size: Int, init: (Int) -> Char)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -71,7 +71,7 @@ public class CharArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Char
+    public actual operator fun get(index: Int): Char
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -79,13 +79,13 @@ public class CharArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Char): Unit
+    public actual operator fun set(index: Int, value: Char): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): CharIterator
+    public actual operator fun iterator(): CharIterator
 }
 
 /**
@@ -93,7 +93,7 @@ public class CharArray(size: Int) {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class ShortArray(size: Int) {
+public actual class ShortArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -103,7 +103,7 @@ public class ShortArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Short)
+    public actual inline constructor(size: Int, init: (Int) -> Short)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -111,7 +111,7 @@ public class ShortArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Short
+    public actual operator fun get(index: Int): Short
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -119,13 +119,13 @@ public class ShortArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Short): Unit
+    public actual operator fun set(index: Int, value: Short): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): ShortIterator
+    public actual operator fun iterator(): ShortIterator
 }
 
 /**
@@ -133,7 +133,7 @@ public class ShortArray(size: Int) {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class IntArray(size: Int) {
+public actual class IntArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -143,7 +143,7 @@ public class IntArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Int)
+    public actual inline constructor(size: Int, init: (Int) -> Int)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -151,7 +151,7 @@ public class IntArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Int
+    public actual operator fun get(index: Int): Int
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -159,13 +159,13 @@ public class IntArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Int): Unit
+    public actual operator fun set(index: Int, value: Int): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): IntIterator
+    public actual operator fun iterator(): IntIterator
 }
 
 /**
@@ -173,7 +173,7 @@ public class IntArray(size: Int) {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class LongArray(size: Int) {
+public actual class LongArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -183,7 +183,7 @@ public class LongArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Long)
+    public actual inline constructor(size: Int, init: (Int) -> Long)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -191,7 +191,7 @@ public class LongArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Long
+    public actual operator fun get(index: Int): Long
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -199,13 +199,13 @@ public class LongArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Long): Unit
+    public actual operator fun set(index: Int, value: Long): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): LongIterator
+    public actual operator fun iterator(): LongIterator
 }
 
 /**
@@ -213,7 +213,7 @@ public class LongArray(size: Int) {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class FloatArray(size: Int) {
+public actual class FloatArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -223,7 +223,7 @@ public class FloatArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Float)
+    public actual inline constructor(size: Int, init: (Int) -> Float)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -231,7 +231,7 @@ public class FloatArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Float
+    public actual operator fun get(index: Int): Float
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -239,13 +239,13 @@ public class FloatArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Float): Unit
+    public actual operator fun set(index: Int, value: Float): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): FloatIterator
+    public actual operator fun iterator(): FloatIterator
 }
 
 /**
@@ -253,7 +253,7 @@ public class FloatArray(size: Int) {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class DoubleArray(size: Int) {
+public actual class DoubleArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -263,7 +263,7 @@ public class DoubleArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Double)
+    public actual inline constructor(size: Int, init: (Int) -> Double)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -271,7 +271,7 @@ public class DoubleArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Double
+    public actual operator fun get(index: Int): Double
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -279,13 +279,13 @@ public class DoubleArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Double): Unit
+    public actual operator fun set(index: Int, value: Double): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): DoubleIterator
+    public actual operator fun iterator(): DoubleIterator
 }
 
 /**
@@ -293,7 +293,7 @@ public class DoubleArray(size: Int) {
  * @constructor Creates a new array of the specified [size], with all elements initialized to `false`.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class BooleanArray(size: Int) {
+public actual class BooleanArray(size: Int) {
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
      * [init] function.
@@ -303,7 +303,7 @@ public class BooleanArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Boolean)
+    public actual inline constructor(size: Int, init: (Int) -> Boolean)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
@@ -311,7 +311,7 @@ public class BooleanArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun get(index: Int): Boolean
+    public actual operator fun get(index: Int): Boolean
 
     /**
      * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
@@ -319,12 +319,12 @@ public class BooleanArray(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: Boolean): Unit
+    public actual operator fun set(index: Int, value: Boolean): Unit
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): BooleanIterator
+    public actual operator fun iterator(): BooleanIterator
 }
 

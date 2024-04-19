@@ -11,17 +11,17 @@ package kotlin
  * The `String` class represents character strings. All string literals in Kotlin programs, such as `"abc"`, are
  * implemented as instances of this class.
  */
-public class String : Comparable<String>, CharSequence {
-    public companion object {}
+public actual class String : Comparable<String>, CharSequence {
+    public actual companion object {}
     
     /**
      * Returns a string obtained by concatenating this string with the string representation of the given [other] object.
      */
     @kotlin.internal.IntrinsicConstEvaluation
-    public operator fun plus(other: Any?): String
+    public actual operator fun plus(other: Any?): String
 
     @kotlin.internal.IntrinsicConstEvaluation
-    public override val length: Int
+    public actual override val length: Int
 
     /**
      * Returns the character of this string at the specified [index].
@@ -30,18 +30,18 @@ public class String : Comparable<String>, CharSequence {
      * where the behavior is unspecified.
      */
     @kotlin.internal.IntrinsicConstEvaluation
-    public override fun get(index: Int): Char
+    public actual override fun get(index: Int): Char
 
-    public override fun subSequence(startIndex: Int, endIndex: Int): CharSequence
-
-    @kotlin.internal.IntrinsicConstEvaluation
-    public override fun compareTo(other: String): Int
+    public actual override fun subSequence(startIndex: Int, endIndex: Int): CharSequence
 
     @kotlin.internal.IntrinsicConstEvaluation
-    public override fun equals(other: Any?): Boolean
+    public actual override fun compareTo(other: String): Int
+
+    @kotlin.internal.IntrinsicConstEvaluation
+    public actual override fun equals(other: Any?): Boolean
 
     public override fun hashCode(): Int
 
     @kotlin.internal.IntrinsicConstEvaluation
-    public override fun toString(): String
+    public actual override fun toString(): String
 }

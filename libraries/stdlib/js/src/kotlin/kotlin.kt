@@ -10,7 +10,7 @@ package kotlin
 /**
  * Returns an empty array of the specified type [T].
  */
-public inline fun <T> emptyArray(): Array<T> = js("[]")
+public actual inline fun <T> emptyArray(): Array<T> = js("[]")
 
 /**
  * Creates a new instance of the [Lazy] that uses the specified initialization function [initializer].

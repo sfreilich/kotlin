@@ -7,15 +7,15 @@ package kotlin
 
 import kotlin.js.*
 
-public abstract class Enum<E : Enum<E>>(@kotlin.internal.IntrinsicConstEvaluation public val name: String, public val ordinal: Int) : Comparable<E> {
+public actual abstract class Enum<E : Enum<E>> actual constructor(@kotlin.internal.IntrinsicConstEvaluation public actual val name: String, public actual val ordinal: Int) : Comparable<E> {
 
-    final override fun compareTo(other: E): Int = ordinal.compareTo(other.ordinal)
+    actual final override fun compareTo(other: E): Int = ordinal.compareTo(other.ordinal)
 
-    final override fun equals(other: Any?): Boolean = this === other
+    actual final override fun equals(other: Any?): Boolean = this === other
 
-    final override fun hashCode(): Int = identityHashCode(this)
+    actual final override fun hashCode(): Int = identityHashCode(this)
 
-    override fun toString(): String = name
+    actual override fun toString(): String = name
 
-    public companion object
+    public actual companion object
 }
