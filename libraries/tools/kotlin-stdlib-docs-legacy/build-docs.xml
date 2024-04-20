@@ -106,7 +106,6 @@
               sincekotlin="1.0">
 
         <sourceroot path="${kotlin_builtins_dir}/native"/>
-        <sourceroot path="${kotlin_builtins_dir}/src"/>
 
         <sourceroot path="${kotlin_stdlib_dir}/common/src"/>
         <sourceroot path="${kotlin_stdlib_dir}/src"/>
@@ -134,7 +133,6 @@
                   includeRootPackage="false">
 
         <sourceroot path="${kotlin_builtins_dir}/native"/>
-        <sourceroot path="${kotlin_builtins_dir}/src"/>
         <sourceroot path="${kotlin_stdlib_dir}/jvm/runtime"/>
         <sourceroot path="${kotlin_stdlib_dir}/jvm/src"/>
 
@@ -227,11 +225,6 @@
         <sourceroot path="${kotlin_builtins_dir}/native/kotlin/Iterator.kt"/>
         <sourceroot path="${kotlin_builtins_dir}/native/kotlin/Nothing.kt"/>
         <sourceroot path="${kotlin_builtins_dir}/native/kotlin/Number.kt"/>
-
-        <sourceroot path="${kotlin_builtins_dir}/src/kotlin/annotation/Annotations.kt"/>
-        <sourceroot path="${kotlin_builtins_dir}/src/kotlin/Function.kt"/>
-        <sourceroot path="${kotlin_builtins_dir}/src/kotlin/internal/InternalAnnotations.kt"/>
-        <sourceroot path="${kotlin_builtins_dir}/src/kotlin/Unit.kt"/>
 
         <!-- TODO Docs? -->
         <packageoptions prefix="org.w3c" reportUndocumented="false"/>

@@ -102,7 +102,6 @@ fun createStdLibVersionedDocTask(version: String, isLatest: Boolean) =
 
                 displayName.set("Common")
                 sourceRoots.from("$kotlin_root/core/builtins/native")
-                sourceRoots.from("$kotlin_root/core/builtins/src/")
 
                 sourceRoots.from("$kotlin_stdlib_dir/common/src")
                 sourceRoots.from("$kotlin_stdlib_dir/src")
@@ -155,13 +154,6 @@ fun createStdLibVersionedDocTask(version: String, isLatest: Boolean) =
                     "Nothing.kt",
                     "Number.kt",
                 ).forEach { sourceRoots.from("$kotlin_root/core/builtins/native/kotlin/$it") }
-
-                listOf(
-                    "annotation/Annotations.kt",
-                    "Function.kt",
-                    "internal/InternalAnnotations.kt",
-                    "Unit.kt",
-                ).forEach { sourceRoots.from("$kotlin_root/core/builtins/src/kotlin/$it") }
 
                 perPackageOption("org.w3c") {
                     reportUndocumented.set(false)
