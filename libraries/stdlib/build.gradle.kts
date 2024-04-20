@@ -329,7 +329,6 @@ kotlin {
                 srcDir("common/src")
                 srcDir(files("src").builtBy(prepareCommonSources))
                 srcDir("unsigned/src")
-                srcDir("$builtinsDir/src")
             }
         }
         commonTest {

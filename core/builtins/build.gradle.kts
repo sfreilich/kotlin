@@ -5,7 +5,6 @@ plugins {
     `maven-publish`
 }
 
-val builtinsSrc = fileFrom(rootDir, "core", "builtins", "src")
 val builtinsNative = fileFrom(rootDir, "core", "builtins", "native")
 val kotlinJvm = fileFrom(rootDir, "libraries/stdlib/jvm/src/kotlin")
 val kotlinReflectJvm = fileFrom(kotlinJvm, "reflect")
@@ -52,6 +51,7 @@ val prepareCommonSources by tasks.registering(Sync::class) {
     }
     from(kotlinJvm) {
         include("ArrayIntrinsics.kt")
+        include("Unit.kt")
     }
 
     into(layout.buildDirectory.dir("src/common"))
@@ -103,9 +103,9 @@ fun serializeTask(name: String, sourcesTask: TaskProvider<*>, inDirs: List<Any>)
         }
     }
 
-val serialize = serializeTask("serialize", prepareSources, listOf(builtinsSrc, builtinsNative, prepareSources.map { it.destinationDir }, prepareCommonSources.map { it.destinationDir }))
+val serialize = serializeTask("serialize", prepareSources, listOf(builtinsNative, prepareSources.map { it.destinationDir }, prepareCommonSources.map { it.destinationDir }))
 
-val serializeJvm = serializeTask("serializeJvm", prepareSourcesJvm, listOf(builtinsSrc, builtinsNative, prepareSourcesJvm.map { it.destinationDir }, prepareCommonSources.map { it.destinationDir }))
+val serializeJvm = serializeTask("serializeJvm", prepareSourcesJvm, listOf(builtinsNative, prepareSourcesJvm.map { it.destinationDir }, prepareCommonSources.map { it.destinationDir }))
 
 val builtinsJar by task<Jar> {
     dependsOn(serialize)
