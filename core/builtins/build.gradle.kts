@@ -7,12 +7,13 @@ plugins {
 
 val builtinsSrc = fileFrom(rootDir, "core", "builtins", "src")
 val builtinsNative = fileFrom(rootDir, "core", "builtins", "native")
-val kotlinReflectCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/reflect/")
 val kotlinJvm = fileFrom(rootDir, "libraries/stdlib/jvm/src/kotlin")
 val kotlinReflectJvm = fileFrom(kotlinJvm, "reflect")
-val kotlinRangesCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/ranges")
-val kotlinCollectionsCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/collections")
-val kotlinAnnotationsCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/annotations")
+val kotlinCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin")
+val kotlinReflectCommon = fileFrom(kotlinCommon, "reflect")
+val kotlinRangesCommon = fileFrom(kotlinCommon, "ranges")
+val kotlinCollectionsCommon = fileFrom(kotlinCommon, "collections")
+val kotlinAnnotationsCommon = fileFrom(kotlinCommon, "annotations")
 
 val runtimeElements by configurations.creating {
     isCanBeResolved = false
@@ -42,6 +43,12 @@ val prepareCommonSources by tasks.registering(Sync::class) {
         include("ExperimentalStdlibApi.kt")
         include("OptIn.kt")
         include("WasExperimental.kt")
+    }
+    from(kotlinCommon) {
+        include("Annotations.kt")
+        include("Function.kt")
+        include("annotation/Annotations.kt")
+        include("internal/AnnotationsBuiltin.kt")
     }
     from(kotlinJvm) {
         include("ArrayIntrinsics.kt")
