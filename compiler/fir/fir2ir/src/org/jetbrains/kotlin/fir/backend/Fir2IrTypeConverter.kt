@@ -51,7 +51,8 @@ class Fir2IrTypeConverter(
             StandardClassIds.Double to irBuiltIns.doubleClass,
             StandardClassIds.Char to irBuiltIns.charClass,
             StandardClassIds.Array to irBuiltIns.arrayClass,
-            StandardClassIds.Annotations.IntrinsicConstEvaluation to irBuiltIns.intrinsicConstSymbol
+            StandardClassIds.Annotations.IntrinsicConstEvaluation to irBuiltIns.intrinsicConstSymbol,
+            ExtensionFunctionType to irBuiltIns.extensionFunctionTypeSymbol,
         )
     }
 
@@ -133,7 +134,7 @@ class Fir2IrTypeConverter(
                 }
 
                 if (isExtensionFunctionType && annotations.getAnnotationsByClassId(ExtensionFunctionType, session).isEmpty()) {
-                    irBuiltIns.extensionFunctionTypeAnnotationCall?.let {
+                    irBuiltIns.extensionFunctionTypeAnnotation.let {
                         typeAnnotations += it
                     }
                 }
