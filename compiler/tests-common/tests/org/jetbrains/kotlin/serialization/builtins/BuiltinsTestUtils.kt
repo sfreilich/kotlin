@@ -21,7 +21,7 @@ object BuiltinsTestUtils {
             environment, ContainerUtil.concat<File>(
                 allFilesUnder("core/builtins/native"),
                 allFilesUnder("core/builtins/src"),
-                allFilesUnder("core/builtins/build/src/ranges"),
+                allFilesUnder("core/builtins/build/src/common"),
                 allFilesUnder("core/builtins/build/src/reflect"),
             )
         )

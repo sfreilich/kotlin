@@ -8,7 +8,8 @@ plugins {
 val builtinsSrc = fileFrom(rootDir, "core", "builtins", "src")
 val builtinsNative = fileFrom(rootDir, "core", "builtins", "native")
 val kotlinReflectCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/reflect/")
-val kotlinReflectJvm = fileFrom(rootDir, "libraries/stdlib/jvm/src/kotlin/reflect")
+val kotlinJvm = fileFrom(rootDir, "libraries/stdlib/jvm/src/kotlin")
+val kotlinReflectJvm = fileFrom(kotlinJvm, "reflect")
 val kotlinRangesCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/ranges")
 val kotlinCollectionsCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/collections")
 val kotlinAnnotationsCommon = fileFrom(rootDir, "libraries/stdlib/src/kotlin/annotations")
@@ -30,7 +31,7 @@ val runtimeElementsJvm by configurations.creating {
     }
 }
 
-val prepareRangeSources by tasks.registering(Sync::class) {
+val prepareCommonSources by tasks.registering(Sync::class) {
     from(kotlinRangesCommon) {
         exclude("Ranges.kt")
     }
@@ -42,8 +43,11 @@ val prepareRangeSources by tasks.registering(Sync::class) {
         include("OptIn.kt")
         include("WasExperimental.kt")
     }
+    from(kotlinJvm) {
+        include("ArrayIntrinsics.kt")
+    }
 
-    into(layout.buildDirectory.dir("src/ranges"))
+    into(layout.buildDirectory.dir("src/common"))
 }
 
 val prepareSources by tasks.registering(Sync::class) {
@@ -73,7 +77,7 @@ val prepareSourcesJvm by tasks.registering(Sync::class) {
  */
 fun serializeTask(name: String, sourcesTask: TaskProvider<*>, inDirs: List<Any>) =
     tasks.register(name, NoDebugJavaExec::class) {
-        dependsOn(sourcesTask, prepareRangeSources)
+        dependsOn(sourcesTask, prepareCommonSources)
         val outDir = layout.buildDirectory.dir(this.name)
         inDirs.forEach { inputs.dir(it).withPathSensitivity(RELATIVE) }
         outputs.dir(outDir)
@@ -92,9 +96,9 @@ fun serializeTask(name: String, sourcesTask: TaskProvider<*>, inDirs: List<Any>)
         }
     }
 
-val serialize = serializeTask("serialize", prepareSources, listOf(builtinsSrc, builtinsNative, prepareSources.map { it.destinationDir }, prepareRangeSources.map { it.destinationDir }))
+val serialize = serializeTask("serialize", prepareSources, listOf(builtinsSrc, builtinsNative, prepareSources.map { it.destinationDir }, prepareCommonSources.map { it.destinationDir }))
 
-val serializeJvm = serializeTask("serializeJvm", prepareSourcesJvm, listOf(builtinsSrc, builtinsNative, prepareSourcesJvm.map { it.destinationDir }, prepareRangeSources.map { it.destinationDir }))
+val serializeJvm = serializeTask("serializeJvm", prepareSourcesJvm, listOf(builtinsSrc, builtinsNative, prepareSourcesJvm.map { it.destinationDir }, prepareCommonSources.map { it.destinationDir }))
 
 val builtinsJar by task<Jar> {
     dependsOn(serialize)

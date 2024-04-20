@@ -329,13 +329,7 @@ kotlin {
                 srcDir("common/src")
                 srcDir(files("src").builtBy(prepareCommonSources))
                 srcDir("unsigned/src")
-                if (!kotlinBuildProperties.isInIdeaSync) {
-                    srcDir("$builtinsDir/src/kotlin/internal")
-                }
-                if (kotlinBuildProperties.isInIdeaSync) {
-                    // required for correct resolution of builtin classes in common code in K2 IDE
-                    srcDir("$builtinsDir/src")
-                }
+                srcDir("$builtinsDir/src")
             }
         }
         commonTest {
@@ -358,7 +352,6 @@ kotlin {
             val jvmSrcDirs = listOfNotNull(
                 "jvm/src",
                 "jvm/runtime",
-                "$builtinsDir/src".takeUnless { kotlinBuildProperties.isInIdeaSync }
             )
             project.sourceSets["main"].java.srcDirs(*jvmSrcDirs.toTypedArray())
             kotlin.setSrcDirs(jvmSrcDirs)
@@ -411,23 +404,11 @@ kotlin {
                         .map { "core/builtins/native/kotlin/$it" }
 
                 // TODO: try to reuse absolute paths defined in the beginning
-                val sources = listOf(
-                    "core/builtins/src/kotlin/",
-                ) + unimplementedNativeBuiltIns
-
-                val excluded = listOf(
-                    // JS-specific optimized version of emptyArray() already defined
-                    "core/builtins/src/kotlin/ArrayIntrinsics.kt",
-                    // included in common
-                    "core/builtins/src/kotlin/internal/**",
-                )
+                val sources = unimplementedNativeBuiltIns
 
                 sources.forEach { path ->
                     from("$rootDir/$path") {
                         into(path.dropLastWhile { it != '/' })
-                        excluded.filter { it.startsWith(path) }.forEach {
-                            exclude(it.substring(path.length))
-                        }
                     }
                 }
 
@@ -482,17 +463,9 @@ kotlin {
                     (file("$rootDir/core/builtins/native/kotlin/").list().toSortedSet() - file("wasm/builtins/kotlin/").list())
                         .map { "core/builtins/native/kotlin/$it" }
 
-                val sources = listOf(
-                    "core/builtins/src/kotlin/"
-                ) + unimplementedNativeBuiltIns
-
-
+                val sources = unimplementedNativeBuiltIns
 
                 val excluded = listOf(
-                    // included in commonMain
-                    "internal/InternalAnnotations.kt",
-                    // JS-specific optimized version of emptyArray() already defined
-                    "ArrayIntrinsics.kt",
                     // Included with K/N collections
                     "Collections.kt", "Iterator.kt", "Iterators.kt"
                 )

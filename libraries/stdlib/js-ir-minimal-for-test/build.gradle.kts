@@ -16,7 +16,7 @@ val commonMainFullSources by task<Sync> {
         "libraries/stdlib/common/src/",
         "libraries/stdlib/src/kotlin/",
         "libraries/stdlib/unsigned/",
-        "core/builtins/src/kotlin/internal/",
+        "core/builtins/src/",
     )
 
     sources.forEach { path ->
