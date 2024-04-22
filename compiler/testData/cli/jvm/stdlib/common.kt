@@ -74,3 +74,5 @@ public expect inline fun <reified T : Enum<T>> enumValues(): Array<T>
 
 fun testStringPlusInCommon() = "asdf" + 42
 fun testIntArrayOf() = intArrayOf(1, 2, 3)
+
+fun testInCommon(): @ExtensionFunctionType (String.() -> Int) = null!!

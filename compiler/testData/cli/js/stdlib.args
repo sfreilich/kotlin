@@ -1,0 +1,13 @@
+$TESTDATA_DIR$/stdlib/common
+$TESTDATA_DIR$/stdlib/platform
+-Xcommon-sources=$TESTDATA_DIR$/stdlib/common
+-language-version
+2.0
+-ir-output-dir
+$TEMP_DIR$
+-ir-output-name
+stdlib
+-XXLanguage\:+MultiPlatformProjects
+-Xallow-kotlin-package
+-Xexpect-actual-classes
+-Xstdlib-compilation

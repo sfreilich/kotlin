@@ -1566,6 +1566,11 @@ public class CliTestGenerated extends AbstractCliTest {
       runTest("compiler/testData/cli/js/sourceMapRootMultiple.args");
     }
 
+    @TestMetadata("stdlib.args")
+    public void testStdlib() {
+      runTest("compiler/testData/cli/js/stdlib.args");
+    }
+
     @TestMetadata("successfulHmpp.args")
     public void testSuccessfulHmpp() {
       runTest("compiler/testData/cli/js/successfulHmpp.args");
