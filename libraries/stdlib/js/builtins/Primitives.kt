@@ -1198,8 +1198,6 @@ public actual class Long internal constructor(internal val low: Int, internal va
         public actual const val SIZE_BITS: Int = 64
     }
 
-    private actual constructor() : this(0, 0)
-
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,

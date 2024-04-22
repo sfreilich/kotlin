@@ -1164,7 +1164,7 @@ public actual class Int private constructor() : Number(), Comparable<Int> {
  * Represents a 64-bit signed integer.
  * On the JVM, non-nullable values of this type are represented as values of the primitive type `long`.
  */
-public actual class Long private constructor() : Number(), Comparable<Long> {
+public actual class Long /*private constructor()*/ : Number(), Comparable<Long> {
     public companion object {
         /**
          * A constant holding the minimum value an instance of Long can have.

@@ -1170,7 +1170,7 @@ public expect class Int private constructor() : Number, Comparable<Int> {
  * On the JVM, non-nullable values of this type are represented as values of the primitive type `long`.
  */
 @ActualizeByJvmBuiltinProvider
-public expect class Long private constructor() : Number, Comparable<Long> {
+public expect class Long /*private constructor()*/ : Number, Comparable<Long> {
     public companion object {
         /**
          * A constant holding the minimum value an instance of Long can have.
