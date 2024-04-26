@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.test.model.*
 import org.jetbrains.kotlin.test.runners.AbstractKotlinCompilerWithTargetBackendTest
 import org.jetbrains.kotlin.test.services.configuration.JavaForeignAnnotationType
 import org.jetbrains.kotlin.test.services.configuration.JvmForeignAnnotationsConfigurator
+import org.jetbrains.kotlin.test.services.sourceProviders.StdlibCommonForTestsSourceFilesProvider
 import org.jetbrains.kotlin.utils.bind
 
 abstract class AbstractJvmBlackBoxCodegenTestBase<R : ResultingArtifact.FrontendOutput<R>, I : ResultingArtifact.BackendInput<I>>(
@@ -96,6 +97,12 @@ abstract class AbstractJvmBlackBoxCodegenTestBase<R : ResultingArtifact.Frontend
             configureJvmArtifactsHandlersStep {
                 useHandlers(::JvmIrInterpreterDumpHandler)
             }
+        }
+
+        forTestsMatching("compiler/testData/codegen/box/multiplatform/k2/stdlib/*") {
+            useAdditionalSourceProviders(
+                ::StdlibCommonForTestsSourceFilesProvider,
+            )
         }
 
         enableMetaInfoHandler()
