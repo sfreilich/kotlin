@@ -21,7 +21,9 @@ expect open class Any() {
 }
 
 @ActualizeByJvmBuiltinProvider
-expect class Boolean
+expect class Boolean {
+    public operator fun not(): Boolean
+}
 
 @ActualizeByJvmBuiltinProvider
 expect class Int {
@@ -29,10 +31,15 @@ expect class Int {
         const val MIN_VALUE: Int = -2147483648
         const val MAX_VALUE: Int = 2147483647
     }
+
+    //@kotlin.internal.IntrinsicConstEvaluation
+    public operator fun minus(other: Int): Int
+
+    public operator fun rangeTo(other: kotlin.Int): kotlin.ranges.IntRange
 }
 
 @ActualizeByJvmBuiltinProvider
-expect class String
+expect class String private constructor()
 
 @ActualizeByJvmBuiltinProvider
 public expect abstract class Enum<E : Enum<E>>(name: String, ordinal: Int) : Comparable<E> {
@@ -54,10 +61,48 @@ public expect open class Throwable() {
 }
 
 @ActualizeByJvmBuiltinProvider
+expect class Float
+
+@ActualizeByJvmBuiltinProvider
+expect class Double
+
+@ActualizeByJvmBuiltinProvider
+expect class Nothing
+
+@ActualizeByJvmBuiltinProvider
+expect class Char
+
+@ActualizeByJvmBuiltinProvider
+expect class Byte
+
+@ActualizeByJvmBuiltinProvider
+expect class Short
+
+@ActualizeByJvmBuiltinProvider
+expect class Long
+
+object Unit
+
+@ActualizeByJvmBuiltinProvider
+expect interface CharSequence
+
+@ActualizeByJvmBuiltinProvider
+expect abstract class Number
+
+@ActualizeByJvmBuiltinProvider
+expect class Array<T> {
+    final val size: kotlin.Int
+
+    final operator fun get(index: kotlin.Int): T
+
+    final operator fun iterator(): kotlin.collections.Iterator<T>
+}
+
+/*@ActualizeByJvmBuiltinProvider
 public expect class IntArray(size: Int) {
     @Suppress("WRONG_MODIFIER_TARGET")
     public inline constructor(size: Int, init: (Int) -> Int)
-}
+}*/
 
 @ActualizeByJvmBuiltinProvider
 public expect fun Any?.toString(): String

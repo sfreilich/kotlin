@@ -9,3 +9,5 @@ class TestClassInCommon // Currently it doesn't work with FIR2IR_FAKE_OVERRIDE_G
 
 fun testStringPlusInCommon() = "asdf" + 42
 fun testIntArrayOf() = intArrayOf(1, 2, 3)
+
+val indexedValue = IndexedValue<Int>(0, 0)
