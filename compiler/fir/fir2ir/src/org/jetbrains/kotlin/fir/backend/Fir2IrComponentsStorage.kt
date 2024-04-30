@@ -34,7 +34,7 @@ class Fir2IrComponentsStorage(
     override val configuration: Fir2IrConfiguration,
     override val visibilityConverter: Fir2IrVisibilityConverter,
     actualizerTypeContextProvider: (IrBuiltIns) -> IrTypeSystemContext,
-    commonMemberStorage: Fir2IrCommonMemberStorage,
+    val commonMemberStorage: Fir2IrCommonMemberStorage,
     irMangler: KotlinMangler.IrMangler,
     kotlinBuiltIns: KotlinBuiltIns,
     initializedIrBuiltIns: IrBuiltInsOverFir?,
@@ -63,7 +63,7 @@ class Fir2IrComponentsStorage(
 
     // builtins should go after storages and generators, because they use them during initialization
     override val irBuiltIns: IrBuiltInsOverFir = initializedIrBuiltIns ?: IrBuiltInsOverFir(
-        this, configuration.languageVersionSettings, moduleDescriptor, irMangler
+        this, configuration.languageVersionSettings, moduleDescriptor
     )
     val irTypeSystemContext: IrTypeSystemContext = initializedIrTypeSystemContext ?: actualizerTypeContextProvider(irBuiltIns)
 

@@ -81,7 +81,12 @@ fun FirResult.convertToIrAndActualize(
 ): Fir2IrActualizedResult {
     require(outputs.isNotEmpty()) { "No modules found" }
 
-    val commonMemberStorage = Fir2IrCommonMemberStorage(FirBasedSignatureComposer.create(firMangler, fir2IrConfiguration))
+    val commonMemberStorage = Fir2IrCommonMemberStorage(
+        FirBasedSignatureComposer.create(firMangler, fir2IrConfiguration),
+        IrFactoryImpl,
+        kotlinBuiltIns,
+        irMangler
+    )
     fir2IrExtensions.registerDeclarations(commonMemberStorage.symbolTable)
 
     val firProvidersWithGeneratedFiles: MutableMap<FirModuleData, FirProviderWithGeneratedFiles> = mutableMapOf()
