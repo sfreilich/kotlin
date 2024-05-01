@@ -35,6 +35,11 @@ expect class Int {
 expect class String
 
 @ActualizeByJvmBuiltinProvider
+expect interface Comparable<in T> {
+    operator fun compareTo(other: T): Int
+}
+
+@ActualizeByJvmBuiltinProvider
 public expect abstract class Enum<E : Enum<E>>(name: String, ordinal: Int) : Comparable<E> {
     override final fun compareTo(other: E): Int
 

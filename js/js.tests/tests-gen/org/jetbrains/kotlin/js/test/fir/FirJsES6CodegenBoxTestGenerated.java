@@ -28170,6 +28170,12 @@ public class FirJsES6CodegenBoxTestGenerated extends AbstractFirJsES6CodegenBoxT
         public void testAllFilesPresentInStdlib() {
           KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/multiplatform/k2/stdlib"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.JS_IR_ES6, true);
         }
+
+        @Test
+        @TestMetadata("js.kt")
+        public void testJs() {
+          runTest("compiler/testData/codegen/box/multiplatform/k2/stdlib/js.kt");
+        }
       }
     }
 

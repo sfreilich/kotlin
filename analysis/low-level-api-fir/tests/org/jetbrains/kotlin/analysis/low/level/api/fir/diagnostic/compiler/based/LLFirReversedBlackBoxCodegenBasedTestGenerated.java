@@ -39307,6 +39307,12 @@ public class LLFirReversedBlackBoxCodegenBasedTestGenerated extends AbstractLLFi
         }
 
         @Test
+        @TestMetadata("js.kt")
+        public void testJs() {
+          runTest("compiler/testData/codegen/box/multiplatform/k2/stdlib/js.kt");
+        }
+
+        @Test
         @TestMetadata("jvm.kt")
         public void testJvm() {
           runTest("compiler/testData/codegen/box/multiplatform/k2/stdlib/jvm.kt");
