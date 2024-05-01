@@ -136,7 +136,7 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
             this
         } else {
             when (this) {
-                is IrConst<*> -> IrConstantPrimitiveImpl(this.startOffset, this.endOffset, this)
+                is IrConst -> IrConstantPrimitiveImpl(this.startOffset, this.endOffset, this)
                 is IrConstantPrimitive, is IrConstantObject -> this
                 is IrConstantValue -> TODO("Boxing/unboxing of ${this::class.qualifiedName} is not supported")
                 else -> null

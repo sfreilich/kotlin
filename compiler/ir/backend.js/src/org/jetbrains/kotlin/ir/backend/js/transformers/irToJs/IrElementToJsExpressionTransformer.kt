@@ -60,7 +60,7 @@ class IrElementToJsExpressionTransformer : BaseIrElementToJsNodeTransformer<JsEx
         return irFunction.accept(IrFunctionToJsTransformer(), context).apply { name = null }
     }
 
-    override fun visitConst(expression: IrConst<*>, context: JsGenerationContext): JsExpression {
+    override fun visitConst(expression: IrConst, context: JsGenerationContext): JsExpression {
         val kind = expression.kind
         return when (kind) {
             is IrConstKind.String -> JsStringLiteral(expression.value as String)

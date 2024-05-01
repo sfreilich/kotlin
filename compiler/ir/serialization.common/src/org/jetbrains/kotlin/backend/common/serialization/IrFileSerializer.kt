@@ -576,7 +576,7 @@ open class IrFileSerializer(
         return proto.build()
     }
 
-    private fun serializeConst(value: IrConst<*>): ProtoConst {
+    private fun serializeConst(value: IrConst): ProtoConst {
         val proto = ProtoConst.newBuilder()
         when (value.kind) {
             IrConstKind.Null -> proto.`null` = true
@@ -935,7 +935,7 @@ open class IrFileSerializer(
             is IrCall -> operationProto.call = serializeCall(expression)
             is IrConstructorCall -> operationProto.constructorCall = serializeConstructorCall(expression)
             is IrComposite -> operationProto.composite = serializeComposite(expression)
-            is IrConst<*> -> operationProto.const = serializeConst(expression)
+            is IrConst -> operationProto.const = serializeConst(expression)
             is IrContinue -> operationProto.`continue` = serializeContinue(expression)
             is IrDelegatingConstructorCall -> operationProto.delegatingConstructorCall = serializeDelegatingConstructorCall(expression)
             is IrDoWhileLoop -> operationProto.doWhile = serializeDoWhile(expression)
@@ -1138,11 +1138,11 @@ open class IrFileSerializer(
             .setNameType(serializeNameAndType(field.name, field.type))
         if (!(bodiesOnlyForInlines &&
                     (field.parent as? IrDeclarationWithVisibility)?.visibility != DescriptorVisibilities.LOCAL &&
-                    (field.initializer?.expression !is IrConst<*>))
+                    (field.initializer?.expression !is IrConst))
         ) {
             val initializer = field.initializer?.expression
             if (field.correspondingPropertySymbol?.owner?.isConst == true)
-                require(initializer is IrConst<*>) {
+                require(initializer is IrConst) {
                     "This is a compiler bug, please report it to https://kotl.in/issue : const val property must have a const initializer:\n${field.render()}"
                 }
 
@@ -1432,7 +1432,7 @@ open class IrFileSerializer(
 }
 
 internal fun IrElement.isValidConstantAnnotationArgument(): Boolean =
-    this is IrConst<*> || this is IrGetEnumValue || this is IrClassReference ||
+    this is IrConst || this is IrGetEnumValue || this is IrClassReference ||
             (this is IrVararg && elements.all { it.isValidConstantAnnotationArgument() }) ||
             (this is IrConstructorCall &&
                     (0 until valueArgumentsCount).all { getValueArgument(it)?.isValidConstantAnnotationArgument() ?: true })

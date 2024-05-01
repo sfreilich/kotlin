@@ -182,7 +182,7 @@ class VersionChecker(val context: IrPluginContext) {
             ?.backingField
             ?.initializer
             ?.expression
-            as? IrConst<*>
+            as? IrConst
         if (versionExpr == null || versionExpr.kind != IrConstKind.Int) {
             outdatedRuntimeWithUnknownVersionNumber()
         }

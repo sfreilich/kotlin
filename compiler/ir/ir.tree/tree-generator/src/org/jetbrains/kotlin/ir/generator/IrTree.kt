@@ -916,12 +916,10 @@ object IrTree : AbstractTreeBuilder() {
         +field("classType", irTypeType)
     }
     val const: Element by element(Expression) {
-        val t = +param("T")
-
         parent(expression)
 
         +field("kind", type(Packages.exprs, "IrConstKind"))
-        +field("value", t)
+        +field("value", anyType, nullable = true)
     }
     val constantValue: Element by element(Expression) {
         transformByChildren = true
@@ -932,7 +930,7 @@ object IrTree : AbstractTreeBuilder() {
     val constantPrimitive: Element by element(Expression) {
         parent(constantValue)
 
-        +field("value", const.withArgs("T" to TypeRef.Star))
+        +field("value", const)
     }
     val constantObject: Element by element(Expression) {
         parent(constantValue)

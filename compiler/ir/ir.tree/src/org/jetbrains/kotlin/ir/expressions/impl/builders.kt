@@ -169,7 +169,7 @@ fun IrConstantObjectImpl(
 fun IrConstantPrimitiveImpl(
     startOffset: Int,
     endOffset: Int,
-    value: IrConst<*>,
+    value: IrConst,
 ) = IrConstantPrimitiveImpl(
     constructorIndicator = null,
     startOffset = startOffset,

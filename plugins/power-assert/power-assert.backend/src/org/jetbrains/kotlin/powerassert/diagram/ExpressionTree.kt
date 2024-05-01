@@ -128,7 +128,7 @@ fun buildTree(expression: IrExpression): Node? {
                 expression.acceptChildren(this, data)
             }
 
-            override fun visitConst(expression: IrConst<*>, data: Node) {
+            override fun visitConst(expression: IrConst, data: Node) {
                 // Do not include constants
             }
 
@@ -147,11 +147,11 @@ fun buildTree(expression: IrExpression): Node? {
                         val elseBranchCondition = expression.branches[1].condition
                         val elseBranchResult = expression.branches[1].result
 
-                        if (elseBranchCondition !is IrConst<*> || elseBranchCondition.value != true) {
+                        if (elseBranchCondition !is IrConst || elseBranchCondition.value != true) {
                             elseBranchCondition.accept(this, node)
                         }
 
-                        if (elseBranchResult !is IrConst<*> || elseBranchResult.value != false) {
+                        if (elseBranchResult !is IrConst || elseBranchResult.value != false) {
                             elseBranchResult.accept(this, node)
                         }
                     }
@@ -167,15 +167,15 @@ fun buildTree(expression: IrExpression): Node? {
 
                         thenBranchCondition.accept(this, node)
 
-                        if (thenBranchResult !is IrConst<*> || thenBranchResult.value != true) {
+                        if (thenBranchResult !is IrConst || thenBranchResult.value != true) {
                             thenBranchResult.accept(this, node)
                         }
 
-                        if (elseBranchCondition !is IrConst<*> || elseBranchCondition.value != true) {
+                        if (elseBranchCondition !is IrConst || elseBranchCondition.value != true) {
                             elseBranchCondition.accept(this, node)
                         }
 
-                        if (elseBranchResult !is IrConst<*> || elseBranchResult.value != false) {
+                        if (elseBranchResult !is IrConst || elseBranchResult.value != false) {
                             elseBranchResult.accept(this, node)
                         }
                     }
