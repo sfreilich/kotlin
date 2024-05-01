@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.test.services.LibraryProvider
 import org.jetbrains.kotlin.test.services.configuration.CommonEnvironmentConfigurator
 import org.jetbrains.kotlin.test.services.configuration.JsEnvironmentConfigurator
 import org.jetbrains.kotlin.test.services.sourceProviders.CoroutineHelpersSourceFilesProvider
+import org.jetbrains.kotlin.test.services.sourceProviders.StdlibCommonForTestsSourceFilesProvider
 import java.lang.Boolean.getBoolean
 
 abstract class AbstractJsBlackBoxCodegenTestBase<R : ResultingArtifact.FrontendOutput<R>, I : ResultingArtifact.BackendInput<I>, A : ResultingArtifact.Binary<A>>(
@@ -72,9 +73,19 @@ abstract class AbstractJsBlackBoxCodegenTestBase<R : ResultingArtifact.FrontendO
         }
 
         useAdditionalSourceProviders(
-            ::JsAdditionalSourceProvider,
             ::CoroutineHelpersSourceFilesProvider,
         )
+
+        forTestsNotMatching("compiler/testData/codegen/box/multiplatform/k2/stdlib/*") {
+            useAdditionalSourceProviders(
+                ::JsAdditionalSourceProvider,
+            )
+        }
+        forTestsMatching("compiler/testData/codegen/box/multiplatform/k2/stdlib/*") {
+            useAdditionalSourceProviders(
+                ::StdlibCommonForTestsSourceFilesProvider,
+            )
+        }
 
         forTestsNotMatching("compiler/testData/codegen/box/diagnostics/functions/tailRecursion/*") {
             defaultDirectives {

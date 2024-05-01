@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.test.services.configuration.CommonEnvironmentConfigu
 import org.jetbrains.kotlin.test.services.configuration.JsEnvironmentConfigurator
 import org.jetbrains.kotlin.test.services.sourceProviders.AdditionalDiagnosticsSourceFilesProvider
 import org.jetbrains.kotlin.test.services.sourceProviders.CoroutineHelpersSourceFilesProvider
+import org.jetbrains.kotlin.test.services.sourceProviders.StdlibCommonForTestsSourceFilesProvider
 
 abstract class AbstractFirJsDiagnosticTestBase(val parser: FirParser) : AbstractKotlinCompilerTest() {
     protected open fun configureTestBuilder(builder: TestConfigurationBuilder) = builder.apply {
@@ -56,10 +57,20 @@ abstract class AbstractFirJsDiagnosticTestBase(val parser: FirParser) : Abstract
         )
 
         useAdditionalSourceProviders(
-            ::JsAdditionalSourceProvider,
             ::CoroutineHelpersSourceFilesProvider,
             ::AdditionalDiagnosticsSourceFilesProvider,
         )
+
+        forTestsNotMatching("compiler/testData/codegen/box/multiplatform/k2/stdlib/*") {
+            useAdditionalSourceProviders(
+                ::JsAdditionalSourceProvider,
+            )
+        }
+        forTestsMatching("compiler/testData/codegen/box/multiplatform/k2/stdlib/*") {
+            useAdditionalSourceProviders(
+                ::StdlibCommonForTestsSourceFilesProvider,
+            )
+        }
 
         useAdditionalService(::LibraryProvider)
 
