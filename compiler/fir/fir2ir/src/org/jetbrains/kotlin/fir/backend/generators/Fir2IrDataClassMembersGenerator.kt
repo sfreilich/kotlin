@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.IrGeneratorContextBase
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -312,7 +313,7 @@ class Fir2IrDataClassMembersGenerator(private val c: Fir2IrComponents) : Fir2IrC
             isOperator: Boolean = false,
         ): IrSimpleFunction {
             val symbol = c.declarationStorage.createFunctionSymbol(signature = null)
-            return c.irFactory.createSimpleFunction(
+            return IrFactoryImpl.createSimpleFunction(
                 startOffset = UNDEFINED_OFFSET,
                 endOffset = UNDEFINED_OFFSET,
                 origin = origin,
@@ -350,7 +351,7 @@ class Fir2IrDataClassMembersGenerator(private val c: Fir2IrComponents) : Fir2IrC
         }
 
         private fun createSyntheticIrParameter(irFunction: IrFunction, name: Name, type: IrType, index: Int = 0): IrValueParameter =
-            c.irFactory.createValueParameter(
+            IrFactoryImpl.createValueParameter(
                 startOffset = UNDEFINED_OFFSET,
                 endOffset = UNDEFINED_OFFSET,
                 origin = IrDeclarationOrigin.DEFINED,

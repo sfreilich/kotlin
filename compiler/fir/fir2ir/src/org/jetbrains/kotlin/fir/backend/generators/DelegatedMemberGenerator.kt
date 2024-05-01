@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetFieldImpl
@@ -288,7 +289,7 @@ class DelegatedMemberGenerator(private val c: Fir2IrComponents) : Fir2IrComponen
     ): IrBlockBody {
         val startOffset = SYNTHETIC_OFFSET
         val endOffset = SYNTHETIC_OFFSET
-        val body = irFactory.createBlockBody(startOffset, endOffset)
+        val body = IrFactoryImpl.createBlockBody(startOffset, endOffset)
 
         val typeOrigin = when {
             originalFirDeclaration is FirPropertyAccessor && originalFirDeclaration.isSetter -> ConversionTypeOrigin.SETTER

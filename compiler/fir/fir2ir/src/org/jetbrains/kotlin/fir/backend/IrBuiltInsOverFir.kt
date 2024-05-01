@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.declarations.IrFunctionBuilder
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstructorCallImpl
 import org.jetbrains.kotlin.ir.symbols.*
@@ -60,7 +61,7 @@ class IrBuiltInsOverFir(
     private val symbolProvider: FirSymbolProvider
         get() = session.symbolProvider
 
-    override val irFactory: IrFactory = c.irFactory
+    override val irFactory: IrFactory = IrFactoryImpl
 
     private val kotlinPackage = StandardClassIds.BASE_KOTLIN_PACKAGE
 

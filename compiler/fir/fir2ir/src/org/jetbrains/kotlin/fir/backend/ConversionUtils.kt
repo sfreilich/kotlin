@@ -51,6 +51,7 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.declarations.UNDEFINED_PARAMETER_INDEX
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin.GeneratedByPlugin
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -583,7 +584,7 @@ internal fun IrDeclarationParent.declareThisReceiverParameter(
     explicitReceiver: FirReceiverParameter? = null,
     isAssignable: Boolean = false
 ): IrValueParameter {
-    return c.irFactory.createValueParameter(
+    return IrFactoryImpl.createValueParameter(
         startOffset = startOffset,
         endOffset = endOffset,
         origin = thisOrigin,
@@ -796,7 +797,7 @@ fun List<IrDeclaration>.extractFirDeclarations(): Set<FirDeclaration> {
 fun FirExpression.asCompileTimeIrInitializer(components: Fir2IrComponents, expectedType: ConeKotlinType? = null): IrExpressionBody {
     val visitor = Fir2IrVisitor(components, Fir2IrConversionScope(components.configuration))
     val expression = visitor.convertToIrExpression(this, expectedType = expectedType)
-    return components.irFactory.createExpressionBody(expression)
+    return IrFactoryImpl.createExpressionBody(expression)
 }
 
 /**
