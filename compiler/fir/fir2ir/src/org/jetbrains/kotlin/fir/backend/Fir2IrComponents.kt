@@ -36,7 +36,6 @@ interface Fir2IrComponents {
     val specialAnnotationsProvider: IrSpecialAnnotationsProvider?
     val manglers: Manglers
 
-    val irFactory: IrFactory
     val irProviders: List<IrProvider>
     val lock: IrLock
 

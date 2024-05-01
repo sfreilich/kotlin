@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.fir.declarations.FirReceiverParameter
 import org.jetbrains.kotlin.fir.declarations.utils.*
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.declarations.lazy.AbstractIrLazyFunction
 import org.jetbrains.kotlin.ir.declarations.lazy.IrLazyFunctionBase
 import org.jetbrains.kotlin.ir.declarations.lazy.lazyVar
@@ -109,8 +110,7 @@ abstract class AbstractFir2IrLazyFunction<F : FirCallableDeclaration>(
         }
     }
 
-    override val factory: IrFactory
-        get() = super<AbstractFir2IrLazyDeclaration>.factory
+    override val factory: IrFactory = IrFactoryImpl
 
     override fun createLazyAnnotations(): ReadWriteProperty<Any?, List<IrConstructorCall>> {
         return super<AbstractFir2IrLazyDeclaration>.createLazyAnnotations()

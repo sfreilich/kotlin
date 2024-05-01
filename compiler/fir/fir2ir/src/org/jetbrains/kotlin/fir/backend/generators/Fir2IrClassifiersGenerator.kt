@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.fir.types.toLookupTag
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.symbols.impl.IrClassSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrExternalPackageFragmentSymbolImpl
@@ -44,7 +45,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
         require(index >= 0)
         val origin = typeParameter.computeIrOrigin()
         val irTypeParameter = typeParameter.convertWithOffsets { startOffset, endOffset ->
-            irFactory.createTypeParameter(
+            IrFactoryImpl.createTypeParameter(
                 startOffset = startOffset,
                 endOffset = endOffset,
                 origin = origin,
@@ -78,7 +79,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
             else -> regularClass.modality ?: Modality.FINAL
         }
         val irClass = regularClass.convertWithOffsets { startOffset, endOffset ->
-            irFactory.createClass(
+            IrFactoryImpl.createClass(
                 startOffset = startOffset,
                 endOffset = endOffset,
                 origin = regularClass.computeIrOrigin(predefinedOrigin),
@@ -230,7 +231,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
     }
 
     private val temporaryParent by lazy {
-        irFactory.createSimpleFunction(
+        IrFactoryImpl.createSimpleFunction(
             startOffset = UNDEFINED_OFFSET,
             endOffset = UNDEFINED_OFFSET,
             origin = IrDeclarationOrigin.DEFINED,
@@ -262,7 +263,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
         val origin = IrDeclarationOrigin.DEFINED
         val modality = Modality.FINAL
         val irAnonymousObject = anonymousObject.convertWithOffsets { startOffset, endOffset ->
-            irFactory.createClass(
+            IrFactoryImpl.createClass(
                 startOffset = startOffset,
                 endOffset = endOffset,
                 origin = origin,
@@ -289,7 +290,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
         symbol: IrTypeAliasSymbol,
     ): IrTypeAlias = typeAlias.convertWithOffsets { startOffset, endOffset ->
         classifierStorage.preCacheTypeParameters(typeAlias)
-        irFactory.createTypeAlias(
+        IrFactoryImpl.createTypeAlias(
             startOffset = startOffset,
             endOffset = endOffset,
             origin = IrDeclarationOrigin.DEFINED,
@@ -312,7 +313,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
         val conversionData = codeFragment.conversionData
 
         val irClass = codeFragment.convertWithOffsets { startOffset, endOffset ->
-            irFactory.createClass(
+            IrFactoryImpl.createClass(
                 startOffset,
                 endOffset,
                 IrDeclarationOrigin.DEFINED,
@@ -355,7 +356,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
     ): IrEnumEntry {
         return enumEntry.convertWithOffsets { startOffset, endOffset ->
             val origin = enumEntry.computeIrOrigin(predefinedOrigin)
-            irFactory.createEnumEntry(
+            IrFactoryImpl.createEnumEntry(
                 startOffset = startOffset,
                 endOffset = endOffset,
                 origin = origin,
@@ -419,7 +420,7 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
         )
 
         return symbolTable.declareClassIfNotExists(signature, { IrClassSymbolImpl(signature = signature) }) {
-            irFactory.createClass(
+            IrFactoryImpl.createClass(
                 startOffset = UNDEFINED_OFFSET,
                 endOffset = UNDEFINED_OFFSET,
                 origin = IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB,

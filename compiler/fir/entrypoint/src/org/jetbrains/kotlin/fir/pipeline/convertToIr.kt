@@ -100,7 +100,6 @@ fun FirResult.convertToIrAndActualize(
             session,
             scopeSession,
             fir,
-            IrFactoryImpl,
             fir2IrExtensions,
             fir2IrConfiguration,
             visibilityConverter,

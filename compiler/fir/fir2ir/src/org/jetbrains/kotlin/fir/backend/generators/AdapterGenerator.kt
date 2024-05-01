@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirTypeParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.ir.builders.declarations.UNDEFINED_PARAMETER_INDEX
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
@@ -135,7 +136,7 @@ internal class AdapterGenerator(
             val irCall = createAdapteeCallForCallableReference(
                 callableReferenceAccess, firAdaptee, adapteeSymbol, irAdapterFunction, type, boundDispatchReceiver, boundExtensionReceiver
             )
-            irAdapterFunction.body = irFactory.createBlockBody(startOffset, endOffset) {
+            irAdapterFunction.body = IrFactoryImpl.createBlockBody(startOffset, endOffset) {
                 if (expectedReturnType?.isUnit() == true) {
                     statements.add(Fir2IrImplicitCastInserter.coerceToUnitIfNeeded(irCall, irBuiltIns))
                 } else {
@@ -192,7 +193,7 @@ internal class AdapterGenerator(
             is FirConstructor -> SpecialNames.INIT
             else -> firAdaptee.symbol.name
         }
-        return irFactory.createSimpleFunction(
+        return IrFactoryImpl.createSimpleFunction(
             startOffset = startOffset,
             endOffset = endOffset,
             origin = IrDeclarationOrigin.ADAPTER_FOR_CALLABLE_REFERENCE,
@@ -249,7 +250,7 @@ internal class AdapterGenerator(
         type: IrType,
         origin: IrDeclarationOrigin
     ): IrValueParameter =
-        irFactory.createValueParameter(
+        IrFactoryImpl.createValueParameter(
             startOffset = adapterFunction.startOffset,
             endOffset = adapterFunction.endOffset,
             origin = origin,
@@ -629,7 +630,7 @@ internal class AdapterGenerator(
     ): IrSimpleFunction {
         val returnType = type.arguments.last().typeOrNull!!
         val parameterTypes = type.arguments.dropLast(1).map { it.typeOrNull!! }
-        return irFactory.createSimpleFunction(
+        return IrFactoryImpl.createSimpleFunction(
             startOffset = startOffset,
             endOffset = endOffset,
             origin = IrDeclarationOrigin.ADAPTER_FOR_SUSPEND_CONVERSION,
@@ -663,7 +664,7 @@ internal class AdapterGenerator(
                     IrDeclarationOrigin.ADAPTER_PARAMETER_FOR_SUSPEND_CONVERSION
                 )
             }
-            irAdapterFunction.body = irFactory.createBlockBody(startOffset, endOffset) {
+            irAdapterFunction.body = IrFactoryImpl.createBlockBody(startOffset, endOffset) {
                 val irCall = createAdapteeCallForArgument(startOffset, endOffset, irAdapterFunction, invokeSymbol)
                 if (returnType.isUnit()) {
                     statements.add(irCall)
@@ -752,7 +753,7 @@ internal class AdapterGenerator(
         val functionParameter = callableSymbol.valueParameterSymbols.singleOrNull()
             ?: throw AssertionError("Single value parameter expected: ${callableSymbol.valueParameterSymbols}")
 
-        return irFactory.createSimpleFunction(
+        return IrFactoryImpl.createSimpleFunction(
             startOffset = startOffset,
             endOffset = endOffset,
             origin = IrDeclarationOrigin.ADAPTER_FOR_FUN_INTERFACE_CONSTRUCTOR,
@@ -780,7 +781,7 @@ internal class AdapterGenerator(
                 IrDeclarationOrigin.ADAPTER_PARAMETER_FOR_CALLABLE_REFERENCE
             )
             irAdapterFunction.valueParameters = listOf(irFunctionParameter)
-            irAdapterFunction.body = irFactory.createBlockBody(
+            irAdapterFunction.body = IrFactoryImpl.createBlockBody(
                 startOffset, endOffset,
                 listOf(
                     IrReturnImpl(

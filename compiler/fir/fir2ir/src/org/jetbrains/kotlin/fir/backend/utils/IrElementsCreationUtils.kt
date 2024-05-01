@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.IrVariable
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.*
@@ -46,7 +47,7 @@ internal fun IrDeclarationParent.declareThisReceiverParameter(
     explicitReceiver: FirReceiverParameter? = null,
     isAssignable: Boolean = false
 ): IrValueParameter {
-    return c.irFactory.createValueParameter(
+    return IrFactoryImpl.createValueParameter(
         startOffset = startOffset,
         endOffset = endOffset,
         origin = thisOrigin,

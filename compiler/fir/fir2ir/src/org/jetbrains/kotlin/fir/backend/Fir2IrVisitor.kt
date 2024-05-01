@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.*
 import org.jetbrains.kotlin.ir.builders.declarations.UNDEFINED_PARAMETER_INDEX
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -150,7 +151,7 @@ class Fir2IrVisitor(
                 // `correspondingClass` definitely is not a lazy class
                 @OptIn(UnsafeDuringIrConstructionAPI::class)
                 val constructor = correspondingClass.constructors.first()
-                irEnumEntry.initializerExpression = irFactory.createExpressionBody(
+                irEnumEntry.initializerExpression = IrFactoryImpl.createExpressionBody(
                     IrEnumConstructorCallImpl(
                         startOffset, endOffset, irType,
                         constructor.symbol,
@@ -166,7 +167,7 @@ class Fir2IrVisitor(
             val delegatedConstructor = initializer.anonymousObject.primaryConstructorIfAny(session)?.fir?.delegatedConstructor
             if (delegatedConstructor != null) {
                 with(memberGenerator) {
-                    irEnumEntry.initializerExpression = irFactory.createExpressionBody(
+                    irEnumEntry.initializerExpression = IrFactoryImpl.createExpressionBody(
                         delegatedConstructor.toIrDelegatingConstructorCall()
                     )
                 }
@@ -178,7 +179,7 @@ class Fir2IrVisitor(
             val constructor = irParentEnumClass.defaultConstructor
                 ?: error("Assuming that default constructor should exist and be converted at this point")
             enumEntry.convertWithOffsets { startOffset, endOffset ->
-                irEnumEntry.initializerExpression = irFactory.createExpressionBody(
+                irEnumEntry.initializerExpression = IrFactoryImpl.createExpressionBody(
                     IrEnumConstructorCallImpl(
                         startOffset, endOffset, irType, constructor.symbol,
                         valueArgumentsCount = constructor.valueParameters.size,
@@ -237,7 +238,7 @@ class Fir2IrVisitor(
                 val origin = if (isSelf) IrDeclarationOrigin.INSTANCE_RECEIVER else IrDeclarationOrigin.SCRIPT_IMPLICIT_RECEIVER
                 val irReceiver =
                     receiver.convertWithOffsets { startOffset, endOffset ->
-                        irFactory.createValueParameter(
+                        IrFactoryImpl.createValueParameter(
                             startOffset, endOffset, origin, name, receiver.typeRef.toIrType(c), isAssignable = false,
                             IrValueParameterSymbolImpl(),
                             if (isSelf) UNDEFINED_PARAMETER_INDEX else index,
@@ -338,7 +339,7 @@ class Fir2IrVisitor(
         declarationStorage.enterScope(irFunction.symbol)
         conversionScope.withParent(irFunction) {
             val irBlock = codeFragment.block.convertToIrBlock(forceUnitType = false)
-            irFunction.body = irFactory.createExpressionBody(irBlock)
+            irFunction.body = IrFactoryImpl.createExpressionBody(irBlock)
         }
         declarationStorage.leaveScope(irFunction.symbol)
 
@@ -1012,7 +1013,7 @@ class Fir2IrVisitor(
     internal fun convertToIrBlockBody(block: FirBlock): IrBlockBody {
         return block.convertWithOffsets { startOffset, endOffset ->
             val irStatements = block.statements.mapToIrStatements()
-            irFactory.createBlockBody(
+            IrFactoryImpl.createBlockBody(
                 startOffset, endOffset,
                 if (irStatements.isNotEmpty()) {
                     irStatements.filterNotNull().takeIf { it.isNotEmpty() }
