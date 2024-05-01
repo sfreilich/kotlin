@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.backend.common.actualizer.SpecialFakeOverrideSymbols
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
+import org.jetbrains.kotlin.config.AnalysisFlags
 import org.jetbrains.kotlin.diagnostics.impl.BaseDiagnosticsCollector
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.FirSession
@@ -41,6 +42,7 @@ import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
+import org.jetbrains.kotlin.utils.addToStdlib.runUnless
 
 data class FirResult(val outputs: List<ModuleCompilerAnalyzedOutput>)
 
@@ -92,10 +94,7 @@ fun FirResult.convertToIrAndActualize(
 
     val platformFirOutput = outputs.last()
 
-    fun ModuleCompilerAnalyzedOutput.createFir2IrComponentsStorage(
-        irBuiltIns: IrBuiltInsOverFir? = null,
-        irTypeSystemContext: IrTypeSystemContext? = null,
-    ): Fir2IrComponentsStorage {
+    fun ModuleCompilerAnalyzedOutput.createFir2IrComponentsStorage(componentsStorage: Fir2IrComponentsStorage?): Fir2IrComponentsStorage {
         return Fir2IrComponentsStorage(
             session,
             scopeSession,
@@ -107,14 +106,14 @@ fun FirResult.convertToIrAndActualize(
             commonMemberStorage,
             irMangler,
             kotlinBuiltIns,
-            irBuiltIns,
+            componentsStorage?.irBuiltIns,
             specialAnnotationsProvider,
-            irTypeSystemContext,
+            componentsStorage?.irTypeSystemContext,
             firProvidersWithGeneratedFiles.getValue(session.moduleData),
         )
     }
 
-    val platformComponentsStorage = platformFirOutput.createFir2IrComponentsStorage()
+    val platformComponentsStorage = platformFirOutput.createFir2IrComponentsStorage(componentsStorage = null)
 
     val dependentIrFragments = mutableListOf<IrModuleFragment>()
     lateinit var mainIrFragment: IrModuleFragment
@@ -126,7 +125,10 @@ fun FirResult.convertToIrAndActualize(
         val componentsStorage = if (isMainOutput) {
             platformComponentsStorage
         } else {
-            firOutput.createFir2IrComponentsStorage(platformComponentsStorage.irBuiltIns, platformComponentsStorage.irTypeSystemContext)
+            // Initialize different builtins for common and platform source sets if `stdlibCompilation` is enabled
+            firOutput.createFir2IrComponentsStorage(
+                runUnless(fir2IrConfiguration.languageVersionSettings.getFlag(AnalysisFlags.stdlibCompilation)) { platformComponentsStorage }
+            )
         }
 
         val irModuleFragment = Fir2IrConverter.generateIrModuleFragment(componentsStorage, firOutput.fir).also {

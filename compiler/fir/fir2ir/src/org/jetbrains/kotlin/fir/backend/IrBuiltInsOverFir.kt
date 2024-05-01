@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.fir.backend
 import org.jetbrains.kotlin.backend.common.serialization.signature.PublicIdSignatureComputer
 import org.jetbrains.kotlin.builtins.PrimitiveType
 import org.jetbrains.kotlin.builtins.UnsignedType
+import org.jetbrains.kotlin.config.AnalysisFlags
 import org.jetbrains.kotlin.config.LanguageVersionSettings
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.fir.FirSession
@@ -15,6 +16,7 @@ import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
 import org.jetbrains.kotlin.fir.declarations.constructors
 import org.jetbrains.kotlin.fir.descriptors.FirModuleDescriptor
+import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.resolve.providers.FirSymbolProvider
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.scopes.getDeclaredConstructors
@@ -711,11 +713,17 @@ class IrBuiltInsOverFir(
 
         val irFun4SignatureCalculation = makeWithSymbol(IrSimpleFunctionSymbolImpl())
         val signature = irSignatureBuilder.computeSignature(irFun4SignatureCalculation)
-        return c.symbolTable.declareSimpleFunction(
-            signature,
-            { IrSimpleFunctionSymbolImpl(null, signature) },
-            ::makeWithSymbol
-        )
+        return if (languageVersionSettings.getFlag(AnalysisFlags.stdlibCompilation) && session.moduleData.isCommon) {
+            // If there is stdlib compilation, reuse already declared function in common source sets
+            @OptIn(UnsafeDuringIrConstructionAPI::class)
+            c.symbolTable.referenceSimpleFunction(signature).owner
+        } else {
+            c.symbolTable.declareSimpleFunction(
+                signature,
+                { IrSimpleFunctionSymbolImpl(null, signature) },
+                ::makeWithSymbol
+            )
+        }
     }
 
     private fun findFunctions(packageName: FqName, name: Name): List<IrSimpleFunctionSymbol> {
