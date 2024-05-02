@@ -164,7 +164,7 @@ progressive mode enabled may cause compilation errors in progressive mode."""
         }
 
     @Argument(
-        value = "-Xstdlib-compilation",
+        value = "-XXstdlib-compilation",
         description = "Enables special features which are relevant only for stdlib compilation.",
     )
     var stdlibCompilation = false
