@@ -26,10 +26,7 @@ import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.createEmptyExternalPackageFragment
 import org.jetbrains.kotlin.ir.descriptors.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstructorCallImpl
-import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
-import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
-import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeBuilder
@@ -92,6 +89,10 @@ class IrBuiltInsOverDescriptors(
 
     private fun ClassDescriptor.toIrSymbol(): IrClassSymbol {
         return symbolTable.descriptorExtension.referenceClass(this)
+    }
+
+    private fun ClassConstructorDescriptor.toIrSymbol(): IrConstructorSymbol {
+        return symbolTable.descriptorExtension.referenceConstructor(this)
     }
 
     private fun FunctionDescriptor.toIrSymbol(): IrSimpleFunctionSymbol {
@@ -162,7 +163,7 @@ class IrBuiltInsOverDescriptors(
 
             if (isIntrinsicConst) {
                 operator.annotations += IrConstructorCallImpl.fromSymbolDescriptor(
-                    UNDEFINED_OFFSET, UNDEFINED_OFFSET, intrinsicConstType, intrinsicConstConstructor.symbol
+                    UNDEFINED_OFFSET, UNDEFINED_OFFSET, intrinsicConstType, intrinsicConstConstructor
                 )
             }
 
@@ -292,9 +293,8 @@ class IrBuiltInsOverDescriptors(
     override val anyClass = builtIns.any.toIrSymbol()
     override val anyNType = anyType.makeNullable()
 
-    private val intrinsicConstClass = createIntrinsicConstEvaluationClass()
-    private val intrinsicConstType = intrinsicConstClass.defaultType
-    private val intrinsicConstConstructor = intrinsicConstClass.primaryConstructor as IrConstructor
+    private val intrinsicConstType = builtIns.intrinsicConstAnnotation.defaultType.toIrType()
+    private val intrinsicConstConstructor = builtIns.intrinsicConstAnnotation.constructors.single().toIrSymbol()
 
     val bool = builtIns.booleanType
     override val booleanType = bool.toIrType()

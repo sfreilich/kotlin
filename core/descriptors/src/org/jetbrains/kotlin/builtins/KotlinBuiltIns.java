@@ -350,6 +350,14 @@ public abstract class KotlinBuiltIns {
     }
 
     @NotNull
+    public ClassDescriptor getIntrinsicConstAnnotation() {
+        ClassifierDescriptor classifier = getBuiltInsModule().getPackage(KOTLIN_INTERNAL_FQ_NAME).getMemberScope()
+                .getContributedClassifier(FqNames.intrinsicConstEvaluation.shortName(), NoLookupLocation.FROM_BUILTINS);
+        assert classifier != null;
+        return (ClassDescriptor) classifier;
+    }
+
+    @NotNull
     public ClassDescriptor getKClass() {
         return getBuiltInClassByFqName(FqNames.kClass.toSafe());
     }
