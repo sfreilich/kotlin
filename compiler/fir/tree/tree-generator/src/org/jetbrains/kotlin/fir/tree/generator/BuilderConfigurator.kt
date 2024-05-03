@@ -331,7 +331,7 @@ object BuilderConfigurator : AbstractFirBuilderConfigurator<FirTreeBuilder>(FirT
 
         builder(valueParameter, type = "FirDefaultSetterValueParameter") {
             defaultNull("defaultValue", "initializer", "delegate", "receiverParameter", "getter", "setter")
-            defaultFalse("isCrossinline", "isNoinline", "isVararg", "isVar")
+            defaultFalse("isCrossinline", "isNoinline", "isVararg", "isVar", "isDataarg", "isSealedarg")
             defaultTrue("isVal")
         }
 

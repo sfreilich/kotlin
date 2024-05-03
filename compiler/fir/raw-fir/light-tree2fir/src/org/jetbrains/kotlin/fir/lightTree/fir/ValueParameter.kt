@@ -81,6 +81,7 @@ class ValueParameter(
             origin = FirDeclarationOrigin.Source
             isVararg = modifiers.hasVararg()
             isDataarg = modifiers.hasDataarg()
+            isSealedarg = modifiers.hasSealedarg()
             returnTypeRef = if (isVararg && this@ValueParameter.returnTypeRef is FirErrorTypeRef) {
                 this@ValueParameter.returnTypeRef.wrapIntoArray()
             } else {

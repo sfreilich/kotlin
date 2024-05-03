@@ -1753,6 +1753,16 @@ internal class NameForAmbiguousParameterImpl(
     token: KtLifetimeToken,
 ) : KtAbstractFirDiagnostic<KtValueArgument>(firDiagnostic, token), KtFirDiagnostic.NameForAmbiguousParameter
 
+internal class ValueDataargsConflictImpl(
+    firDiagnostic: KtPsiDiagnostic,
+    token: KtLifetimeToken,
+) : KtAbstractFirDiagnostic<KtValueArgument>(firDiagnostic, token), KtFirDiagnostic.ValueDataargsConflict
+
+internal class SealedargsNoConstructorImpl(
+    firDiagnostic: KtPsiDiagnostic,
+    token: KtLifetimeToken,
+) : KtAbstractFirDiagnostic<PsiElement>(firDiagnostic, token), KtFirDiagnostic.SealedargsNoConstructor
+
 internal class AssignmentTypeMismatchImpl(
     override val expectedType: KtType,
     override val actualType: KtType,

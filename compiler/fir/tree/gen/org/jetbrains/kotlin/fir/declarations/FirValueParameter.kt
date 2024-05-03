@@ -56,6 +56,7 @@ abstract class FirValueParameter : FirVariable(), FirControlFlowGraphOwner {
     abstract val isNoinline: Boolean
     abstract val isVararg: Boolean
     abstract val isDataarg: Boolean
+    abstract val isSealedarg: Boolean
 
     override fun <R, D> accept(visitor: FirVisitor<R, D>, data: D): R =
         visitor.visitValueParameter(this, data)

@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.fir.resolve.calls
 
 import org.jetbrains.kotlin.fir.declarations.FirValueParameter
 import org.jetbrains.kotlin.fir.expressions.FirExpression
+import org.jetbrains.kotlin.fir.types.FirTypeRef
 
 sealed class ResolvedCallArgument {
     abstract val arguments: List<FirExpression>
@@ -28,6 +29,11 @@ sealed class ResolvedCallArgument {
     class DataargArgument(val namedArguments: CallableReferenceMappedArguments) : ResolvedCallArgument() {
         override val arguments: List<FirExpression>
             get() = namedArguments.values.flatMap { it.arguments }
+    }
+
+    class SealedargArgument(val callArgument: FirExpression, val typeRef: FirTypeRef) : ResolvedCallArgument() {
+        override val arguments: List<FirExpression>
+            get() = listOf(callArgument)
     }
 }
 

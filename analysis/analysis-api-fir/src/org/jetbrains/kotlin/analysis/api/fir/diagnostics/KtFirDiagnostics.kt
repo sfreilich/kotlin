@@ -1461,6 +1461,14 @@ sealed interface KtFirDiagnostic<PSI : PsiElement> : KtDiagnosticWithPsi<PSI> {
         override val diagnosticClass get() = NameForAmbiguousParameter::class
     }
 
+    interface ValueDataargsConflict : KtFirDiagnostic<KtValueArgument> {
+        override val diagnosticClass get() = ValueDataargsConflict::class
+    }
+
+    interface SealedargsNoConstructor : KtFirDiagnostic<PsiElement> {
+        override val diagnosticClass get() = SealedargsNoConstructor::class
+    }
+
     interface AssignmentTypeMismatch : KtFirDiagnostic<KtExpression> {
         override val diagnosticClass get() = AssignmentTypeMismatch::class
         val expectedType: KtType

@@ -1214,6 +1214,7 @@ open class FirDeclarationsResolveTransformer(
                     isNoinline = false
                     isVararg = false
                     isDataarg = false
+                    isSealedarg = false
                 }
                 listOf(itParam)
             }

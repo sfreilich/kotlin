@@ -61,6 +61,10 @@ class ValueDataargsConflict(
     override val argument: FirNamedArgumentExpression,
 ) : InapplicableArgumentDiagnostic()
 
+class SealedargsNoConstructor(
+    override val argument: FirExpression,
+) : InapplicableArgumentDiagnostic()
+
 class VarargArgumentOutsideParentheses(
     override val argument: FirExpression,
     val valueParameter: FirValueParameter

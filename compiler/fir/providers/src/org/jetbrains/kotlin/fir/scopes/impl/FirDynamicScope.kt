@@ -170,6 +170,7 @@ class FirDynamicMembersStorage(val session: FirSession) : FirSessionComponent {
             isNoinline = false
             isVararg = true
             isDataarg = false
+            isSealedarg = false
         }
 
         valueParameters.add(parameter)

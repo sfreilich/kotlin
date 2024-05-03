@@ -201,6 +201,7 @@ val possibleTargetMap = mapOf(
     REIFIED_KEYWORD to EnumSet.of(KotlinTarget.TYPE_PARAMETER),
     VARARG_KEYWORD to EnumSet.of(KotlinTarget.VALUE_PARAMETER, KotlinTarget.PROPERTY_PARAMETER),
     DATAARG_KEYWORD to EnumSet.of(KotlinTarget.VALUE_PARAMETER),
+    SEALEDARG_KEYWORD to EnumSet.of(KotlinTarget.VALUE_PARAMETER),
     COMPANION_KEYWORD to EnumSet.of(KotlinTarget.OBJECT),
     LATEINIT_KEYWORD to EnumSet.of(
         KotlinTarget.MEMBER_PROPERTY,

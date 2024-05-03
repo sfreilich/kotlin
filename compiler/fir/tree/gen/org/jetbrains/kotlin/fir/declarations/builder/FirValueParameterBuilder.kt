@@ -49,6 +49,7 @@ open class FirValueParameterBuilder : FirAnnotationContainerBuilder {
     open var isNoinline: Boolean by kotlin.properties.Delegates.notNull<Boolean>()
     open var isVararg: Boolean by kotlin.properties.Delegates.notNull<Boolean>()
     open var isDataarg: Boolean by kotlin.properties.Delegates.notNull<Boolean>()
+    open var isSealedarg: Boolean by kotlin.properties.Delegates.notNull<Boolean>()
 
     override fun build(): FirValueParameter {
         return FirValueParameterImpl(
@@ -72,6 +73,7 @@ open class FirValueParameterBuilder : FirAnnotationContainerBuilder {
             isNoinline,
             isVararg,
             isDataarg,
+            isSealedarg,
         )
     }
 
@@ -111,5 +113,6 @@ inline fun buildValueParameterCopy(original: FirValueParameter, init: FirValuePa
     copyBuilder.isNoinline = original.isNoinline
     copyBuilder.isVararg = original.isVararg
     copyBuilder.isDataarg = original.isDataarg
+    copyBuilder.isSealedarg = original.isSealedarg
     return copyBuilder.apply(init).build()
 }

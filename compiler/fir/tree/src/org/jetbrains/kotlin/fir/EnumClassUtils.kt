@@ -123,6 +123,7 @@ fun FirRegularClassBuilder.generateValueOfFunction(
             isNoinline = false
             isVararg = false
             isDataarg = false
+            isSealedarg = false
             resolvePhase = this@generateValueOfFunction.resolvePhase
         }
         resolvePhase = this@generateValueOfFunction.resolvePhase
