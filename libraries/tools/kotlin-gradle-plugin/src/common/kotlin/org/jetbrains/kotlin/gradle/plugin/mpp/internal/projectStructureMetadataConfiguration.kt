@@ -1,0 +1,40 @@
+/*
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
+ */
+
+package org.jetbrains.kotlin.gradle.plugin.mpp.internal
+
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.attributes.Attribute
+import org.gradle.api.attributes.Usage
+import org.jetbrains.kotlin.gradle.plugin.PSM_CONSUMABLE_CONFIGURATION_NAME
+import org.jetbrains.kotlin.gradle.plugin.mpp.GenerateProjectStructureMetadata
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
+import org.jetbrains.kotlin.gradle.plugin.usageByName
+import org.jetbrains.kotlin.gradle.targets.metadata.GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME
+import org.jetbrains.kotlin.gradle.utils.maybeCreateConsumable
+import org.jetbrains.kotlin.gradle.utils.named
+import org.jetbrains.kotlin.gradle.utils.setAttribute
+
+internal val psmAttribute = Attribute.of("psmFile", Boolean::class.javaObjectType)
+
+internal fun setupProjectStructureMetadataConsumableConfiguration(project: Project) {
+    val psmConsumableConfiguration = maybeCreatePsmConsumableConfiguration(project)
+    project.artifacts.add(
+        psmConsumableConfiguration.name,
+        project.tasks.named<GenerateProjectStructureMetadata>(GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME).map { it.resultFile }
+    )
+}
+
+private fun maybeCreatePsmConsumableConfiguration(project: Project): Configuration {
+    return project.configurations.maybeCreateConsumable(PSM_CONSUMABLE_CONFIGURATION_NAME) {
+        configurePsmDependenciesAttributes(project)
+    }
+}
+
+private fun Configuration.configurePsmDependenciesAttributes(project: Project) {
+    attributes.setAttribute(psmAttribute, true)
+    attributes.setAttribute(Usage.USAGE_ATTRIBUTE, project.usageByName(KotlinUsages.KOTLIN_PSM))
+}

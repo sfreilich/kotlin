@@ -264,8 +264,10 @@ class KotlinMetadataTargetConfigurator :
 }
 
 
+internal const val GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME = "generateProjectStructureMetadata"
+
 internal fun Project.createGenerateProjectStructureMetadataTask(): TaskProvider<GenerateProjectStructureMetadata> =
-    project.registerTask(lowerCamelCaseName("generateProjectStructureMetadata")) { task ->
+    project.registerTask(lowerCamelCaseName(GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME)) { task ->
         task.lazyKotlinProjectStructureMetadata = lazy { project.multiplatformExtension.kotlinProjectStructureMetadata }
         task.description = "Generates serialized project structure metadata of the current project (for tooling)"
     }
