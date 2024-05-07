@@ -451,13 +451,13 @@ class IrBuiltInsOverDescriptors(
 
     override val unsignedTypesToUnsignedArrays: Map<UnsignedType, IrClassSymbol> =
         UnsignedType.entries.mapNotNull { unsignedType ->
-            val array = builtIns.builtInsModule.findClassAcrossModuleDependencies(unsignedType.arrayClassId)?.toIrSymbol()
+            val array = builtInsModule.findClassAcrossModuleDependencies(unsignedType.arrayClassId)?.toIrSymbol()
             if (array == null) null else unsignedType to array
         }.toMap()
 
     override val unsignedArraysElementTypes: Map<IrClassSymbol, IrType?> by lazy {
         unsignedTypesToUnsignedArrays.map { (k, v) ->
-            v to builtIns.builtInsModule.findClassAcrossModuleDependencies(k.classId)?.defaultType?.toIrType()
+            v to builtInsModule.findClassAcrossModuleDependencies(k.classId)?.defaultType?.toIrType()
         }.toMap()
     }
 
@@ -533,7 +533,7 @@ class IrBuiltInsOverDescriptors(
     override val enumClass = builtIns.enum.toIrSymbol()
 
     private fun builtInsPackage(vararg packageNameSegments: String) =
-        builtIns.builtInsModule.getPackage(FqName.fromSegments(listOf(*packageNameSegments))).memberScope
+        builtInsModule.getPackage(FqName.fromSegments(listOf(*packageNameSegments))).memberScope
 
     override fun findFunctions(name: Name, vararg packageNameSegments: String): Iterable<IrSimpleFunctionSymbol> =
         builtInsPackage(*packageNameSegments).getContributedFunctions(name, NoLookupLocation.FROM_BACKEND).map {
@@ -541,12 +541,12 @@ class IrBuiltInsOverDescriptors(
         }
 
     override fun findFunctions(name: Name, packageFqName: FqName): Iterable<IrSimpleFunctionSymbol> =
-        builtIns.builtInsModule.getPackage(packageFqName).memberScope.getContributedFunctions(name, NoLookupLocation.FROM_BACKEND).map {
+        builtInsModule.getPackage(packageFqName).memberScope.getContributedFunctions(name, NoLookupLocation.FROM_BACKEND).map {
             it.toIrSymbol()
         }
 
     override fun findProperties(name: Name, packageFqName: FqName): Iterable<IrPropertySymbol> =
-        builtIns.builtInsModule.getPackage(packageFqName).memberScope.getContributedVariables(name, NoLookupLocation.FROM_BACKEND).map {
+        builtInsModule.getPackage(packageFqName).memberScope.getContributedVariables(name, NoLookupLocation.FROM_BACKEND).map {
             it.toIrSymbol()
         }
 
@@ -560,7 +560,7 @@ class IrBuiltInsOverDescriptors(
         findClassDescriptor(name, packageFqName)?.toIrSymbol()
 
     fun findClassDescriptor(name: Name, packageFqName: FqName): ClassDescriptor? =
-        builtIns.builtInsModule.getPackage(packageFqName).memberScope.getContributedClassifier(
+        builtInsModule.getPackage(packageFqName).memberScope.getContributedClassifier(
             name,
             NoLookupLocation.FROM_BACKEND
         ) as? ClassDescriptor
