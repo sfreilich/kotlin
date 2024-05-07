@@ -13,12 +13,11 @@ import org.gradle.api.attributes.AttributeContainer
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logging
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtensionOrNull
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.MetadataDependencyResolution.ChooseVisibleSourceSets.MetadataProvider.ArtifactMetadataProvider
+import org.jetbrains.kotlin.gradle.plugin.mpp.internal.projectStructureMetadataConfiguration
 import org.jetbrains.kotlin.gradle.plugin.sources.internal
-import org.jetbrains.kotlin.gradle.utils.whenEvaluated
 import org.jetbrains.kotlin.gradle.utils.*
 import java.util.*
 
@@ -102,6 +101,7 @@ internal class GranularMetadataTransformation(
         val projectStructureMetadataExtractorFactory: MppDependencyProjectStructureMetadataExtractorFactory,
         val projectData: Map<String, ProjectData>,
         val platformCompilationSourceSets: Set<String>,
+        val projectStructureMetadataConfiguration: LazyResolvedConfiguration,
     ) {
         constructor(project: Project, kotlinSourceSet: KotlinSourceSet) : this(
             build = project.currentBuild,
@@ -110,7 +110,8 @@ internal class GranularMetadataTransformation(
             sourceSetVisibilityProvider = SourceSetVisibilityProvider(project),
             projectStructureMetadataExtractorFactory = project.kotlinMppDependencyProjectStructureMetadataExtractorFactory,
             projectData = project.allProjectsData,
-            platformCompilationSourceSets = project.multiplatformExtension.platformCompilationSourceSets
+            platformCompilationSourceSets = project.multiplatformExtension.platformCompilationSourceSets,
+            projectStructureMetadataConfiguration = LazyResolvedConfiguration(kotlinSourceSet.internal.projectStructureMetadataConfiguration)
         )
     }
 
@@ -226,7 +227,8 @@ internal class GranularMetadataTransformation(
 
         logger.debug("Transform composite metadata artifact: '${compositeMetadataArtifact.file}'")
 
-        val mppDependencyMetadataExtractor = params.projectStructureMetadataExtractorFactory.create(compositeMetadataArtifact)
+        val mppDependencyMetadataExtractor =
+            params.projectStructureMetadataExtractorFactory.create(compositeMetadataArtifact, params.projectStructureMetadataConfiguration)
         val projectStructureMetadata = mppDependencyMetadataExtractor.getProjectStructureMetadata()
             ?: return MetadataDependencyResolution.KeepOriginalDependency(module)
 

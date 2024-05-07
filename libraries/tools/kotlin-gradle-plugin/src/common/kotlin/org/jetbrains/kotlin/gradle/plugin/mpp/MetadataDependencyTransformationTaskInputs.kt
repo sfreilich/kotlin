@@ -8,6 +8,7 @@ import org.gradle.api.tasks.*
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider.Companion.kotlinPropertiesProvider
+import org.jetbrains.kotlin.gradle.plugin.mpp.internal.projectStructureMetadataConfiguration
 import org.jetbrains.kotlin.gradle.plugin.sources.internal
 import org.jetbrains.kotlin.gradle.utils.currentBuild
 import org.jetbrains.kotlin.gradle.utils.filesProvider
@@ -20,6 +21,15 @@ internal class MetadataDependencyTransformationTaskInputs(
 ) {
 
     private val currentBuild = project.currentBuild
+
+    @Suppress("unused") // Gradle input
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:IgnoreEmptyDirectories
+    @get:NormalizeLineEndings
+    val psmConfigurationToResolve: FileCollection = kotlinSourceSet
+        .internal
+        .projectStructureMetadataConfiguration
 
     @Suppress("unused") // Gradle input
     @get:InputFiles

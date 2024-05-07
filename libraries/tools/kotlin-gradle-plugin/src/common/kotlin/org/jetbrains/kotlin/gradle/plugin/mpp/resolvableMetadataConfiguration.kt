@@ -39,10 +39,7 @@ internal val InternalKotlinSourceSet.resolvableMetadataConfiguration: Configurat
         .maybeCreateResolvable(resolvableMetadataConfigurationName)
         .configureMetadataDependenciesAttribute(project)
 
-    withDependsOnClosure.forAll { sourceSet ->
-        val extenders = sourceSet.internal.compileDependenciesConfigurations
-        configuration.extendsFrom(*extenders.toTypedArray())
-    }
+    extendsFromWithDependsOnClosureConfigurations(configuration)
 
     /**
      * Adding dependencies from associate compilations using a listProvider, since we would like to defer
@@ -59,6 +56,18 @@ internal val InternalKotlinSourceSet.resolvableMetadataConfiguration: Configurat
     configureLegacyMetadataDependenciesConfigurations(configuration)
 
     configuration
+}
+
+/**
+ * Extends the given [configuration] from the configurations defined in the [withDependsOnClosure] of the source set.
+ *
+ * @param configuration The configuration to be extended.
+ */
+internal fun InternalKotlinSourceSet.extendsFromWithDependsOnClosureConfigurations(configuration: Configuration) {
+    withDependsOnClosure.forAll { sourceSet ->
+        val extenders = sourceSet.internal.compileDependenciesConfigurations
+        configuration.extendsFrom(*extenders.toTypedArray())
+    }
 }
 
 private val InternalKotlinSourceSet.compileDependenciesConfigurations: List<Configuration>
@@ -115,7 +124,7 @@ internal val SetupConsistentMetadataDependenciesResolution = KotlinProjectSetupC
     }
 
     for ((sourceSetTree, sourceSetsOfTree) in sourceSetsBySourceSetTree) {
-        val configurationName = when(sourceSetTree) {
+        val configurationName = when (sourceSetTree) {
             null -> continue // for unknown trees there should be no relation between source sets, so just skip
             KotlinSourceSetTree.main -> "allSourceSetsCompileDependenciesMetadata"
             else -> lowerCamelCaseName("all", sourceSetTree.name, "SourceSetsCompileDependenciesMetadata")
