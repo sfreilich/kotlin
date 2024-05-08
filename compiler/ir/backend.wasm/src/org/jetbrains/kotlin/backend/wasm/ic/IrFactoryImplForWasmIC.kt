@@ -3,13 +3,14 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.ir.declarations.impl
+package org.jetbrains.kotlin.backend.wasm.ic
 
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.util.IdSignature
+import org.jetbrains.kotlin.ir.util.dump
 import java.util.*
 
-class IrFactoryImplForJsIC(stageController: StageController) : IrFactory(stageController), IdSignatureRetriever {
+class IrFactoryImplForWasmIC(stageController: StageController) : IrFactory(stageController), IdSignatureRetriever {
     private val declarationToSignature = WeakHashMap<IrDeclaration, IdSignature>()
 
     override fun <T : IrDeclaration> T.declarationCreated(): T {
@@ -21,6 +22,18 @@ class IrFactoryImplForJsIC(stageController: StageController) : IrFactory(stageCo
     }
 
     override fun declarationSignature(declaration: IrDeclaration): IdSignature? {
-        return declarationToSignature[declaration] ?: declaration.symbol.signature ?: declaration.symbol.privateSignature
+        when (declaration) {
+            is IrFunction, is IrProperty, is IrClass, is IrField -> Unit
+            else -> return null
+        }
+
+        val signature = declarationToSignature[declaration]
+            ?: declaration.symbol.signature
+            ?: declaration.symbol.privateSignature
+        if (signature != null) return signature
+
+        val unknownDeclaration = IdSignature.ScopeLocalDeclaration(declaration.dump().hashCode(), "UNKNOWN")
+        declarationToSignature[declaration] = unknownDeclaration
+        return unknownDeclaration
     }
 }
