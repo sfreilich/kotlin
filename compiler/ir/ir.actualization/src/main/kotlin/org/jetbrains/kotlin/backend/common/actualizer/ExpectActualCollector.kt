@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.backend.common.actualizer
 
+import org.jetbrains.kotlin.backend.common.actualizer.ExpectActualLinkCollector.MatchingContext
 import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.config.LanguageVersionSettings
 import org.jetbrains.kotlin.incremental.components.ExpectActualTracker
@@ -48,19 +49,19 @@ internal class ExpectActualCollector(
     private val typeSystemContext: IrTypeSystemContext,
     private val diagnosticsReporter: IrDiagnosticReporter,
     private val expectActualTracker: ExpectActualTracker?,
-    private val extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor?,
+    private val extraActualDeclarationExtractors: List<IrExtraActualDeclarationExtractor>,
 ) {
     fun collectClassActualizationInfo(): ClassActualizationInfo {
         val expectTopLevelDeclarations = ExpectTopLevelDeclarationCollector.collect(dependentFragments)
         val fragmentsWithActuals = dependentFragments.drop(1) + mainFragment
         return ActualDeclarationsCollector.collectActuals(
-            fragmentsWithActuals, expectTopLevelDeclarations, extraActualDeclarationExtractor
+            fragmentsWithActuals, expectTopLevelDeclarations, extraActualDeclarationExtractors
         )
     }
 
     fun matchAllExpectDeclarations(classActualizationInfo: ClassActualizationInfo): MutableMap<IrSymbol, IrSymbol> {
         val linkCollector = ExpectActualLinkCollector()
-        val linkCollectorContext = ExpectActualLinkCollector.MatchingContext(
+        val linkCollectorContext = MatchingContext(
             typeSystemContext, diagnosticsReporter, expectActualTracker, classActualizationInfo, null
         )
         dependentFragments.forEach { linkCollector.collectAndCheckMapping(it, linkCollectorContext) }
@@ -68,6 +69,15 @@ internal class ExpectActualCollector(
         // Thus relevant actuals are always missing for the last module
         // But the collector should be run anyway to detect and report "hanging" expect declarations
         linkCollector.collectAndCheckMapping(mainFragment, linkCollectorContext)
+
+        /*for (extraExpectDeclaration in extraExpectDeclarations) {
+            when (extraExpectDeclaration) {
+                is IrProperty -> matchExpectCallable(extraExpectDeclaration, extraExpectDeclaration.callableId, linkCollectorContext)
+                is IrFunction -> matchExpectCallable(extraExpectDeclaration, extraExpectDeclaration.callableId, linkCollectorContext)
+                is IrClass -> matchExpectClass(extraExpectDeclaration, linkCollectorContext)
+            }
+        }*/
+
         return linkCollectorContext.destination
     }
 }
@@ -121,19 +131,22 @@ private class ExpectTopLevelDeclarationCollector {
     }
 }
 
-private class ActualDeclarationsCollector(private val expectTopLevelDeclarations: ExpectTopLevelDeclarations) {
+private class ActualDeclarationsCollector(
+    private val expectTopLevelDeclarations: ExpectTopLevelDeclarations,
+    private val extraActualDeclarationExtractors: List<IrExtraActualDeclarationExtractor>
+) {
     companion object {
         fun collectActuals(
             fragments: List<IrModuleFragment>,
             expectTopLevelDeclarations: ExpectTopLevelDeclarations,
-            extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor?,
+            extraActualDeclarationExtractors: List<IrExtraActualDeclarationExtractor>,
         ): ClassActualizationInfo {
-            val collector = ActualDeclarationsCollector(expectTopLevelDeclarations)
+            val collector = ActualDeclarationsCollector(expectTopLevelDeclarations, extraActualDeclarationExtractors)
             for (fragment in fragments) {
                 collector.collect(fragment)
             }
-            if (extraActualDeclarationExtractor != null) {
-                collector.collectExtraActualDeclarations(extraActualDeclarationExtractor)
+            if (extraActualDeclarationExtractors.isNotEmpty()) {
+                collector.collectExtraActualDeclarations()
             }
             return ClassActualizationInfo(
                 collector.actualClasses,
@@ -207,9 +220,9 @@ private class ActualDeclarationsCollector(private val expectTopLevelDeclarations
         }
     }
 
-    private fun collectExtraActualDeclarations(extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor) {
+    private fun collectExtraActualDeclarations() {
         for (classSymbol in expectTopLevelDeclarations.classes.values) {
-            collectExtraActualClasses(extraActualDeclarationExtractor, classSymbol.owner)
+            collectExtraActualClasses(classSymbol.owner)
         }
         for ((callableId, callableSymbols) in expectTopLevelDeclarations.callables) {
             val expectTopLevelCallables = callableSymbols.mapNotNull {
@@ -219,12 +232,14 @@ private class ActualDeclarationsCollector(private val expectTopLevelDeclarations
                     else -> null
                 }
             }
-            collectExtraActualCallables(extraActualDeclarationExtractor, expectTopLevelCallables, callableId)
+            collectExtraActualCallables(expectTopLevelCallables, callableId)
         }
     }
 
-    private fun collectExtraActualClasses(extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor, expectClass: IrClass) {
-        val actualClassSymbol = extraActualDeclarationExtractor.extract(expectClass) ?: return
+    private fun collectExtraActualClasses(expectClass: IrClass) {
+        val actualClassSymbols = extraActualDeclarationExtractors.mapNotNull { it.extract(expectClass) }
+        val actualClassSymbol = actualClassSymbols.singleOrNull() ?: return // TODO: report multiple extra actual classes
+
         val classId = expectClass.classIdOrFail
         if (actualClasses.containsKey(classId)) return // TODO: report actual classes collision, KT-67740
 
@@ -232,17 +247,16 @@ private class ActualDeclarationsCollector(private val expectTopLevelDeclarations
 
         for (declaration in expectClass.declarations) {
             if (declaration is IrClass) {
-                collectExtraActualClasses(extraActualDeclarationExtractor, declaration)
+                collectExtraActualClasses(declaration)
             }
         }
     }
 
-    private fun collectExtraActualCallables(
-        extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor,
-        expectTopLevelCallables: List<IrDeclarationWithName>,
-        callableId: CallableId
-    ) {
-        for (actualCallableSymbol in extraActualDeclarationExtractor.extract(expectTopLevelCallables, callableId)) {
+    private fun collectExtraActualCallables(expectTopLevelCallables: List<IrDeclarationWithName>, callableId: CallableId) {
+        val actualCallableSymbolsList = extraActualDeclarationExtractors.map { it.extract(expectTopLevelCallables, callableId) }
+        val actualCallableSymbols = actualCallableSymbolsList.singleOrNull() ?: return // TODO: report multiple extra actual callables
+
+        for (actualCallableSymbol in actualCallableSymbols) {
             recordActualCallable(actualCallableSymbol.owner as IrDeclarationWithName, callableId, writeActualSymbolToFile = false)
         }
     }
@@ -307,40 +321,9 @@ private class ExpectActualLinkCollector {
             }
         }
 
-        private fun matchExpectCallable(declaration: IrDeclarationWithName, callableId: CallableId, context: MatchingContext) {
-            matchAndCheckExpectDeclaration(
-                declaration.symbol,
-                context.classActualizationInfo.actualTopLevels[callableId].orEmpty(),
-                context,
-            )
-        }
-
         override fun visitClass(declaration: IrClass, data: MatchingContext) {
             if (!declaration.isExpect) return
-            val classId = declaration.classIdOrFail
-            val expectClassSymbol = declaration.symbol
-            val actualClassLikeSymbol = data.classActualizationInfo.getActualWithoutExpansion(classId)
-            matchAndCheckExpectDeclaration(expectClassSymbol, listOfNotNull(actualClassLikeSymbol), data)
-        }
-
-        private fun matchAndCheckExpectDeclaration(
-            expectSymbol: IrSymbol,
-            actualSymbols: List<IrSymbol>,
-            context: MatchingContext,
-        ) {
-            val matched = AbstractExpectActualMatcher.matchSingleExpectTopLevelDeclarationAgainstPotentialActuals(
-                expectSymbol,
-                actualSymbols,
-                context,
-            )
-            if (matched != null) {
-                AbstractExpectActualChecker.checkSingleExpectTopLevelDeclarationAgainstMatchedActual(
-                    expectSymbol,
-                    matched,
-                    context,
-                    context.languageVersionSettings,
-                )
-            }
+            matchExpectClass(declaration, data)
         }
 
         override fun visitElement(element: IrElement, data: MatchingContext) {
@@ -418,6 +401,41 @@ private class ExpectActualLinkCollector {
                 }
             }
         }
+    }
+}
+
+private fun matchExpectClass(declaration: IrClass, context: MatchingContext) {
+    val classId = declaration.classIdOrFail
+    val expectClassSymbol = declaration.symbol
+    val actualClassLikeSymbol = context.classActualizationInfo.getActualWithoutExpansion(classId)
+    matchAndCheckExpectDeclaration(expectClassSymbol, listOfNotNull(actualClassLikeSymbol), context)
+}
+
+private fun matchExpectCallable(declaration: IrDeclarationWithName, callableId: CallableId, context: MatchingContext) {
+    matchAndCheckExpectDeclaration(
+        declaration.symbol,
+        context.classActualizationInfo.actualTopLevels[callableId].orEmpty(),
+        context,
+    )
+}
+
+private fun matchAndCheckExpectDeclaration(
+    expectSymbol: IrSymbol,
+    actualSymbols: List<IrSymbol>,
+    context: MatchingContext,
+) {
+    val matched = AbstractExpectActualMatcher.matchSingleExpectTopLevelDeclarationAgainstPotentialActuals(
+        expectSymbol,
+        actualSymbols,
+        context,
+    )
+    if (matched != null) {
+        AbstractExpectActualChecker.checkSingleExpectTopLevelDeclarationAgainstMatchedActual(
+            expectSymbol,
+            matched,
+            context,
+            context.languageVersionSettings,
+        )
     }
 }
 

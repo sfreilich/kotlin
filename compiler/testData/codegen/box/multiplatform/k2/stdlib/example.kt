@@ -44,7 +44,9 @@ expect open class Any() {
 }
 
 @ActualizeByJvmBuiltinProvider
-expect class Boolean
+expect class Boolean {
+    operator fun not(): kotlin.Boolean
+}
 
 @ActualizeByJvmBuiltinProvider
 expect class Int {
@@ -52,6 +54,12 @@ expect class Int {
         const val MIN_VALUE: Int = -2147483648
         const val MAX_VALUE: Int = 2147483647
     }
+
+    operator fun plus(other: kotlin.Int): kotlin.Int
+
+    operator fun times(other: kotlin.Int): kotlin.Int
+
+    infix fun xor(other: kotlin.Int): kotlin.Int
 }
 
 @ActualizeByJvmBuiltinProvider
@@ -94,6 +102,14 @@ public expect fun intArrayOf(vararg elements: Int): IntArray
 @ActualizeByJvmBuiltinProvider
 @SinceKotlin("1.1")
 public expect inline fun <reified T : Enum<T>> enumValues(): Array<T>
+
+public interface Function<out R>
+
+// FILE: collections.kt
+
+package kotlin.collections
+
+public data class IndexedValue<out T>(public val index: kotlin.Int, public val value: T)
 
 // FILE: testCommon.kt
 

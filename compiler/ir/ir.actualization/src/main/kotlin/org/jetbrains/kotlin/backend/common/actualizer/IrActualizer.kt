@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.backend.common.actualizer
 
 import org.jetbrains.kotlin.backend.common.actualizer.checker.IrExpectActualCheckers
 import org.jetbrains.kotlin.incremental.components.ExpectActualTracker
+import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -16,6 +17,8 @@ import org.jetbrains.kotlin.ir.types.IrTypeSystemContext
 import org.jetbrains.kotlin.ir.types.classOrFail
 import org.jetbrains.kotlin.ir.util.SymbolRemapper
 import org.jetbrains.kotlin.ir.util.classIdOrFail
+import org.jetbrains.kotlin.ir.util.getPackageFragment
+import org.jetbrains.kotlin.ir.util.packageFqName
 
 data class IrActualizedResult(
     val actualizedExpectDeclarations: List<IrDeclaration>,
@@ -36,7 +39,7 @@ class IrActualizer(
     val useFirBasedFakeOverrideGenerator: Boolean,
     val mainFragment: IrModuleFragment,
     val dependentFragments: List<IrModuleFragment>,
-    extraActualClassExtractor: IrExtraActualDeclarationExtractor? = null,
+    extraActualClassExtractors: List<IrExtraActualDeclarationExtractor>,
 ) {
     private val collector = ExpectActualCollector(
         mainFragment,
@@ -44,7 +47,7 @@ class IrActualizer(
         typeSystemContext,
         ktDiagnosticReporter,
         expectActualTracker,
-        extraActualClassExtractor,
+        extraActualClassExtractors,
     )
 
     private val classActualizationInfo = collector.collectClassActualizationInfo()
@@ -71,9 +74,23 @@ class IrActualizer(
         dependentFragments.forEach { it.transform(ActualizerVisitor(classSymbolRemapper), null) }
     }
 
-    fun actualizeCallablesAndMergeModules(): Map<IrSymbol, IrSymbol> {
+    fun actualizeCallablesAndMergeModules(
+        extraExpectBuiltInsDeclarations: MutableList<IrDeclarationWithName>,
+        platformIrBuiltIns: IrBuiltIns
+    ): Map<IrSymbol, IrSymbol> {
         // 1. Collect expect-actual links for members of classes found on step 1.
         val expectActualMap = collector.matchAllExpectDeclarations(classActualizationInfo)
+
+        for (extraExpectBuiltInsDeclaration in extraExpectBuiltInsDeclarations) {
+            val name = extraExpectBuiltInsDeclaration.name
+            val packageFqName = extraExpectBuiltInsDeclaration.getPackageFragment().packageFqName
+            expectActualMap[extraExpectBuiltInsDeclaration.symbol] = when (extraExpectBuiltInsDeclaration) {
+                is IrClass -> platformIrBuiltIns.findClass(name, packageFqName)!!
+                is IrProperty -> platformIrBuiltIns.findProperties(name, packageFqName).single()
+                is IrFunction -> platformIrBuiltIns.findFunctions(name, packageFqName).single()
+                else -> error("Unexpected declaration")
+            }
+        }
 
         if (useFirBasedFakeOverrideGenerator) {
             //   2. Actualize expect fake overrides in non-expect classes inside common or multi-platform module.

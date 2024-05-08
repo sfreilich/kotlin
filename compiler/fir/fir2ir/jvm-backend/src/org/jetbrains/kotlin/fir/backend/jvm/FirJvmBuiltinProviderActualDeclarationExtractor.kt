@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.util.classIdOrFail
 import org.jetbrains.kotlin.ir.util.isAnnotation
+import org.jetbrains.kotlin.ir.util.isExpect
 import org.jetbrains.kotlin.ir.util.isTopLevel
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.CallableId
@@ -38,6 +39,7 @@ class FirJvmBuiltinProviderActualDeclarationExtractor(
     }
 
     override fun extract(expectIrClass: IrClass): IrClassSymbol? {
+        require(expectIrClass.isExpect)
         if (!expectIrClass.hasActualizeByJvmBuiltinProviderFqNameAnnotation()) return null
 
         val regularClassSymbol = provider.getRegularClassSymbolByClassId(expectIrClass.classIdOrFail) ?: return null
@@ -50,7 +52,7 @@ class FirJvmBuiltinProviderActualDeclarationExtractor(
     }
 
     override fun extract(expectTopLevelCallables: List<IrDeclarationWithName>, expectCallableId: CallableId): List<IrSymbol> {
-        require(expectTopLevelCallables.all { it.isTopLevel })
+        require(expectTopLevelCallables.all { it.isExpect && it.isTopLevel })
 
         if (expectTopLevelCallables.none { expectCallable ->
                 expectCallable.annotations.any { it.isAnnotation(ActualizeByJvmBuiltinProviderFqName) }
