@@ -17,17 +17,19 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.extendsFromWithDependsOnClosureCon
 import org.jetbrains.kotlin.gradle.plugin.sources.InternalKotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.sources.disambiguateName
 import org.jetbrains.kotlin.gradle.plugin.usageByName
-import org.jetbrains.kotlin.gradle.targets.metadata.GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME
 import org.jetbrains.kotlin.gradle.utils.*
 
 internal val psmAttribute = Attribute.of("psmFile", Boolean::class.javaObjectType)
 
 internal fun setupProjectStructureMetadataConsumableConfiguration(project: Project) {
-    val psmConsumableConfiguration = maybeCreatePsmConsumableConfiguration(project)
-    project.artifacts.add(
-        psmConsumableConfiguration.name,
-        project.tasks.named<GenerateProjectStructureMetadata>(GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME).map { it.resultFile }
-    )
+    val generateProjectStructureMetadata = project.tasks.withType<GenerateProjectStructureMetadata>()
+    if (generateProjectStructureMetadata.isNotEmpty()) {
+        val psmConsumableConfiguration = maybeCreatePsmConsumableConfiguration(project)
+        project.artifacts.add(
+            psmConsumableConfiguration.name,
+            generateProjectStructureMetadata.first().resultFileProvider
+        )
+    }
 }
 
 internal val InternalKotlinSourceSet.projectStructureMetadataConfiguration: Configuration by extrasStoredProperty {

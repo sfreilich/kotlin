@@ -263,11 +263,8 @@ class KotlinMetadataTargetConfigurator :
     private val ResolvedArtifactResult.isMpp: Boolean get() = variant.attributes.containsMultiplatformAttributes
 }
 
-
-internal const val GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME = "generateProjectStructureMetadata"
-
 internal fun Project.createGenerateProjectStructureMetadataTask(): TaskProvider<GenerateProjectStructureMetadata> =
-    project.registerTask(lowerCamelCaseName(GENERATE_PROJECT_STRUCTURE_METADATA_TASK_NAME)) { task ->
+    project.registerTask(lowerCamelCaseName("generateProjectStructureMetadata")) { task ->
         task.lazyKotlinProjectStructureMetadata = lazy { project.multiplatformExtension.kotlinProjectStructureMetadata }
         task.description = "Generates serialized project structure metadata of the current project (for tooling)"
     }

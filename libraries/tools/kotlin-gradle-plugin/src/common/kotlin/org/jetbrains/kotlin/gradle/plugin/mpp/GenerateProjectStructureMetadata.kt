@@ -7,6 +7,8 @@ package org.jetbrains.kotlin.gradle.plugin.mpp
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputFile
@@ -28,17 +30,25 @@ abstract class GenerateProjectStructureMetadata : DefaultTask() {
     internal val kotlinProjectStructureMetadata: KotlinProjectStructureMetadata
         get() = lazyKotlinProjectStructureMetadata.value
 
+    @Suppress("LeakingThis")
     @get:OutputFile
+    val resultFileProvider: Provider<RegularFile> = projectLayout.buildDirectory.file(
+        "kotlinProjectStructureMetadata/$MULTIPLATFORM_PROJECT_METADATA_JSON_FILE_NAME"
+    )
+
+    @get:Internal
+    @Deprecated(
+        message = "Non lazy property. Will be removed in next releases. Use `resultFileProvider` instead",
+        replaceWith = ReplaceWith("resultFileProvider")
+    )
     val resultFile: File
-        get() = projectLayout.buildDirectory.file(
-            "kotlinProjectStructureMetadata/$MULTIPLATFORM_PROJECT_METADATA_JSON_FILE_NAME"
-        ).get().asFile
+        get() = resultFileProvider.get().asFile
 
     @TaskAction
     fun generateMetadataXml() {
-        resultFile.parentFile.mkdirs()
+        resultFileProvider.get().asFile.parentFile.mkdirs()
         val resultString = kotlinProjectStructureMetadata.toJson()
-        resultFile.writeText(resultString)
+        resultFileProvider.get().asFile.writeText(resultString)
     }
 }
 
