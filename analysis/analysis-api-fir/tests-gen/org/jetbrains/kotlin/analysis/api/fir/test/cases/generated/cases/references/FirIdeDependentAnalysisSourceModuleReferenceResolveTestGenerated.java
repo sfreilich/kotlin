@@ -943,6 +943,12 @@ public class FirIdeDependentAnalysisSourceModuleReferenceResolveTestGenerated ex
       public void testTypeAnnotation() {
         runTest("analysis/analysis-api/testData/referenceResolve/codeFragment/typeCodeFragment/TypeAnnotation.kt");
       }
+
+      @Test
+      @TestMetadata("TypeParameter.kt")
+      public void testTypeParameter() {
+        runTest("analysis/analysis-api/testData/referenceResolve/codeFragment/typeCodeFragment/TypeParameter.kt");
+      }
     }
   }
 
