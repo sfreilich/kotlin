@@ -1,0 +1,2 @@
+KtSimpleNameReference:
+  (in <local>: test) val list: kotlin.collections.MutableList<kotlin.String>

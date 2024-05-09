@@ -1,0 +1,37 @@
+KtCallableReferenceExpression:
+KaApplicableCallCandidateInfo:
+  candidate = KaSimpleFunctionCall:
+    isImplicitInvoke = false
+    partiallyAppliedSymbol = KaPartiallyAppliedSymbol:
+      dispatchReceiver = KaImplicitReceiverValue:
+        symbol = KaReceiverParameterSymbol:
+          annotationsList: []
+          origin: SOURCE
+          owningCallableSymbol: KaAnonymousFunctionSymbol(<local>/<no name provided>)
+          type: KaUsualClassType:
+            annotationsList: []
+            ownTypeArguments: [
+              KaUsualClassType:
+                annotationsList: []
+                ownTypeArguments: []
+                type: PartData
+            ]
+            type: kotlin/collections/MutableList<PartData>
+        type = kotlin.collections.MutableList<PartData>
+      extensionReceiver = null
+      signature = KaFunctionLikeSignature:
+        receiverType = null
+        returnType = kotlin.Boolean
+        symbol = kotlin/collections/MutableList.add(<dispatch receiver>: kotlin.collections.MutableList<E>, element: E): kotlin.Boolean
+        valueParameters = [
+          KaVariableLikeSignature:
+            name = element
+            receiverType = null
+            returnType = ERROR CLASS: Cannot infer type for parameter E
+            symbol = element: E
+            callableId = null
+        ]
+        callableId = kotlin/collections/MutableList.add
+    typeArgumentsMapping = {}
+    argumentMapping = {}
+  isInBestCandidates = true

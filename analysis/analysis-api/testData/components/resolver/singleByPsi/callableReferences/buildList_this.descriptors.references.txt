@@ -1,0 +1,2 @@
+KtSimpleNameReference:
+  (in <local>: test) fun kotlin.collections.MutableList<kotlin.String>.(): kotlin.Unit
