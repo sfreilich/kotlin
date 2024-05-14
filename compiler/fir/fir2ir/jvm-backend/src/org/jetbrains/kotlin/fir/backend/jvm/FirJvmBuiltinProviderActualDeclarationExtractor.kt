@@ -32,7 +32,7 @@ class FirJvmBuiltinProviderActualDeclarationExtractor(
     val provider: FirBuiltinSymbolProvider,
     private val classifierStorage: Fir2IrClassifierStorage,
     private val declarationStorage: Fir2IrDeclarationStorage,
-) : IrExtraActualDeclarationExtractor() {
+) : IrExtraActualDeclarationExtractor(expectTopLevelDeclarations = null) {
     companion object {
         val ActualizeByJvmBuiltinProviderFqName: FqName = StandardClassIds.Annotations.ActualizeByJvmBuiltinProvider.asSingleFqName()
     }

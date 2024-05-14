@@ -172,10 +172,11 @@ private class ActualDeclarationsCollector(private val expectTopLevelDeclarations
     }
 
     private fun collectExtraActualDeclarations(extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor) {
-        for (classSymbol in expectTopLevelDeclarations.classes.values) {
+        val relevantExpectTopLevelDeclarations = extraActualDeclarationExtractor?.expectTopLevelDeclarations ?: expectTopLevelDeclarations
+        for (classSymbol in relevantExpectTopLevelDeclarations.classes.values) {
             collectExtraActualClasses(extraActualDeclarationExtractor, classSymbol.owner)
         }
-        for ((callableId, callableSymbols) in expectTopLevelDeclarations.callables) {
+        for ((callableId, callableSymbols) in relevantExpectTopLevelDeclarations.callables) {
             val expectTopLevelCallables = callableSymbols.mapNotNull {
                 when (val owner = it.owner) {
                     is IrProperty -> owner
