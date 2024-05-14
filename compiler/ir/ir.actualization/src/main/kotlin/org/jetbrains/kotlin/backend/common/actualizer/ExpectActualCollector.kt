@@ -48,13 +48,13 @@ internal class ExpectActualCollector(
     private val typeSystemContext: IrTypeSystemContext,
     private val diagnosticsReporter: IrDiagnosticReporter,
     private val expectActualTracker: ExpectActualTracker?,
-    private val extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor?,
+    private val extraActualDeclarationExtractors: List<IrExtraActualDeclarationExtractor>,
 ) {
     fun collectClassActualizationInfo(): ClassActualizationInfo {
         val expectTopLevelDeclarations = ExpectTopLevelDeclarationCollector.collect(dependentFragments)
         val fragmentsWithActuals = dependentFragments.drop(1) + mainFragment
         return ActualDeclarationsCollector.collectActuals(
-            fragmentsWithActuals, expectTopLevelDeclarations, extraActualDeclarationExtractor
+            fragmentsWithActuals, expectTopLevelDeclarations, extraActualDeclarationExtractors
         )
     }
 
@@ -90,14 +90,14 @@ private class ActualDeclarationsCollector(private val expectTopLevelDeclarations
         fun collectActuals(
             fragments: List<IrModuleFragment>,
             expectTopLevelDeclarations: ExpectTopLevelDeclarations,
-            extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor?,
+            extraActualDeclarationExtractors: List<IrExtraActualDeclarationExtractor>,
         ): ClassActualizationInfo {
             val collector = ActualDeclarationsCollector(expectTopLevelDeclarations)
             for (fragment in fragments) {
                 collector.collect(fragment)
             }
-            if (extraActualDeclarationExtractor != null) {
-                collector.collectExtraActualDeclarations(extraActualDeclarationExtractor)
+            if (extraActualDeclarationExtractors.isNotEmpty()) {
+                collector.collectExtraActualDeclarations(extraActualDeclarationExtractors)
             }
             return ClassActualizationInfo(
                 collector.actualClasses,
@@ -171,20 +171,23 @@ private class ActualDeclarationsCollector(private val expectTopLevelDeclarations
         }
     }
 
-    private fun collectExtraActualDeclarations(extraActualDeclarationExtractor: IrExtraActualDeclarationExtractor) {
-        val relevantExpectTopLevelDeclarations = extraActualDeclarationExtractor?.expectTopLevelDeclarations ?: expectTopLevelDeclarations
-        for (classSymbol in relevantExpectTopLevelDeclarations.classes.values) {
-            collectExtraActualClasses(extraActualDeclarationExtractor, classSymbol.owner)
-        }
-        for ((callableId, callableSymbols) in relevantExpectTopLevelDeclarations.callables) {
-            val expectTopLevelCallables = callableSymbols.mapNotNull {
-                when (val owner = it.owner) {
-                    is IrProperty -> owner
-                    is IrFunction -> owner
-                    else -> null
-                }
+    private fun collectExtraActualDeclarations(extraActualDeclarationExtractors: List<IrExtraActualDeclarationExtractor>) {
+        for (extraActualDeclarationExtractor in extraActualDeclarationExtractors) {
+            val relevantExpectTopLevelDeclarations =
+                extraActualDeclarationExtractor.expectTopLevelDeclarations ?: expectTopLevelDeclarations
+            for (classSymbol in relevantExpectTopLevelDeclarations.classes.values) {
+                collectExtraActualClasses(extraActualDeclarationExtractor, classSymbol.owner)
             }
-            collectExtraActualCallables(extraActualDeclarationExtractor, expectTopLevelCallables, callableId)
+            for ((callableId, callableSymbols) in relevantExpectTopLevelDeclarations.callables) {
+                val expectTopLevelCallables = callableSymbols.mapNotNull {
+                    when (val owner = it.owner) {
+                        is IrProperty -> owner
+                        is IrFunction -> owner
+                        else -> null
+                    }
+                }
+                collectExtraActualCallables(extraActualDeclarationExtractor, expectTopLevelCallables, callableId)
+            }
         }
     }
 

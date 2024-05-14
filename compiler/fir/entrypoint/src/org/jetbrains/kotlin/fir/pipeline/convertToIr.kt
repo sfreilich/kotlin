@@ -250,10 +250,9 @@ private class Fir2IrPipeline(
                 fir2IrConfiguration.expectActualTracker,
                 mainIrFragment,
                 dependentIrFragments,
-                this@Fir2IrPipeline.extraActualDeclarationExtractorInitializer(componentsStorage),
+                listOfNotNull(this@Fir2IrPipeline.extraActualDeclarationExtractorInitializer(componentsStorage)),
             )
         }
-
     }
 
     private fun Fir2IrConversionResult.generateSyntheticBodiesOfDataValueMembers() {
