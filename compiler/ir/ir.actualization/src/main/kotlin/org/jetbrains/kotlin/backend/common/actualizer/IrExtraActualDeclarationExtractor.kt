@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.name.CallableId
  * Allows extracting extra actual top-level declarations which are not presented in source code.
  * For instance, it allows extracting actual top-level classes and functions from builtin symbol provider (KT-65841).
  */
-abstract class IrExtraActualDeclarationExtractor {
+abstract class IrExtraActualDeclarationExtractor(val expectTopLevelDeclarations: ExpectTopLevelDeclarations?) {
     abstract fun extract(expectIrClass: IrClass): IrClassSymbol?
 
     /**
