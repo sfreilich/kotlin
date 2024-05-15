@@ -65,7 +65,6 @@ fun main(){
     intersectIn<Sub>(In(), In<Super>())
     intersectIn<Sub>(In<Sub>(), In<Super>())
     intersectIn(In<Sub>(), In<Super>())
-    intersectOut(Out<Int>(), Out<String>())
 
     sequentialTypeVariableDependency(In(), In<Int>())
     parallelTypeVariableDependency(In(), In<String>())

@@ -18075,6 +18075,12 @@ public class FirLightTreeOldFrontendDiagnosticsTestGenerated extends AbstractFir
           }
 
           @Test
+          @TestMetadata("inferredEmptyIntersection.kt")
+          public void testInferredEmptyIntersection() {
+            runTest("compiler/testData/diagnostics/tests/inference/builderInference/stubTypes/inferredEmptyIntersection.kt");
+          }
+
+          @Test
           @TestMetadata("intersect.kt")
           public void testIntersect() {
             runTest("compiler/testData/diagnostics/tests/inference/builderInference/stubTypes/intersect.kt");
