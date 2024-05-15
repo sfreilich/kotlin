@@ -12,15 +12,9 @@ import org.gradle.api.attributes.Usage
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.plugin.categoryByName
 import org.jetbrains.kotlin.gradle.plugin.hierarchy.orNull
 import org.jetbrains.kotlin.gradle.plugin.sources.*
-import org.jetbrains.kotlin.gradle.plugin.sources.InternalKotlinSourceSet
-import org.jetbrains.kotlin.gradle.plugin.sources.disambiguateName
-import org.jetbrains.kotlin.gradle.plugin.usageByName
 import org.jetbrains.kotlin.gradle.utils.*
-import org.jetbrains.kotlin.gradle.utils.listProperty
-import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 
 /**
  * @see resolvableMetadataConfiguration
@@ -41,17 +35,6 @@ internal val InternalKotlinSourceSet.resolvableMetadataConfiguration: Configurat
 
     extendsFromWithDependsOnClosureConfigurations(configuration)
 
-    /**
-     * Adding dependencies from associate compilations using a listProvider, since we would like to defer
-     * the call to 'getVisibleSourceSetsFromAssociateCompilations' as much as possible (changes to the model might significantly
-     * change the result of this visible source sets)
-     */
-    configuration.dependencies.addAllLater(project.listProvider {
-        getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
-            sourceSet.internal.compileDependenciesConfigurations.flatMap { it.allDependencies }
-        }
-    })
-
     // needed for old IDEs
     configureLegacyMetadataDependenciesConfigurations(configuration)
 
@@ -68,6 +51,18 @@ internal fun InternalKotlinSourceSet.extendsFromWithDependsOnClosureConfiguratio
         val extenders = sourceSet.internal.compileDependenciesConfigurations
         configuration.extendsFrom(*extenders.toTypedArray())
     }
+
+    /**
+     * Adding dependencies from associate compilations using a listProvider, since we would like to defer
+     * the call to 'getVisibleSourceSetsFromAssociateCompilations' as much as possible (changes to the model might significantly
+     * change the result of this visible source sets)
+     */
+    configuration.dependencies.addAllLater(project.listProvider {
+        getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
+            sourceSet.internal.compileDependenciesConfigurations.flatMap { it.allDependencies }
+        }
+    })
+
 }
 
 private val InternalKotlinSourceSet.compileDependenciesConfigurations: List<Configuration>
