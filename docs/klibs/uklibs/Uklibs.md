@@ -32,7 +32,7 @@ _Def. "Refines-edge"_: a relation between fragments. `A refines B` means that `A
 
 _Def. "(Kotlin) Module"_: a set of Fragments (source sets) that are connected with refines (dependsOn) edges. In the Gradle world, given that there's no custom configuration of the KMP project model, each KMP module maps to precisely one Gradle project. 
 
-_Def. "Analyzer"_: a consumer of a serialized representation of Kotlin code. You can think that the "serialized representation" is an output of some Kotlin backend (it's almost true modulo whether you count metadata-compiler as a separate Kotlin abckend): `.kotlin_metadata`, `.knm`, IR, `.classfiles`, etc. 
+_Def. "Analyzer"_: a consumer of a serialized representation of Kotlin code. You can think that the "serialized representation" is an output of some Kotlin backend (it's almost true modulo whether you count metadata-compiler as a separate Kotlin backend): `.kotlin_metadata`, `.knm`, IR, `.classfiles`, etc. 
 Examples of analyzers: Kotlin compiler itself, IDE, kotlinx-metadata library, etc.
 
 ## What is uklib?
