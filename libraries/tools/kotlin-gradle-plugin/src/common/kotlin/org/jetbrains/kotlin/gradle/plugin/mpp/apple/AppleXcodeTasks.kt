@@ -177,12 +177,14 @@ internal fun Project.registerEmbedAndSignAppleFrameworkTask(framework: Framework
     }
 
     val checkSandboxAndWriteProtectionTask = locateOrRegisterTask<DefaultTask>(AppleXcodeTasks.checkSandboxAndWriteProtection) { task ->
+        val builtProductsDir = environment.builtProductsDir
+
         task.group = BasePlugin.BUILD_GROUP
         task.description = "Check BUILT_PRODUCTS_DIR accessible and ENABLE_USER_SCRIPT_SANDBOXING not enabled"
-        task.inputs.property(AppleXcodeTasks.builtProductsDir, environment.builtProductsDir)
+        task.inputs.property(AppleXcodeTasks.builtProductsDir, builtProductsDir)
 
         task.doFirst {
-            val dirAccessible = builtProductsDirAccessibility(it.inputs.properties[AppleXcodeTasks.builtProductsDir] as File?)
+            val dirAccessible = builtProductsDirAccessibility(builtProductsDir)
             when (dirAccessible) {
                 DirAccessibility.NOT_ACCESSIBLE -> fireSandboxException(frameworkTaskName, userScriptSandboxingEnabled)
                 DirAccessibility.DOES_NOT_EXIST,
