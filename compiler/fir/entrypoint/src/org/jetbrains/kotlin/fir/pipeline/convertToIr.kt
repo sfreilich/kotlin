@@ -53,7 +53,7 @@ data class FirResult(val outputs: List<ModuleCompilerAnalyzedOutput>)
 data class ModuleCompilerAnalyzedOutput(
     val session: FirSession,
     val scopeSession: ScopeSession,
-    val fir: List<FirFile>
+    val fir: List<FirFile>,
 )
 
 data class Fir2IrActualizedResult(
