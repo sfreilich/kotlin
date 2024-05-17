@@ -365,7 +365,7 @@ Then, all of the following lists are correctly ordered outputs of Fragment Resol
 * `C.jvmMain, C.commonMain, A.jvmMain, A.commonMain, B.jvmMain, B.jvmAndJsMain, B.commonMain`
 * `A.jvmMain, B.jvmMain, A.commonMain, C.jvmMain, C.commonMain, B.jvmAndJsMain, B.commonMain`
 
-However, the following list is not ordered correctly: `B.jvmAndJsMain` must go before `B.jvmMain`:
+However, the following list is not ordered correctly: `B.jvmAndJsMain` must go before `B.commonMain`:
 * `A.jvmMain, A.commonMain, B.jvmMain, B.commonMain, B.jvmAndJsMain, C.jvmMain, C.commonMain`
 
 > [!note] 
