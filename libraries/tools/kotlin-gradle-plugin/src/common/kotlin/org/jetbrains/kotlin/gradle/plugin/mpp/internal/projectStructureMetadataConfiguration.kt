@@ -11,7 +11,6 @@ import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Usage
 import org.jetbrains.kotlin.gradle.plugin.PSM_CONSUMABLE_CONFIGURATION_NAME
 import org.jetbrains.kotlin.gradle.plugin.PSM_RESOLVABLE_CONFIGURATION_NAME
-import org.jetbrains.kotlin.gradle.plugin.mpp.GenerateProjectStructureMetadata
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
 import org.jetbrains.kotlin.gradle.plugin.mpp.extendsFromWithDependsOnClosureConfigurations
 import org.jetbrains.kotlin.gradle.plugin.sources.InternalKotlinSourceSet
@@ -27,7 +26,7 @@ internal fun setupProjectStructureMetadataConsumableConfiguration(project: Proje
     val psmConsumableConfiguration = maybeCreatePsmConsumableConfiguration(project)
     project.artifacts.add(
         psmConsumableConfiguration.name,
-        generateProjectStructureMetadata.map { task -> task.resultFileProvider }
+        generateProjectStructureMetadata.map { task -> task.resultFile }
     )
 }
 

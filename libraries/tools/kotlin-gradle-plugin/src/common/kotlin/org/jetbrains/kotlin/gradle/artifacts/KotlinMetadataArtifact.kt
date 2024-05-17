@@ -33,7 +33,7 @@ internal val KotlinMetadataArtifact = KotlinTargetArtifact { target, apiElements
     /* Include 'KotlinProjectStructureMetadata' file */
     val generateMetadata = target.project.locateOrRegisterGenerateProjectStructureMetadataTask()
     metadataJarTask.configure { jar ->
-        jar.from(generateMetadata.map { it.resultFileProvider }) { spec ->
+        jar.from(generateMetadata.map { it.resultFile }) { spec ->
             spec.into("META-INF").rename { MULTIPLATFORM_PROJECT_METADATA_JSON_FILE_NAME }
         }
     }
