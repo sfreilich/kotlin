@@ -5,6 +5,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * The common base class of all enum classes.
  * See the [Kotlin language documentation](https://kotlinlang.org/docs/reference/enum-classes.html) for more

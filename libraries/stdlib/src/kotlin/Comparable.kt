@@ -16,6 +16,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * Classes which inherit from this interface have a defined total ordering between their instances.
  */

@@ -16,6 +16,7 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
 import kotlin.internal.PureReifiable
 
 /**

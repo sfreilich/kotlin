@@ -8,6 +8,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * An array of bytes. When targeting the JVM, instances of this class are represented as `byte[]`.
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.

@@ -16,6 +16,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * Represents a readable sequence of [Char] values.
  */

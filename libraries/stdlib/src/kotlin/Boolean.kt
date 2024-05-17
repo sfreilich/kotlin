@@ -8,6 +8,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * Represents a value which is either `true` or `false`.
  * On the JVM, non-nullable values of this type are represented as values of the primitive type `boolean`.

@@ -16,6 +16,8 @@
 
 package kotlin.collections
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * An iterator over a collection or another entity that can be represented as a sequence of elements.
  * Allows to sequentially access the elements.

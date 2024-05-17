@@ -16,6 +16,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * Superclass for all platform classes representing numeric values.
  */

@@ -5,6 +5,7 @@
 
 package kotlin.collections
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
 import kotlin.internal.PlatformDependent
 
 /**

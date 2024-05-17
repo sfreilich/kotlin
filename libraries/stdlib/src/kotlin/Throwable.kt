@@ -16,6 +16,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * The base class for all errors and exceptions. Only instances of this class can be thrown or caught.
  *

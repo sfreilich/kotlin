@@ -10,6 +10,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * Represents a 8-bit signed integer.
  * On the JVM, non-nullable values of this type are represented as values of the primitive type `byte`.

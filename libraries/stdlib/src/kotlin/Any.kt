@@ -16,6 +16,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * The root of the Kotlin class hierarchy. Every Kotlin class has [Any] as a superclass.
  */

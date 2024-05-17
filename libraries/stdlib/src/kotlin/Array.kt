@@ -5,6 +5,8 @@
 
 package kotlin
 
+import kotlin.internal.ActualizeByJvmBuiltinProvider
+
 /**
  * Represents an array (specifically, a Java array when targeting the JVM platform).
  * Array instances can be created using the [arrayOf], [arrayOfNulls] and [emptyArray]
