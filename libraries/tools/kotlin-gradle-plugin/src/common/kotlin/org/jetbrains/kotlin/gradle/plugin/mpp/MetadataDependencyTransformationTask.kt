@@ -32,7 +32,7 @@ import javax.inject.Inject
 typealias TransformKotlinGranularMetadata = MetadataDependencyTransformationTask
 
 internal const val TRANSFORM_ALL_SOURCESETS_DEPENDENCIES_METADATA = "transformDependenciesMetadata"
-private fun transformGranularMetadataTaskName(sourceSetName: String) =
+internal fun transformGranularMetadataTaskName(sourceSetName: String) =
     lowerCamelCaseName("transform", sourceSetName, "DependenciesMetadata")
 
 internal fun Project.locateOrRegisterMetadataDependencyTransformationTask(
