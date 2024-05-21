@@ -220,7 +220,7 @@ internal class GranularMetadataTransformation(
             .getArtifacts(dependency)
             .singleOrNull()
             // Make sure that resolved metadata artifact is actually Multiplatform one
-            ?.takeIf { it.variant.attributes.containsMultiplatformAttributes }
+            ?.takeIf { it.variant.attributes.containsMultiplatformMetadataAttributes}
         // expected only ony Composite Metadata Klib, but if dependency got resolved into platform variant
         // when source set is a leaf then we might get multiple artifacts in such case we must return KeepOriginal
             ?: return MetadataDependencyResolution.KeepOriginalDependency(module)
@@ -357,3 +357,6 @@ internal val GranularMetadataTransformation?.metadataDependencyResolutionsOrEmpt
 
 internal val AttributeContainer.containsMultiplatformAttributes: Boolean
     get() = keySet().any { it.name == KotlinPlatformType.attribute.name }
+
+private val AttributeContainer.containsMultiplatformMetadataAttributes: Boolean
+    get() = keySet().any {it.name == KotlinPlatformType.attribute.name && getAttribute(it).toString() == KotlinPlatformType.common.name}
