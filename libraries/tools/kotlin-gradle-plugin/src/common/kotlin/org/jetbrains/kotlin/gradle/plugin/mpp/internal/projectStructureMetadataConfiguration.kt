@@ -8,10 +8,13 @@ package org.jetbrains.kotlin.gradle.plugin.mpp.internal
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.Attribute
+import org.gradle.api.attributes.Bundling
+import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.jetbrains.kotlin.gradle.dsl.awaitMetadataTarget
 import org.jetbrains.kotlin.gradle.dsl.metadataTarget
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.PSM_CONSUMABLE_CONFIGURATION_NAME
 import org.jetbrains.kotlin.gradle.plugin.PSM_RESOLVABLE_CONFIGURATION_NAME
 import org.jetbrains.kotlin.gradle.plugin.launch
@@ -61,4 +64,5 @@ private fun maybeCreatePsmConsumableConfiguration(project: Project): Configurati
 private fun Configuration.configurePsmDependenciesAttributes(project: Project) {
     attributes.setAttribute(psmAttribute, true)
     attributes.setAttribute(Usage.USAGE_ATTRIBUTE, project.usageByName(KotlinUsages.KOTLIN_PSM))
+    attributes.setAttribute(Category.CATEGORY_ATTRIBUTE, project.categoryByName(Category.LIBRARY))
 }
