@@ -28,7 +28,6 @@ import org.jetbrains.kotlin.fir.backend.Fir2IrVisibilityConverter
 import org.jetbrains.kotlin.fir.backend.js.FirJsKotlinMangler
 import org.jetbrains.kotlin.fir.descriptors.FirModuleDescriptor
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
-import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.pipeline.*
 import org.jetbrains.kotlin.fir.session.KlibIcData
 import org.jetbrains.kotlin.incremental.components.LookupTracker
@@ -47,7 +46,6 @@ import org.jetbrains.kotlin.platform.wasm.WasmTarget
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.storage.LockBasedStorageManager
 import org.jetbrains.kotlin.wasm.config.WasmConfigurationKeys
-import java.io.File
 import java.nio.file.Paths
 import kotlin.io.path.createTempDirectory
 
@@ -186,9 +184,8 @@ fun compileModulesToAnalyzedFirWithLightTree(
     lookupTracker: LookupTracker?,
     useWasmPlatform: Boolean,
 ): AnalyzedFirOutput {
-    val metadataDestinationBaseDir =
-        moduleStructure.compilerConfiguration.get(CLIConfigurationKeys.METADATA_DESTINATION_DIRECTORY)
-            ?: createTempDirectory("kotlinMetadata").toFile()
+    moduleStructure.compilerConfiguration.get(CLIConfigurationKeys.METADATA_DESTINATION_DIRECTORY)
+        ?: createTempDirectory("kotlinMetadata").toFile()
     val metadataVersion =
         moduleStructure.compilerConfiguration.get(CommonConfigurationKeys.METADATA_VERSION) ?: BuiltInsBinaryVersion.INSTANCE
 
@@ -204,7 +201,6 @@ fun compileModulesToAnalyzedFirWithLightTree(
         buildResolveAndCheckFir = { session, files ->
             buildResolveAndCheckFirViaLightTree(
                 session, files,
-                File(metadataDestinationBaseDir, "${session.moduleData.name.asString()}-metadata"),
                 metadataVersion, moduleStructure.compilerConfiguration.languageVersionSettings,
                 diagnosticsReporter, null,
             )
