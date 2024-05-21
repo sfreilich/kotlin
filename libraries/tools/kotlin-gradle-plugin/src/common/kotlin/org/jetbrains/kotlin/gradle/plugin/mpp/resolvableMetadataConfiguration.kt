@@ -57,11 +57,10 @@ internal fun InternalKotlinSourceSet.extendsFromWithDependsOnClosureConfiguratio
      * the call to 'getVisibleSourceSetsFromAssociateCompilations' as much as possible (changes to the model might significantly
      * change the result of this visible source sets)
      */
-    configuration.dependencies.addAllLater(project.listProvider {
-        getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
-            sourceSet.internal.compileDependenciesConfigurations.flatMap { it.allDependencies }
-        }
-    })
+    val associatedConfigurations = getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
+        sourceSet.internal.compileDependenciesConfigurations
+    }
+    configuration.extendsDependenciesOnly(project, *associatedConfigurations.toTypedArray())
 
 }
 
@@ -96,12 +95,6 @@ private fun Configuration.configureMetadataDependenciesAttribute(project: Projec
     usesPlatformOf(project.multiplatformExtension.metadata())
     attributes.setAttribute(Usage.USAGE_ATTRIBUTE, project.usageByName(KotlinUsages.KOTLIN_METADATA))
     attributes.setAttribute(Category.CATEGORY_ATTRIBUTE, project.categoryByName(Category.LIBRARY))
-}
-
-private inline fun <reified T> Project.listProvider(noinline provider: () -> List<T>): Provider<List<T>> {
-    return project.objects.listProperty<T>().apply {
-        set(project.provider(provider))
-    }
 }
 
 /**

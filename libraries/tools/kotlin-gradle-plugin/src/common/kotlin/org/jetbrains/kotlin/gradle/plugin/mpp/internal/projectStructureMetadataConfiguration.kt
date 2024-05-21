@@ -9,8 +9,13 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Usage
+import org.jetbrains.kotlin.gradle.dsl.awaitMetadataTarget
+import org.jetbrains.kotlin.gradle.dsl.metadataTarget
+import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.PSM_CONSUMABLE_CONFIGURATION_NAME
 import org.jetbrains.kotlin.gradle.plugin.PSM_RESOLVABLE_CONFIGURATION_NAME
+import org.jetbrains.kotlin.gradle.plugin.launch
+import org.jetbrains.kotlin.gradle.plugin.mpp.InternalKotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
 import org.jetbrains.kotlin.gradle.plugin.mpp.extendsFromWithDependsOnClosureConfigurations
 import org.jetbrains.kotlin.gradle.plugin.sources.InternalKotlinSourceSet
@@ -24,6 +29,13 @@ internal val psmAttribute = Attribute.of("psmFile", Boolean::class.javaObjectTyp
 internal fun setupProjectStructureMetadataConsumableConfiguration(project: Project) {
     val generateProjectStructureMetadata = project.locateOrRegisterGenerateProjectStructureMetadataTask()
     val psmConsumableConfiguration = maybeCreatePsmConsumableConfiguration(project)
+    project.launch {
+        val metadataTarget = project.multiplatformExtension.awaitMetadataTarget()
+        psmConsumableConfiguration.extendsDependenciesOnly(
+            project,
+            project.configurations.getByName(metadataTarget.apiElementsConfigurationName)
+        )
+    }
     project.artifacts.add(
         psmConsumableConfiguration.name,
         generateProjectStructureMetadata.map { task -> task.resultFile }
