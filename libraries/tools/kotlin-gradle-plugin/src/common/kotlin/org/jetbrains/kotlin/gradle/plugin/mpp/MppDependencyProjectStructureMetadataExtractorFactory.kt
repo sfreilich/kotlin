@@ -8,7 +8,6 @@ package org.jetbrains.kotlin.gradle.plugin.mpp
 import org.gradle.api.Project
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
-import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.utils.*
 
 internal val Project.kotlinMppDependencyProjectStructureMetadataExtractorFactory: MppDependencyProjectStructureMetadataExtractorFactory
@@ -66,13 +65,10 @@ private constructor(
     }
 
     companion object {
-        private val extensionName = MppDependencyProjectStructureMetadataExtractorFactory::class.java.simpleName
         fun getOrCreate(project: Project): MppDependencyProjectStructureMetadataExtractorFactory =
-            project.rootProject.extraProperties.getOrPut(extensionName) {
-                MppDependencyProjectStructureMetadataExtractorFactory(
-                    currentBuild = project.currentBuild,
-                    lazy { GlobalProjectStructureMetadataStorage.getProjectStructureMetadataProvidersFromAllGradleBuilds(project) },
-                )
-            }
+            MppDependencyProjectStructureMetadataExtractorFactory(
+                currentBuild = project.currentBuild,
+                lazy { GlobalProjectStructureMetadataStorage.getProjectStructureMetadataProvidersFromAllGradleBuilds(project) },
+            )
     }
 }
