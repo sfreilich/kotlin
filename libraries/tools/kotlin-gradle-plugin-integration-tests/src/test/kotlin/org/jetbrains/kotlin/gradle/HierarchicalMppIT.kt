@@ -1321,6 +1321,18 @@ open class HierarchicalMppIT : KGPBaseTest() {
             buildGradleKts.modify {
                 "import ${DefaultKotlinSourceSet::class.qualifiedName}\n" + it + "\n" + """
                 val $testTaskName by tasks.creating {
+                // adding psm generation if needed
+                // for that purpose we setting all Project Structure Metadata Resolvable Configurations as inputs for report task
+                        kotlin.sourceSets
+                        .map { it.name }
+                        .forEach { sourceSetName ->
+                            val configurationName = sourceSetName + "ProjectStructureMetadataResolvableConfiguration"
+                            inputs.files(project.provider {
+                                project.configurations.named(configurationName).get().incoming.artifactView {
+                                    isLenient = true
+                                }.artifacts.artifactFiles
+                            })
+                        }
                     doFirst {
                         for (scope in listOf("api", "implementation", "compileOnly", "runtimeOnly")) {
                             println("========\n${'$'}scope\n")
