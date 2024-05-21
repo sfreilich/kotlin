@@ -8,22 +8,15 @@ package org.jetbrains.kotlin.gradle.plugin.mpp.internal
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.Attribute
-import org.gradle.api.attributes.Bundling
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
 import org.jetbrains.kotlin.gradle.dsl.awaitMetadataTarget
-import org.jetbrains.kotlin.gradle.dsl.metadataTarget
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.plugin.PSM_CONSUMABLE_CONFIGURATION_NAME
-import org.jetbrains.kotlin.gradle.plugin.PSM_RESOLVABLE_CONFIGURATION_NAME
-import org.jetbrains.kotlin.gradle.plugin.launch
-import org.jetbrains.kotlin.gradle.plugin.mpp.InternalKotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
 import org.jetbrains.kotlin.gradle.plugin.mpp.extendsFromWithDependsOnClosureConfigurations
 import org.jetbrains.kotlin.gradle.plugin.sources.InternalKotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.sources.disambiguateName
-import org.jetbrains.kotlin.gradle.plugin.usageByName
 import org.jetbrains.kotlin.gradle.targets.metadata.locateOrRegisterGenerateProjectStructureMetadataTask
 import org.jetbrains.kotlin.gradle.utils.*
 
