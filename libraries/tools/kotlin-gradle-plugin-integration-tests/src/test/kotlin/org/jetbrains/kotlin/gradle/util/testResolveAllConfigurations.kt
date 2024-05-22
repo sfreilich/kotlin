@@ -84,6 +84,8 @@ private fun generateResolveAllConfigurationsTask(excludes: List<String>) =
                 project.configurations
                     .matching { it.canBeResolved }
                     .matching { !excludeConfigs.contains(it.name) }
+                    // We are excluding project structure metadata configurations, because they should be `isLenient = true`
+                    .matching { !it.name.toLowerCase().contains("ProjectStructureMetadataResolvableConfiguration".toLowerCase()) }
                     .each { configuration ->
                         def configurationPath = (project.path == ":") ? ":" + configuration.name : project.path + ":" + configuration.name
                         try {                            
@@ -116,6 +118,8 @@ private fun generateResolveAllConfigurationsTaskKts(excludes: List<String>) =
                 project.configurations
                     .filter { it.isCanBeResolved }
                     .filterNot { excludeConfigs.contains(it.name) }
+                    // We are excluding project structure metadata configurations, because they should be `isLenient = true`
+                    .filterNot { it.name.toLowerCase().contains("ProjectStructureMetadataResolvableConfiguration".toLowerCase()) }
                     .forEach { configuration ->
                         val configurationPath = 
                             if (project.path == ":") ":" + configuration.name

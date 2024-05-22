@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.gradle
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.testbase.*
 import org.jetbrains.kotlin.gradle.util.*
+import org.jetbrains.kotlin.test.TestMetadata
 import org.junit.jupiter.api.DisplayName
 import kotlin.io.path.appendText
 import kotlin.test.assertTrue
@@ -85,6 +86,7 @@ class VariantAwareDependenciesMppIT : KGPBaseTest() {
     }
 
     @DisplayName("Multiplatform project could depend on JS project")
+    @TestMetadata("new-mpp-lib-and-app/sample-lib")
     @GradleTest
     fun testMppLibResolvesJsKtApp(gradleVersion: GradleVersion) {
         project("new-mpp-lib-and-app/sample-lib", gradleVersion) {
@@ -200,6 +202,7 @@ class VariantAwareDependenciesMppIT : KGPBaseTest() {
     }
 
     @DisplayName("Multiplatform project with Java plugin applied could be resolved in all configurations")
+    @TestMetadata("new-mpp-jvm-with-java-multi-module")
     @GradleTest
     fun testJvmWithJavaProjectCanBeResolvedInAllConfigurations(gradleVersion: GradleVersion) {
         project("new-mpp-jvm-with-java-multi-module", gradleVersion) {
