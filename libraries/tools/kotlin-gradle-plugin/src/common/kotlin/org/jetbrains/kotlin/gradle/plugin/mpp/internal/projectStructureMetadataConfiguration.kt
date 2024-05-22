@@ -14,9 +14,12 @@ import org.jetbrains.kotlin.gradle.dsl.awaitMetadataTarget
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
+import org.jetbrains.kotlin.gradle.plugin.mpp.compileDependenciesConfigurations
 import org.jetbrains.kotlin.gradle.plugin.mpp.extendsFromWithDependsOnClosureConfigurations
 import org.jetbrains.kotlin.gradle.plugin.sources.InternalKotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.sources.disambiguateName
+import org.jetbrains.kotlin.gradle.plugin.sources.getVisibleSourceSetsFromAssociateCompilations
+import org.jetbrains.kotlin.gradle.plugin.sources.internal
 import org.jetbrains.kotlin.gradle.targets.metadata.locateOrRegisterGenerateProjectStructureMetadataTask
 import org.jetbrains.kotlin.gradle.utils.*
 
@@ -27,7 +30,7 @@ internal fun setupProjectStructureMetadataConsumableConfiguration(project: Proje
     val psmConsumableConfiguration = maybeCreatePsmConsumableConfiguration(project)
     project.launch {
         val metadataTarget = project.multiplatformExtension.awaitMetadataTarget()
-        psmConsumableConfiguration.extendsDependenciesOnly(
+        psmConsumableConfiguration.extendsProjectDependenciesOnly(
             project,
             project.configurations.getByName(metadataTarget.apiElementsConfigurationName)
         )
@@ -40,9 +43,27 @@ internal fun setupProjectStructureMetadataConsumableConfiguration(project: Proje
 
 internal val InternalKotlinSourceSet.projectStructureMetadataConfiguration: Configuration by extrasStoredProperty {
     project.configurations.maybeCreateResolvable(projectStructureMetadataConfigurationName) {
-        extendsFromWithDependsOnClosureConfigurations(this)
+        extendsProjectDependenciesOnlyFromWithDependsOnClosureConfigurations(this)
         configurePsmDependenciesAttributes(project)
     }
+}
+
+private fun InternalKotlinSourceSet.extendsProjectDependenciesOnlyFromWithDependsOnClosureConfigurations(configuration: Configuration) {
+    withDependsOnClosure.forAll { sourceSet ->
+        val extenders = sourceSet.internal.compileDependenciesConfigurations
+        configuration.extendsProjectDependenciesOnly(project, *extenders.toTypedArray())
+    }
+
+    /**
+     * Adding dependencies from associate compilations using a listProvider, since we would like to defer
+     * the call to 'getVisibleSourceSetsFromAssociateCompilations' as much as possible (changes to the model might significantly
+     * change the result of this visible source sets)
+     */
+    val associatedConfigurations = getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
+        sourceSet.internal.compileDependenciesConfigurations
+    }
+    configuration.extendsProjectDependenciesOnly(project, *associatedConfigurations.toTypedArray())
+
 }
 
 private val InternalKotlinSourceSet.projectStructureMetadataConfigurationName: String

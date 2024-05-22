@@ -63,7 +63,7 @@ internal fun InternalKotlinSourceSet.extendsFromWithDependsOnClosureConfiguratio
 
 }
 
-private val InternalKotlinSourceSet.compileDependenciesConfigurations: List<Configuration>
+internal val InternalKotlinSourceSet.compileDependenciesConfigurations: List<Configuration>
     get() = listOf(
         project.configurations.getByName(apiConfigurationName),
         project.configurations.getByName(implementationConfigurationName),
