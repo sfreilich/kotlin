@@ -56,10 +56,11 @@ internal fun InternalKotlinSourceSet.extendsFromWithDependsOnClosureConfiguratio
      * the call to 'getVisibleSourceSetsFromAssociateCompilations' as much as possible (changes to the model might significantly
      * change the result of this visible source sets)
      */
-    val associatedConfigurations = getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
-        sourceSet.internal.compileDependenciesConfigurations
-    }
-    configuration.extendsDependenciesOnly(project, *associatedConfigurations.toTypedArray())
+    configuration.dependencies.addAllLater(project.listProvider {
+        getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
+            sourceSet.internal.compileDependenciesConfigurations.flatMap { it.allDependencies }
+        }
+    })
 
 }
 

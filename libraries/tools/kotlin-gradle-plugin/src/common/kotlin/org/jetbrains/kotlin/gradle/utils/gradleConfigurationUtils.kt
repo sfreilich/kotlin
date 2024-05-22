@@ -47,18 +47,6 @@ internal fun Configuration.addGradlePluginMetadataAttributes(
 }
 
 /**
- * Extends the dependencies of this configuration by adding the specified [configurations]'s dependencies.
- *
- * @param project The project on which the configuration is applied.
- * @param configurations The configurations whose dependencies will be added to this configuration.
- */
-internal fun Configuration.extendsDependenciesOnly(project: Project, vararg configurations: Configuration) {
-    return dependencies.addAllLater(project.listProvider {
-        configurations.flatMap { it.allDependencies }
-    })
-}
-
-/**
  * Extends the dependencies of this configuration by adding the specified [configurations]'s projects' dependencies only.
  *
  * @param project The project on which the configuration is applied.

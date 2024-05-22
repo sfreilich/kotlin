@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.gradle.plugin.mpp.internal
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
@@ -59,11 +60,11 @@ private fun InternalKotlinSourceSet.extendsProjectDependenciesOnlyFromWithDepend
      * the call to 'getVisibleSourceSetsFromAssociateCompilations' as much as possible (changes to the model might significantly
      * change the result of this visible source sets)
      */
-    val associatedConfigurations = getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
-        sourceSet.internal.compileDependenciesConfigurations
-    }
-    configuration.extendsProjectDependenciesOnly(project, *associatedConfigurations.toTypedArray())
-
+    configuration.dependencies.addAllLater(project.listProvider {
+        getVisibleSourceSetsFromAssociateCompilations(this).flatMap { sourceSet ->
+            sourceSet.internal.compileDependenciesConfigurations.flatMap { it.allDependencies.filterIsInstance<ProjectDependency>() }
+        }
+    })
 }
 
 private val InternalKotlinSourceSet.projectStructureMetadataConfigurationName: String
