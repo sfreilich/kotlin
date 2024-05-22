@@ -245,7 +245,7 @@ Additionally, we require that each Kotlin Attribute dimension also provides an `
 
 Pseudo-code for illustrative purposes:
 ```kotlin
-enum class KonanTarget {
+enum class KotlinTarget {
 	JVM,
 	ANDROID,
 	LINUX_X64,
@@ -257,7 +257,7 @@ enum class KonanTarget {
 	...
 }
 
-class KotlinPlatformAttribute(val targets: Set<KonanTarget>) : KotlinAttribute {
+class KotlinPlatformAttribute(val targets: Set<KotlinTarget>) : KotlinAttribute {
     override val uniqueId = "org.jetbrains.kotlin.platform"   
 
     override val isCompatibleWith(other: KotlinPlatformAttribute): Boolean =
@@ -285,10 +285,10 @@ class Fragment(
 
 
 A couple of notes about other invariants/expectations:
-* Fragment `F` doesn't have refinees <=> it has exactly one `KonanTarget`
+* Fragment `F` doesn't have refinees <=> it has exactly one `KotlinTarget`
 * Fragment `F1` refines fragment `F2` <=> targets of `F1` are compatible with `F2`
 	* Note that in Gradle implementation, only the implication from left to right holds. 
-* It's OK to have several Fragments with one and the same set of `KonanTarget`. 
+* It's OK to have several Fragments with one and the same set of `KotlinTarget`. 
   There are no cases where they behave differently from just having one merged fragment. Therefore, we might issue a warning or even an error on the publisher side, but there's no reason to reject such modules.
 * It's OK to have a fragment with more targets than all of its refinees. E.g.: `commonMain` has `jvm` across its targets, but there is no `jvmMain` fragment
 
