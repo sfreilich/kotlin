@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.fir.java.FirProjectSessionProvider
 import org.jetbrains.kotlin.fir.resolve.calls.ConeCallConflictResolverFactory
 import org.jetbrains.kotlin.fir.resolve.providers.impl.FirBuiltinSyntheticFunctionInterfaceProvider
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirStdlibBuiltinSyntheticFunctionInterfaceProvider
 import org.jetbrains.kotlin.fir.scopes.FirDefaultImportProviderHolder
 import org.jetbrains.kotlin.fir.scopes.FirKotlinScopeProvider
 import org.jetbrains.kotlin.fir.session.FirSessionFactoryHelper.registerDefaultComponents
@@ -72,6 +73,7 @@ object FirJsSessionFactory : FirAbstractSessionFactory() {
                             it,
                         )
                     },
+                    FirStdlibBuiltinSyntheticFunctionInterfaceProvider.initializeIfStdlib(session, moduleData, kotlinScopeProvider),
                     *dependencies.toTypedArray(),
                 )
             }
@@ -101,7 +103,7 @@ object FirJsSessionFactory : FirAbstractSessionFactory() {
         createProviders = { session, builtinsModuleData, kotlinScopeProvider, syntheticFunctionInterfaceProvider ->
             listOfNotNull(
                 KlibBasedSymbolProvider(session, moduleDataProvider, kotlinScopeProvider, resolvedLibraries),
-                FirBuiltinSyntheticFunctionInterfaceProvider(session, builtinsModuleData, kotlinScopeProvider),
+                FirBuiltinSyntheticFunctionInterfaceProvider.initializeIfNotStdlib(session, builtinsModuleData, kotlinScopeProvider),
                 syntheticFunctionInterfaceProvider
             )
         }

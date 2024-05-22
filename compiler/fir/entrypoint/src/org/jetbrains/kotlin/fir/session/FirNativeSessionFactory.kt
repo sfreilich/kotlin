@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.fir.deserialization.ModuleDataProvider
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 import org.jetbrains.kotlin.fir.java.FirProjectSessionProvider
 import org.jetbrains.kotlin.fir.resolve.providers.impl.FirBuiltinSyntheticFunctionInterfaceProvider
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirStdlibBuiltinSyntheticFunctionInterfaceProvider
 import org.jetbrains.kotlin.fir.scopes.FirDefaultImportProviderHolder
 import org.jetbrains.kotlin.fir.scopes.FirKotlinScopeProvider
 import org.jetbrains.kotlin.fir.scopes.FirOverrideChecker
@@ -60,7 +61,7 @@ object FirNativeSessionFactory : FirAbstractSessionFactory() {
                 listOfNotNull(
                     KlibBasedSymbolProvider(session, moduleDataProvider, kotlinScopeProvider, resolvedKotlinLibraries),
                     NativeForwardDeclarationsSymbolProvider(session, forwardDeclarationsModuleData, kotlinScopeProvider, resolvedKotlinLibraries),
-                    FirBuiltinSyntheticFunctionInterfaceProvider(session, builtinsModuleData, kotlinScopeProvider),
+                    FirBuiltinSyntheticFunctionInterfaceProvider.initializeIfNotStdlib(session, builtinsModuleData, kotlinScopeProvider),
                     syntheticFunctionInterfaceProvider,
                 )
             })
@@ -90,10 +91,15 @@ object FirNativeSessionFactory : FirAbstractSessionFactory() {
             },
             registerExtraCheckers = { it.registerNativeCheckers() },
             createKotlinScopeProvider = { FirKotlinScopeProvider() },
-            createProviders = { _, _, symbolProvider, generatedSymbolsProvider, dependencies ->
+            createProviders = { _, kotlinScopeProvider, symbolProvider, generatedSymbolsProvider, dependencies ->
                 listOfNotNull(
                     symbolProvider,
                     generatedSymbolsProvider,
+                    FirStdlibBuiltinSyntheticFunctionInterfaceProvider.initializeIfStdlib(
+                        moduleData.session,
+                        moduleData,
+                        kotlinScopeProvider
+                    ),
                     *dependencies.toTypedArray(),
                 )
             }
