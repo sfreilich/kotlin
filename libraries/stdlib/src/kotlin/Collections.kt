@@ -6,7 +6,6 @@
 package kotlin.collections
 
 import kotlin.internal.ActualizeByJvmBuiltinProvider
-import kotlin.internal.PlatformDependent
 
 /**
  * Classes that inherit from this interface can be represented as a sequence of elements that can
@@ -329,18 +328,6 @@ public expect interface Map<K, out V> {
      */
     public operator fun get(key: K): V?
 
-    /**
-     * Returns the value corresponding to the given [key], or [defaultValue] if such a key is not present in the map.
-     *
-     * @since JDK 1.8
-     */
-    @SinceKotlin("1.1")
-    @PlatformDependent
-    public fun getOrDefault(key: K, defaultValue: @UnsafeVariance V): V /*{
-        // See default implementation in JDK sources
-        throw NotImplementedError()
-    }*/
-
     // Views
     /**
      * Returns a read-only [Set] of all keys in this map.
@@ -395,18 +382,6 @@ public expect interface MutableMap<K, V> : Map<K, V> {
      * @return the previous value associated with the key, or `null` if the key was not present in the map.
      */
     public fun remove(key: K): V?
-
-    /**
-     * Removes the entry for the specified key only if it is mapped to the specified value.
-     *
-     * @return true if entry was removed
-     */
-    @SinceKotlin("1.1")
-    @PlatformDependent
-    public fun remove(key: K, value: V): Boolean /*{
-        // See default implementation in JDK sources
-        return true
-    }*/
 
     // Bulk Modification Operations
     /**
