@@ -73,7 +73,7 @@ A large part of it is platform-specific klibs. In the current publication scheme
 
 There are two options to solve that:
 
-1. Optimize it on the compiler level. It is a planned project called "klib-compilation," when each fragment's contents are compiled to klib with IR. Therefore, the contents of common fragments won't be duplicated across the whole publication, reducing the size of the artifacts we publish. 
+1. Optimize it on the compiler level. It is a planned project called "klib-compilation", when each fragment's contents are compiled to klib with IR. Therefore, the contents of common fragments won't be duplicated across the whole publication, reducing the size of the artifacts we publish. 
    This effort is highly non-trivial from a technical perspective. The timeline for its rollout is probably years from now
 
 2. Abuse the fact that the data in `uklib` contains a lot of duplicates. This is where compression algorithms come to play.
@@ -229,7 +229,7 @@ Example of output (only one dependency is shown for clarity)
 ![fragment-resolution-output](imgs/fragment-resolution-output.jpg)
 #### Kotlin attributes
 
-To enable "Fragment resolution," we'll have to introduce a notion of **Kotlin Attributes** (inspired by Gradle Attributes)
+To enable "Fragment resolution", we'll have to introduce a notion of **Kotlin Attributes** (inspired by Gradle Attributes)
 
 You can think of Kotlin Attributes as "key-value" pairs of strings attached to each fragment.
 
@@ -717,4 +717,3 @@ Indeed, it is a concern. There are two ways to mitigate that:
 
 ### IDE support
 TODO: explain that we don't care about IDE in the first design iteration because we control the whole stack
-
