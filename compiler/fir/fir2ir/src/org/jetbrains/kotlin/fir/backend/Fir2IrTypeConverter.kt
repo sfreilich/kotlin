@@ -29,8 +29,10 @@ import org.jetbrains.kotlin.name.StandardClassIds.Annotations.FlexibleMutability
 import org.jetbrains.kotlin.name.StandardClassIds.Annotations.FlexibleNullability
 import org.jetbrains.kotlin.name.StandardClassIds.Annotations.RawTypeAnnotation
 import org.jetbrains.kotlin.types.CommonFlexibleTypeBoundsChecker
+import org.jetbrains.kotlin.types.ErrorUtils
 import org.jetbrains.kotlin.types.TypeApproximatorConfiguration
 import org.jetbrains.kotlin.types.Variance
+import org.jetbrains.kotlin.utils.IDEAPluginsCompatibilityAPI
 
 class Fir2IrTypeConverter(
     private val c: Fir2IrComponents,
@@ -104,7 +106,7 @@ class Fir2IrTypeConverter(
         addRawTypeAnnotation: Boolean = false
     ): IrType {
         return when (this) {
-            is ConeErrorType -> createErrorType()
+            is ConeErrorType -> createErrorType(this.diagnostic.reason)
             is ConeLookupTagBasedType -> {
                 val typeAnnotations = mutableListOf<IrConstructorCall>()
                 typeAnnotations += with(annotationGenerator) { annotations.toIrAnnotations() }
@@ -366,4 +368,6 @@ internal fun ConeKotlinType.approximateForIrOrSelf(c: Fir2IrComponents): ConeKot
     return approximateForIrOrNull(c) ?: this
 }
 
-internal fun createErrorType(): IrErrorType = IrErrorTypeImpl(null, emptyList(), Variance.INVARIANT)
+@OptIn(IDEAPluginsCompatibilityAPI::class)
+internal fun createErrorType(message: String = "<error>"): IrErrorType =
+    IrErrorTypeImpl(ErrorUtils.createErrorType(message), emptyList(), Variance.INVARIANT)
