@@ -77,7 +77,7 @@ class FirExtensionSyntheticFunctionInterfaceProvider(
 /*
  * Provides kotlin.FunctionN, kotlin.coroutines.SuspendFunctionN, kotlin.reflect.KFunctionN and kotlin.reflect.KSuspendFunctionN
  */
-open class FirBuiltinSyntheticFunctionInterfaceProvider protected constructor(
+open class FirBuiltinSyntheticFunctionInterfaceProvider constructor(
     session: FirSession,
     moduleData: FirModuleData,
     kotlinScopeProvider: FirKotlinScopeProvider

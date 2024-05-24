@@ -91,6 +91,14 @@ public expect fun intArrayOf(vararg elements: Int): IntArray
 @SinceKotlin("1.1")
 public expect inline fun <reified T : Enum<T>> enumValues(): Array<T>
 
+// FILE: reflect/KProperty.kt
+
+package kotlin.reflect
+
+public expect interface KProperty0<out V> : KProperty<V>, () -> V {
+    public fun get(): V
+}
+
 // FILE: testCommon.kt
 
 enum class TestEnumInCommon {
@@ -108,6 +116,15 @@ fun throwableInCommon() = Throwable()
 fun testIntArrayOf() = intArrayOf(1, 2, 3)
 
 // MODULE: platform()()(common)
+
+// FILE: reflect/KProperty.kt
+
+package kotlin.reflect
+
+public actual interface KProperty0<out V> : KProperty<V>, () -> V {
+    public actual fun get(): V
+}
+
 // FILE: testPlatform.kt
 
 enum class TestEnumInPlatform {

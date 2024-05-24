@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
 
-class FirStdlibBuiltinSyntheticFunctionInterfaceProvider private constructor(
+class FirStdlibBuiltinSyntheticFunctionInterfaceProvider(
     session: FirSession, moduleData: FirModuleData, kotlinScopeProvider: FirKotlinScopeProvider,
 ) : FirBuiltinSyntheticFunctionInterfaceProvider(session, moduleData, kotlinScopeProvider) {
     companion object {

@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.fir.resolve.providers.impl
 
+import org.jetbrains.kotlin.config.AnalysisFlags
 import org.jetbrains.kotlin.descriptors.SourceElement
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.FirSession
@@ -12,6 +13,7 @@ import org.jetbrains.kotlin.fir.ThreadSafeMutableState
 import org.jetbrains.kotlin.fir.caches.*
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.deserialization.*
+import org.jetbrains.kotlin.fir.languageVersionSettings
 import org.jetbrains.kotlin.fir.resolve.providers.FirSymbolNamesProvider
 import org.jetbrains.kotlin.fir.resolve.providers.FirSymbolProvider
 import org.jetbrains.kotlin.fir.resolve.providers.FirSymbolProviderInternals
@@ -72,11 +74,19 @@ open class FirBuiltinSymbolProvider(
 
     }
 
-    private val syntheticFunctionInterfaceProvider = FirBuiltinSyntheticFunctionInterfaceProvider(
-        session,
-        moduleData,
-        kotlinScopeProvider
-    )
+    private val syntheticFunctionInterfaceProvider = if (session.languageVersionSettings.getFlag(AnalysisFlags.stdlibCompilation)) {
+        FirStdlibBuiltinSyntheticFunctionInterfaceProvider(
+            session,
+            moduleData,
+            kotlinScopeProvider
+        )
+    } else {
+        FirBuiltinSyntheticFunctionInterfaceProvider(
+            session,
+            moduleData,
+            kotlinScopeProvider
+        )
+    }
 
     private val allPackageFragments = builtInsPackageFragments.mapValues { (fqName, foo) ->
         BuiltInsPackageFragmentWrapper(foo, fqName, moduleData, kotlinScopeProvider)
