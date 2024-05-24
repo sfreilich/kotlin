@@ -34,6 +34,7 @@ class IrActualizer(
     expectActualTracker: ExpectActualTracker?,
     val mainFragment: IrModuleFragment,
     val dependentFragments: List<IrModuleFragment>,
+    extraExpectDeclarations: ExpectTopLevelDeclarations?,
     extraActualClassExtractors: List<IrExtraActualDeclarationExtractor>,
 ) {
     private val collector = ExpectActualCollector(
@@ -42,6 +43,7 @@ class IrActualizer(
         typeSystemContext,
         ktDiagnosticReporter,
         expectActualTracker,
+        extraExpectDeclarations,
         extraActualClassExtractors,
     )
 

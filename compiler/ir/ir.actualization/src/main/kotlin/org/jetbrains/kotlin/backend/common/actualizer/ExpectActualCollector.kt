@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.backend.common.actualizer
 
+import org.jetbrains.kotlin.backend.common.actualizer.ExpectActualLinkCollector.MatchingContext
 import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.config.LanguageVersionSettings
 import org.jetbrains.kotlin.incremental.components.ExpectActualTracker
@@ -48,6 +49,7 @@ internal class ExpectActualCollector(
     private val typeSystemContext: IrTypeSystemContext,
     private val diagnosticsReporter: IrDiagnosticReporter,
     private val expectActualTracker: ExpectActualTracker?,
+    private val extraExpectDeclarations: ExpectTopLevelDeclarations?,
     private val extraActualDeclarationExtractors: List<IrExtraActualDeclarationExtractor>,
 ) {
     fun collectClassActualizationInfo(): ClassActualizationInfo {
@@ -60,9 +62,17 @@ internal class ExpectActualCollector(
 
     fun matchAllExpectDeclarations(classActualizationInfo: ClassActualizationInfo): MutableMap<IrSymbol, IrSymbol> {
         val linkCollector = ExpectActualLinkCollector()
-        val linkCollectorContext = ExpectActualLinkCollector.MatchingContext(
+        val linkCollectorContext = MatchingContext(
             typeSystemContext, diagnosticsReporter, expectActualTracker, classActualizationInfo, null
         )
+
+        if (extraExpectDeclarations != null) {
+            extraExpectDeclarations.classes.forEach { matchExpectClass(it.value.owner, linkCollectorContext) }
+            extraExpectDeclarations.callables.forEach { (callableId, symbols) ->
+                symbols.forEach { matchExpectCallable(it.owner as IrDeclarationWithName, callableId, linkCollectorContext) }
+            }
+        }
+
         dependentFragments.forEach { linkCollector.collectAndCheckMapping(it, linkCollectorContext) }
         // It doesn't make sense to link expects from the last module because actuals always should be located in another module
         // Thus relevant actuals are always missing for the last module
@@ -275,40 +285,9 @@ private class ExpectActualLinkCollector {
             }
         }
 
-        private fun matchExpectCallable(declaration: IrDeclarationWithName, callableId: CallableId, context: MatchingContext) {
-            matchAndCheckExpectDeclaration(
-                declaration.symbol,
-                context.classActualizationInfo.actualTopLevels[callableId].orEmpty(),
-                context,
-            )
-        }
-
         override fun visitClass(declaration: IrClass, data: MatchingContext) {
             if (!declaration.isExpect) return
-            val classId = declaration.classIdOrFail
-            val expectClassSymbol = declaration.symbol
-            val actualClassLikeSymbol = data.classActualizationInfo.getActualWithoutExpansion(classId)
-            matchAndCheckExpectDeclaration(expectClassSymbol, listOfNotNull(actualClassLikeSymbol), data)
-        }
-
-        private fun matchAndCheckExpectDeclaration(
-            expectSymbol: IrSymbol,
-            actualSymbols: List<IrSymbol>,
-            context: MatchingContext,
-        ) {
-            val matched = AbstractExpectActualMatcher.matchSingleExpectTopLevelDeclarationAgainstPotentialActuals(
-                expectSymbol,
-                actualSymbols,
-                context,
-            )
-            if (matched != null) {
-                AbstractExpectActualChecker.checkSingleExpectTopLevelDeclarationAgainstMatchedActual(
-                    expectSymbol,
-                    matched,
-                    context,
-                    context.languageVersionSettings,
-                )
-            }
+            matchExpectClass(declaration, data)
         }
 
         override fun visitElement(element: IrElement, data: MatchingContext) {
@@ -386,6 +365,41 @@ private class ExpectActualLinkCollector {
                 }
             }
         }
+    }
+}
+
+private fun matchExpectClass(declaration: IrClass, context: MatchingContext) {
+    val classId = declaration.classIdOrFail
+    val expectClassSymbol = declaration.symbol
+    val actualClassLikeSymbol = context.classActualizationInfo.getActualWithoutExpansion(classId)
+    matchAndCheckExpectDeclaration(expectClassSymbol, listOfNotNull(actualClassLikeSymbol), context)
+}
+
+private fun matchExpectCallable(declaration: IrDeclarationWithName, callableId: CallableId, context: MatchingContext) {
+    matchAndCheckExpectDeclaration(
+        declaration.symbol,
+        context.classActualizationInfo.actualTopLevels[callableId].orEmpty(),
+        context,
+    )
+}
+
+private fun matchAndCheckExpectDeclaration(
+    expectSymbol: IrSymbol,
+    actualSymbols: List<IrSymbol>,
+    context: MatchingContext,
+) {
+    val matched = AbstractExpectActualMatcher.matchSingleExpectTopLevelDeclarationAgainstPotentialActuals(
+        expectSymbol,
+        actualSymbols,
+        context,
+    )
+    if (matched != null) {
+        AbstractExpectActualChecker.checkSingleExpectTopLevelDeclarationAgainstMatchedActual(
+            expectSymbol,
+            matched,
+            context,
+            context.languageVersionSettings,
+        )
     }
 }
 

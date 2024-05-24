@@ -8,14 +8,11 @@ package org.jetbrains.kotlin.fir.pipeline
 import com.intellij.openapi.progress.ProcessCanceledException
 import org.jetbrains.kotlin.backend.common.CodegenUtil
 import org.jetbrains.kotlin.backend.common.IrSpecialAnnotationsProvider
-import org.jetbrains.kotlin.backend.common.actualizer.IrExtraActualDeclarationExtractor
-import org.jetbrains.kotlin.backend.common.actualizer.IrActualizedResult
-import org.jetbrains.kotlin.backend.common.actualizer.IrActualizer
-import org.jetbrains.kotlin.backend.common.actualizer.SpecialFakeOverrideSymbolsResolver
-import org.jetbrains.kotlin.backend.common.actualizer.SpecialFakeOverrideSymbolsResolverVisitor
+import org.jetbrains.kotlin.backend.common.actualizer.*
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
+import org.jetbrains.kotlin.config.AnalysisFlags
 import org.jetbrains.kotlin.diagnostics.impl.BaseDiagnosticsCollector
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.FirSession
@@ -23,10 +20,14 @@ import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.backend.*
 import org.jetbrains.kotlin.fir.backend.generators.Fir2IrDataClassGeneratedMemberBodyGenerator
 import org.jetbrains.kotlin.fir.declarations.FirFile
+import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.descriptors.FirModuleDescriptor
 import org.jetbrains.kotlin.fir.lazy.Fir2IrLazyClass
 import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirCachingCompositeSymbolProvider
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirStdlibBuiltinSyntheticFunctionInterfaceProvider
+import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.KtDiagnosticReporterWithImplicitIrBasedContext
@@ -35,6 +36,7 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrModuleFragmentImpl
 import org.jetbrains.kotlin.ir.declarations.lazy.IrLazyDeclarationBase
 import org.jetbrains.kotlin.ir.overrides.IrFakeOverrideBuilder
+import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrTypeSystemContext
 import org.jetbrains.kotlin.ir.types.getClass
@@ -43,6 +45,7 @@ import org.jetbrains.kotlin.ir.util.SymbolTable
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.platform.jvm.isJvm
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
 
@@ -237,10 +240,35 @@ private class Fir2IrPipeline(
         return Fir2IrActualizedResult(mainIrFragment, componentsStorage, pluginContext, actualizationResult, irBuiltIns, symbolTable)
     }
 
+    private fun Fir2IrConversionResult.createExtraExpectDeclarationsIfStdlib(): ExpectTopLevelDeclarations? {
+        if (!fir2IrConfiguration.languageVersionSettings.getFlag(AnalysisFlags.stdlibCompilation)) return null
+
+        val syntheticClassSymbols: MutableMap<ClassId, IrClassSymbol> = mutableMapOf()
+
+        for (firOutput in outputs) {
+            val session = firOutput.session
+            if (!session.moduleData.isCommon) continue
+
+            val dependencyProviders = (session.symbolProvider as FirCachingCompositeSymbolProvider).providers
+            val stdlibBuiltinSyntheticFunctionInterfaceProvider =
+                dependencyProviders.filterIsInstance<FirStdlibBuiltinSyntheticFunctionInterfaceProvider>().single()
+            val firSyntheticClasses = stdlibBuiltinSyntheticFunctionInterfaceProvider.generatedClasses
+
+            for (firSyntheticClass in firSyntheticClasses) {
+                // In some cases, there is no strict correspondence between FIR and FIR2IR declarations
+                // Because FIR provider sometimes generates non-relevant declarations during candidates resolving
+                commonMemberStorage.classCache[firSyntheticClass]?.let { syntheticClassSymbols[firSyntheticClass.classId] = it }
+            }
+        }
+
+        return ExpectTopLevelDeclarations(syntheticClassSymbols, emptyMap())
+    }
+
     // ------------------------------------------------------ pipeline steps ------------------------------------------------------
 
     private fun Fir2IrConversionResult.createIrActualizer(): IrActualizer? {
         return runIf(dependentIrFragments.isNotEmpty()) {
+            val extraExpectDeclarations: ExpectTopLevelDeclarations? = createExtraExpectDeclarationsIfStdlib()
             IrActualizer(
                 KtDiagnosticReporterWithImplicitIrBasedContext(
                     fir2IrConfiguration.diagnosticReporter,
@@ -250,7 +278,11 @@ private class Fir2IrPipeline(
                 fir2IrConfiguration.expectActualTracker,
                 mainIrFragment,
                 dependentIrFragments,
-                listOfNotNull(this@Fir2IrPipeline.extraActualDeclarationExtractorInitializer(componentsStorage)),
+                extraExpectDeclarations,
+                listOfNotNull(
+                    extraExpectDeclarations?.let { IrBuiltinsExtraActualDeclarationExtractor(it, irBuiltIns) },
+                    this@Fir2IrPipeline.extraActualDeclarationExtractorInitializer(componentsStorage)
+                ),
             )
         }
     }
