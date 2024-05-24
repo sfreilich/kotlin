@@ -307,6 +307,15 @@ class Fir2IrDeclarationStorage(
         if (function.visibility == Visibilities.Local) {
             return localStorage.getLocalFunctionSymbol(function)
         }
+        if (function.origin == FirDeclarationOrigin.CommonArtefact) {
+            val callableId = function.symbol.callableId
+            val originalFunction = functionCache.keys().asSequence().firstOrNull { it.symbol.callableId == callableId }
+            if (originalFunction != null) {
+                require(originalFunction.origin != FirDeclarationOrigin.CommonArtefact)
+                return getCachedIrFunctionSymbol(originalFunction)
+            }
+        }
+
         runIf(function.origin.generatedAnyMethod) {
             val containingClass = function.getContainingClass(session)!!
             val cache = dataClassGeneratedFunctionsCache.computeIfAbsent(containingClass) { DataClassGeneratedFunctionsStorage() }
