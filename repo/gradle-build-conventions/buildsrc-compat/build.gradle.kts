@@ -111,7 +111,7 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
 
-    compileOnly(libs.gradle.enterprise.gradlePlugin)
+    compileOnly(libs.gradle.develocity.gradlePlugin)
 
     compileOnly(gradleApi())
 

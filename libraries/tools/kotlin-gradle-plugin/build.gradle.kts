@@ -85,7 +85,7 @@ dependencies {
     commonCompileOnly(libs.android.tools.common) { isTransitive = false }
     commonCompileOnly(intellijPlatformUtil())
     commonCompileOnly(commonDependency("org.jetbrains.teamcity:serviceMessages"))
-    commonCompileOnly(libs.gradle.enterprise.gradlePlugin)
+    commonCompileOnly(libs.gradle.develocity.gradlePlugin)
     commonCompileOnly(commonDependency("com.google.code.gson:gson"))
     commonCompileOnly("com.github.gundy:semver4j:0.16.4:nodeps") {
         exclude(group = "*")

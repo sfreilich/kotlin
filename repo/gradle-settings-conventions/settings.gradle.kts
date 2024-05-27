@@ -30,7 +30,7 @@ dependencyResolutionManagement {
 }
 
 include(":build-cache")
-include(":gradle-enterprise")
+include(":gradle-develocity")
 include(":jvm-toolchain-provisioning")
 include(":kotlin-daemon-config")
 include(":internal-gradle-setup")

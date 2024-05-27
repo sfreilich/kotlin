@@ -1,8 +1,8 @@
 [versions]
 dexMemberList = "4.1.1"
 dokka = "1.9.10"
-gradle-custom-user-data = "1.12.1"
-gradle-enterprise = "3.16.2"
+gradle-custom-user-data = "2.0.1"
+gradle-develocity = "3.17.4"
 gradle-plugin-publish = "1.2.1"
 # Version for foojay should be also synced with version in repo/gradle-settings-conventions/settings.gradle.kts
 gradle-toolchains-foojay-resolver = "0.4.0"
@@ -35,7 +35,7 @@ xerces = "2.12.2"
 dexMemberList = { module = "com.jakewharton.dex:dex-member-list", version.ref = "dexMemberList" }
 dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 gradle-customUserData-gradlePlugin = { module = "com.gradle:common-custom-user-data-gradle-plugin", version.ref = "gradle-custom-user-data" }
-gradle-enterprise-gradlePlugin = { module = "com.gradle:gradle-enterprise-gradle-plugin", version.ref = "gradle-enterprise" }
+gradle-develocity-gradlePlugin = { module = "com.gradle:develocity-gradle-plugin", version.ref = "gradle-develocity" }
 gradle-pluginPublish-gradlePlugin = { module = "com.gradle.publish:plugin-publish-plugin", version.ref = "gradle-plugin-publish" }
 gradle-toolchainsFoojayResolver-gradlePlugin = { module = "org.gradle.toolchains:foojay-resolver", version.ref = "gradle-toolchains-foojay-resolver" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }

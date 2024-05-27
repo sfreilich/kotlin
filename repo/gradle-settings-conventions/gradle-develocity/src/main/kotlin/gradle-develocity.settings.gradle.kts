@@ -1,5 +1,5 @@
 plugins {
-    id("com.gradle.enterprise")
+    id("com.gradle.develocity")
     id("com.gradle.common-custom-user-data-gradle-plugin") apply false
 }
 
@@ -11,21 +11,20 @@ if (buildProperties.buildScanServer != null) {
     plugins.apply("com.gradle.common-custom-user-data-gradle-plugin")
 }
 
-gradleEnterprise {
+develocity {
     buildScan {
         if (buildScanServer != null) {
             server = buildScanServer
-            publishAlways()
+            uploadInBackground = true
 
             capture {
-                isTaskInputFiles = true
-                isBuildLogging = true
-                isBuildLogging = true
-                isUploadInBackground = true
+                fileFingerprints = true
+                testLogging = true
+                buildLogging = true
             }
         } else {
-            termsOfServiceUrl = "https://gradle.com/terms-of-service"
-            termsOfServiceAgree = "yes"
+            termsOfUseUrl = "https://gradle.com/terms-of-service"
+            termsOfUseAgree = "yes"
         }
 
         val overridenName = (buildProperties.getOrNull("kotlin.build.scan.username") as? String)?.trim()
@@ -36,7 +35,7 @@ gradleEnterprise {
             username { originalUsername ->
                 when {
                     isTeamCity -> "TeamCity"
-                    overridenName == null || overridenName.isEmpty() -> "concealed"
+                    overridenName.isNullOrEmpty() -> "concealed"
                     overridenName == "<default>" -> originalUsername
                     else -> overridenName
                 }
