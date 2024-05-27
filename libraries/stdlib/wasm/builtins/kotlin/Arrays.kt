@@ -20,7 +20,7 @@ import kotlin.wasm.internal.*
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class ByteArray(size: Int) {
+public actual class ByteArray actual constructor(size: Int) {
     internal val storage: WasmByteArray
 
     init {
@@ -40,14 +40,14 @@ public class ByteArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Byte)
+    public actual inline constructor(size: Int, init: (Int) -> Byte)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Byte {
+    public actual operator fun get(index: Int): Byte {
         rangeCheck(index, storage.len())
         return storage.get(index)
     }
@@ -57,17 +57,17 @@ public class ByteArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Byte) {
+    public actual operator fun set(index: Int, value: Byte) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): ByteIterator = byteArrayIterator(this)
+    public actual operator fun iterator(): ByteIterator = byteArrayIterator(this)
 }
 
 internal fun byteArrayIterator(array: ByteArray) = object : ByteIterator() {
@@ -88,7 +88,7 @@ internal inline fun createByteArray(size: Int, init: (Int) -> Byte): ByteArray {
  * @constructor Creates a new array of the specified [size], with all elements initialized to null char (`\u0000').
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class CharArray(size: Int) {
+public actual class CharArray actual constructor(size: Int) {
     internal val storage: WasmCharArray
 
     init {
@@ -108,14 +108,14 @@ public class CharArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Char)
+    public actual inline constructor(size: Int, init: (Int) -> Char)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Char {
+    public actual operator fun get(index: Int): Char {
         rangeCheck(index, storage.len())
         return storage.get(index)
     }
@@ -125,17 +125,17 @@ public class CharArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Char) {
+    public actual operator fun set(index: Int, value: Char) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): CharIterator = charArrayIterator(this)
+    public actual operator fun iterator(): CharIterator = charArrayIterator(this)
 }
 
 internal fun charArrayIterator(array: CharArray) = object : CharIterator() {
@@ -156,7 +156,7 @@ internal inline fun createCharArray(size: Int, init: (Int) -> Char): CharArray {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class ShortArray(size: Int) {
+public actual class ShortArray actual constructor(size: Int) {
     internal val storage: WasmShortArray
 
     init {
@@ -176,14 +176,14 @@ public class ShortArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Short)
+    public actual inline constructor(size: Int, init: (Int) -> Short)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Short {
+    public actual operator fun get(index: Int): Short {
         rangeCheck(index, storage.len())
         return storage.get(index)
     }
@@ -193,17 +193,17 @@ public class ShortArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Short) {
+    public actual operator fun set(index: Int, value: Short) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): ShortIterator = shortArrayIterator(this)
+    public actual operator fun iterator(): ShortIterator = shortArrayIterator(this)
 }
 
 internal fun shortArrayIterator(array: ShortArray) = object : ShortIterator() {
@@ -224,7 +224,7 @@ internal inline fun createShortArray(size: Int, init: (Int) -> Short): ShortArra
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class IntArray(size: Int) {
+public actual class IntArray actual constructor(size: Int) {
     internal val storage: WasmIntArray
 
     init {
@@ -244,14 +244,14 @@ public class IntArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Int)
+    public actual inline constructor(size: Int, init: (Int) -> Int)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Int {
+    public actual operator fun get(index: Int): Int {
         rangeCheck(index, storage.len())
         return storage.get(index)
     }
@@ -261,17 +261,17 @@ public class IntArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Int) {
+    public actual operator fun set(index: Int, value: Int) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): IntIterator = intArrayIterator(this)
+    public actual operator fun iterator(): IntIterator = intArrayIterator(this)
 }
 
 internal fun intArrayIterator(array: IntArray) = object : IntIterator() {
@@ -292,7 +292,7 @@ internal inline fun createIntArray(size: Int, init: (Int) -> Int): IntArray {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class LongArray(size: Int) {
+public actual class LongArray actual constructor(size: Int) {
     internal val storage: WasmLongArray
 
     init {
@@ -312,14 +312,14 @@ public class LongArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Long)
+    public actual inline constructor(size: Int, init: (Int) -> Long)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Long {
+    public actual operator fun get(index: Int): Long {
         rangeCheck(index, storage.len())
         return storage.get(index)
     }
@@ -329,17 +329,17 @@ public class LongArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Long) {
+    public actual operator fun set(index: Int, value: Long) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): LongIterator = longArrayIterator(this)
+    public actual operator fun iterator(): LongIterator = longArrayIterator(this)
 }
 
 internal fun longArrayIterator(array: LongArray) = object : LongIterator() {
@@ -360,7 +360,7 @@ internal inline fun createLongArray(size: Int, init: (Int) -> Long): LongArray {
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class FloatArray(size: Int) {
+public actual class FloatArray actual constructor(size: Int) {
     internal val storage: WasmFloatArray
 
     init {
@@ -380,14 +380,14 @@ public class FloatArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Float)
+    public actual inline constructor(size: Int, init: (Int) -> Float)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Float {
+    public actual operator fun get(index: Int): Float {
         rangeCheck(index, storage.len())
         return storage.get(index)
     }
@@ -397,17 +397,17 @@ public class FloatArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Float) {
+    public actual operator fun set(index: Int, value: Float) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): FloatIterator = floatArrayIterator(this)
+    public actual operator fun iterator(): FloatIterator = floatArrayIterator(this)
 }
 
 internal fun floatArrayIterator(array: FloatArray) = object : FloatIterator() {
@@ -428,7 +428,7 @@ internal inline fun createFloatArray(size: Int, init: (Int) -> Float): FloatArra
  * @constructor Creates a new array of the specified [size], with all elements initialized to zero.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class DoubleArray(size: Int) {
+public actual class DoubleArray actual constructor(size: Int) {
     internal val storage: WasmDoubleArray
 
     init {
@@ -448,14 +448,14 @@ public class DoubleArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Double)
+    public actual inline constructor(size: Int, init: (Int) -> Double)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Double {
+    public actual operator fun get(index: Int): Double {
         rangeCheck(index, storage.len())
         return storage.get(index)
     }
@@ -465,17 +465,17 @@ public class DoubleArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Double) {
+    public actual operator fun set(index: Int, value: Double) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): DoubleIterator = doubleArrayIterator(this)
+    public actual operator fun iterator(): DoubleIterator = doubleArrayIterator(this)
 }
 
 internal fun doubleArrayIterator(array: DoubleArray) = object : DoubleIterator() {
@@ -496,7 +496,7 @@ internal inline fun createDoubleArray(size: Int, init: (Int) -> Double): DoubleA
  * @constructor Creates a new array of the specified [size], with all elements initialized to `false`.
  * @throws RuntimeException if the specified [size] is negative.
  */
-public class BooleanArray(size: Int) {
+public actual class BooleanArray actual constructor(size: Int) {
     internal val storage: WasmByteArray
 
     init {
@@ -516,14 +516,14 @@ public class BooleanArray(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> Boolean)
+    public actual inline constructor(size: Int, init: (Int) -> Boolean)
 
     /**
      * Returns the array element at the given [index].  This method can be called using the index operator.
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun get(index: Int): Boolean {
+    public actual operator fun get(index: Int): Boolean {
         rangeCheck(index, storage.len())
         return storage.get(index).reinterpretAsInt().reinterpretAsBoolean()
     }
@@ -533,17 +533,17 @@ public class BooleanArray(size: Int) {
      *
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
      */
-    public operator fun set(index: Int, value: Boolean) {
+    public actual operator fun set(index: Int, value: Boolean) {
         rangeCheck(index, storage.len())
         storage.set(index, value.toInt().reinterpretAsByte())
     }
 
     /** Returns the number of elements in the array. */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /** Creates an iterator over the elements of the array. */
-    public operator fun iterator(): BooleanIterator = booleanArrayIterator(this)
+    public actual operator fun iterator(): BooleanIterator = booleanArrayIterator(this)
 }
 
 internal fun booleanArrayIterator(array: BooleanArray) = object : BooleanIterator() {

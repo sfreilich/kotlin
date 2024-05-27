@@ -5,23 +5,23 @@
 
 package kotlin
 
-public abstract class Enum<E : Enum<E>>(
+public actual abstract class Enum<E : Enum<E>> actual constructor(
     @kotlin.internal.IntrinsicConstEvaluation
-    public val name: String,
-    public val ordinal: Int
+    public actual val name: String,
+    public actual val ordinal: Int
 ) : Comparable<E> {
 
-    public final override fun compareTo(other: E): Int =
+    public actual final override fun compareTo(other: E): Int =
         ordinal.compareTo(other.ordinal)
 
-    public final override fun equals(other: Any?): Boolean =
+    public actual final override fun equals(other: Any?): Boolean =
         this === other
 
-    public final override fun hashCode(): Int =
+    public actual final override fun hashCode(): Int =
         super.hashCode()
 
-    public override fun toString(): String =
+    public actual override fun toString(): String =
         name
 
-    public companion object
+    public actual companion object
 }

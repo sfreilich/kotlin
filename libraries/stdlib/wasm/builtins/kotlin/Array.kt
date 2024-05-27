@@ -22,7 +22,7 @@ import kotlin.wasm.internal.*
  * See [Kotlin language documentation](https://kotlinlang.org/docs/reference/basic-types.html#arrays)
  * for more information on arrays.
  */
-public class Array<T> @PublishedApi internal constructor(size: Int) {
+public actual class Array<T> @PublishedApi internal constructor(size: Int) {
     internal val storage: WasmAnyArray
 
     init {
@@ -42,7 +42,7 @@ public class Array<T> @PublishedApi internal constructor(size: Int) {
      *
      * @throws RuntimeException if the specified [size] is negative.
      */
-    public inline constructor(size: Int, init: (Int) -> T)
+    public actual inline constructor(size: Int, init: (Int) -> T)
 
     /**
      * Returns the array element at the specified [index]. This method can be called using the
@@ -55,7 +55,7 @@ public class Array<T> @PublishedApi internal constructor(size: Int) {
      * where the behavior is unspecified.
      */
     @Suppress("UNCHECKED_CAST")
-    public operator fun get(index: Int): T {
+    public actual operator fun get(index: Int): T {
         rangeCheck(index, storage.len())
         return storage.get(index) as T
     }
@@ -70,7 +70,7 @@ public class Array<T> @PublishedApi internal constructor(size: Int) {
      * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException] except in Kotlin/JS
      * where the behavior is unspecified.
      */
-    public operator fun set(index: Int, value: T) {
+    public actual operator fun set(index: Int, value: T) {
         rangeCheck(index, storage.len())
         storage.set(index, value)
     }
@@ -78,13 +78,13 @@ public class Array<T> @PublishedApi internal constructor(size: Int) {
     /**
      * Returns the number of elements in the array.
      */
-    public val size: Int
+    public actual val size: Int
         get() = storage.len()
 
     /**
      * Creates an iterator for iterating over the elements of the array.
      */
-    public operator fun iterator(): Iterator<T> = arrayIterator(this)
+    public actual operator fun iterator(): Iterator<T> = arrayIterator(this)
 }
 
 internal fun <T> arrayIterator(array: Array<T>) = object : Iterator<T> {
