@@ -16,4 +16,4 @@ import kotlin.native.internal.GCUnsafeCall
  * @return This method never returns normally.
  */
 @GCUnsafeCall("Kotlin_system_exitProcess")
-public external fun exitProcess(status: Int): Nothing
+public actual external fun exitProcess(status: Int): Nothing
