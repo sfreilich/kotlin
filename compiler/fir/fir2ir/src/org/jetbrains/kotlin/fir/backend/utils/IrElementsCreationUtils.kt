@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.fir.backend.utils
 
 import org.jetbrains.kotlin.descriptors.ValueClassRepresentation
+import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.backend.Fir2IrComponents
 import org.jetbrains.kotlin.fir.backend.Fir2IrConversionScope
@@ -13,6 +14,7 @@ import org.jetbrains.kotlin.fir.backend.toIrType
 import org.jetbrains.kotlin.fir.builder.buildPackageDirective
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.builder.buildFile
+import org.jetbrains.kotlin.fir.declarations.utils.classId
 import org.jetbrains.kotlin.fir.declarations.utils.isInline
 import org.jetbrains.kotlin.fir.extensions.FirExtensionApiInternals
 import org.jetbrains.kotlin.fir.extensions.declarationGenerators
@@ -20,6 +22,10 @@ import org.jetbrains.kotlin.fir.extensions.extensionService
 import org.jetbrains.kotlin.fir.extensions.generatedDeclarationsSymbolProvider
 import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.render
+import org.jetbrains.kotlin.fir.resolve.providers.FirSymbolProvider
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirCachingCompositeSymbolProvider
+import org.jetbrains.kotlin.fir.resolve.providers.impl.FirStdlibBuiltinSyntheticFunctionInterfaceProvider
+import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.ir.builders.declarations.UNDEFINED_PARAMETER_INDEX
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
@@ -35,8 +41,7 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.makeNullable
-import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.name.SpecialNames
+import org.jetbrains.kotlin.name.*
 
 internal fun IrDeclarationParent.declareThisReceiverParameter(
     c: Fir2IrComponents,
@@ -128,18 +133,50 @@ fun Fir2IrComponents.computeValueClassRepresentation(klass: FirRegularClass): Va
 fun FirSession.createFilesWithGeneratedDeclarations(): List<FirFile> {
     val symbolProvider = generatedDeclarationsSymbolProvider ?: return emptyList()
     val declarationGenerators = extensionService.declarationGenerators
-    val topLevelClasses = declarationGenerators.flatMap { it.topLevelClassIdsCache.getValue() }.groupBy { it.packageFqName }
-    val topLevelCallables = declarationGenerators.flatMap { it.topLevelCallableIdsCache.getValue() }.groupBy { it.packageName }
 
+    return createSyntheticFiles(
+        this@createFilesWithGeneratedDeclarations.moduleData,
+        "__GENERATED DECLARATIONS__.kt",
+        FirDeclarationOrigin.Synthetic.PluginFile,
+        symbolProvider,
+        topLevelClasses = declarationGenerators.flatMap { it.topLevelClassIdsCache.getValue() }.groupBy { it.packageFqName },
+        topLevelCallables = declarationGenerators.flatMap { it.topLevelCallableIdsCache.getValue() }.groupBy { it.packageName },
+    )
+}
+
+fun FirSession.createFilesWithBuiltinsDeclarations(): List<FirFile> {
+    if (!moduleData.isCommon) return emptyList()
+    val symbolProvider =
+        (symbolProvider as FirCachingCompositeSymbolProvider).providers.filterIsInstance<FirStdlibBuiltinSyntheticFunctionInterfaceProvider>()
+            .singleOrNull() ?: return emptyList()
+
+    return createSyntheticFiles(
+        this@createFilesWithBuiltinsDeclarations.moduleData,
+        "__GENERATED BUILTINS DECLARATIONS__.kt",
+        FirDeclarationOrigin.Synthetic.Builtins,
+        symbolProvider,
+        topLevelClasses = symbolProvider.generatedClasses.map { it.classId }.groupBy { it.packageFqName },
+        topLevelCallables = emptyMap(),
+    )
+}
+
+private fun createSyntheticFiles(
+    fileModuleData: FirModuleData,
+    fileName: String,
+    fileOrigin: FirDeclarationOrigin,
+    symbolProvider: FirSymbolProvider,
+    topLevelClasses: Map<FqName, List<ClassId>>,
+    topLevelCallables: Map<FqName, List<CallableId>>,
+): List<FirFile> {
     return buildList {
         for (packageFqName in (topLevelClasses.keys + topLevelCallables.keys)) {
             this += buildFile {
-                origin = FirDeclarationOrigin.Synthetic.PluginFile
-                moduleData = this@createFilesWithGeneratedDeclarations.moduleData
+                origin = fileOrigin
+                moduleData = fileModuleData
                 packageDirective = buildPackageDirective {
                     this.packageFqName = packageFqName
                 }
-                name = "__GENERATED DECLARATIONS__.kt"
+                name = fileName
                 declarations += topLevelCallables.getOrDefault(packageFqName, emptyList())
                     .flatMap { symbolProvider.getTopLevelCallableSymbols(packageFqName, it.callableName) }
                     .map { it.fir }
