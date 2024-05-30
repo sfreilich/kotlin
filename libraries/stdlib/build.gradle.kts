@@ -46,6 +46,7 @@ fun KotlinCommonCompilerOptions.mainCompilationOptions() {
     apiVersion = KotlinVersion.KOTLIN_2_0
     freeCompilerArgs.add("-Xstdlib-compilation")
     freeCompilerArgs.add("-Xdont-warn-on-error-suppression")
+    allWarningsAsErrors = false
 }
 
 val configurationBuiltins = resolvingConfiguration("builtins") {
