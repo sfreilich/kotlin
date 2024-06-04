@@ -24,14 +24,14 @@ class LazySerializedMetadataLibrary(getSerializedMetadata: () -> SerializedMetad
     private val parts: Map<String, Map<String, ByteArray>> by lazy {
         val result = mutableMapOf<String, Map<String, ByteArray>>()
 
-        serializedMetadata?.fragments?.forEachIndexed { i, fs ->
-            val fragmentFqn = serializedMetadata?.fragmentNames?.get(i) ?: return@forEachIndexed
-            val partName = fragmentFqn.substringAfterLast(".")
-            val numCount = fs.size.toString().length
-            fun withLeadingZeros(i: Int) = String.format("%0${numCount}d", i)
-            // see MetadataWriterImpl.addMetadata for "inspiration" (still unclear why we need the partName in this form)
-            result[fragmentFqn] = fs.withIndex().associate { "${withLeadingZeros(it.index)}_$partName" to it.value }
-        }
+//        serializedMetadata!!.fragments.forEachIndexed { i, fs ->
+//            val fragmentFqn = serializedMetadata?.fragmentNames?.get(i) ?: return@forEachIndexed
+//            val partName = fragmentFqn.substringAfterLast(".")
+//            val numCount = fs.size.toString().length
+//            fun withLeadingZeros(i: Int) = String.format("%0${numCount}d", i)
+//            // see MetadataWriterImpl.addMetadata for "inspiration" (still unclear why we need the partName in this form)
+//            result[fragmentFqn] = fs.withIndex().associate { "${withLeadingZeros(it.index)}_$partName" to it.value }
+//        }
 
         result
     }
