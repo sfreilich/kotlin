@@ -5286,6 +5286,12 @@ public class DiagnosticCompilerTestFirTestdataTestGenerated extends AbstractDiag
       }
 
       @Test
+      @TestMetadata("either.kt")
+      public void testEither() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/either.kt");
+      }
+
+      @Test
       @TestMetadata("enumWithTheSameNameAsEntry.kt")
       public void testEnumWithTheSameNameAsEntry() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/enumWithTheSameNameAsEntry.kt");
@@ -5307,6 +5313,12 @@ public class DiagnosticCompilerTestFirTestdataTestGenerated extends AbstractDiag
       @TestMetadata("notInsideBranches.kt")
       public void testNotInsideBranches() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/notInsideBranches.kt");
+      }
+
+      @Test
+      @TestMetadata("oneLevelDeep.kt")
+      public void testOneLevelDeep() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/oneLevelDeep.kt");
       }
 
       @Test
