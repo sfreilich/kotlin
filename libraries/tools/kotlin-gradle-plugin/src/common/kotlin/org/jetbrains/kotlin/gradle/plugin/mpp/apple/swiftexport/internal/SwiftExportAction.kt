@@ -43,6 +43,7 @@ internal abstract class SwiftExportAction : WorkAction<SwiftExportParameters> {
                     SwiftExportConfig.RENDER_DOC_COMMENTS to parameters.renderDocComments.getOrElse(false).toString(),
                 ),
                 logger = Companion,
+                multipleModulesHandlingStrategy = MultipleModulesHandlingStrategy.IntoSingleModule,
                 distribution = parameters.konanDistribution.get(),
                 outputPath = parameters.outputPath.getFile().toPath(),
             )
