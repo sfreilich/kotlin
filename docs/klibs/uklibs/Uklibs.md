@@ -23,7 +23,7 @@ The current publication layout of KMP libraries is very granular and elaborate. 
 
 Over the course of KMP evolution, we realized that some flexibility hadn't found its usage. One such example is the ability to download only a JS or Native part of the library without downloading common or JVM parts.
 
-In some other cases, there initially was a use for the provided flexibility, but it has disappeared over the course of the evolution of Kotlin. For example, at some point, the cross-compilation capabilities of K/N were limited, and it wasn't guaranteed that a single host that could compile an entire library existed. As most repositories are immutable, this required splitting a library into multiple parts that could be published non-atomically from multiple hosts. Nowadays, in almost all cases, whole library can be published from a single host (Mac if the project has Apple-targets)
+In some other cases, there initially was a use for the provided flexibility, but it has disappeared over the course of the evolution of Kotlin. For example, at some point, the cross-compilation capabilities of K/N were limited, and it wasn't guaranteed that a single host that could compile an entire library existed. As most repositories are immutable, this required splitting a library into multiple parts that could be published non-atomically from multiple hosts. Nowadays, in almost all cases, whole library can be published from a single host (Mac if the library has Apple-targets)
 ## Vocabulary
 
 _Def. "Fragment"_: the smallest unit of grouping KMP sources together. Known as a "Kotlin Source Set" in Gradle implementation.
@@ -37,9 +37,9 @@ Examples of analyzers: Kotlin compiler itself, IDE, kotlinx-metadata library, et
 
 ## What is uklib?
 
-"Uklib" is a **self-contained** artifact representing one KMP project. "Self-contained" means that it contains enough information for any analyzer to read the symbols correctly in a KMP context. 
+"Uklib" is a **self-contained** artifact representing one KMP module. "Self-contained" means that it contains enough information for any analyzer to read the symbols correctly in a KMP context. 
 
-You can intuitively think of it as taking all artifacts currently published for a KMP project and packing them together into one archive + adding some metainformation on top of it.
+You can intuitively think of it as taking all artifacts currently published for a KMP module and packing them together into one archive + adding some metainformation on top of it.
 
 > [!note] Trivia: the name "uklib" stands for "uber-klib". The idea is that "uber-klib" is basically couple of klibs packed together, just like ["uber-jar"](https://stackoverflow.com/questions/11947037/what-is-an-uber-jar-file) is a couple of jars packed together
 
@@ -162,13 +162,13 @@ val guava = Module(
 )
 ```
 
-Kotlin analyzers work with a model where each fragment has a set of dependencies on other fragments. So, if our project depends on `kotlinx-coroutines-core` and we want to compile `commonMain`, we need to know which fragments from `kotlinx-coroutines-core` it sees.
+Kotlin analyzers work with a model where each fragment has a set of dependencies on other fragments. So, if our module depends on `kotlinx-coroutines-core` and we want to compile `commonMain`, we need to know which fragments from `kotlinx-coroutines-core` it sees.
 
 ```kotlin
 fun compile(compiledFragment: Fragment, dependencies: List<Fragment>)
 ```
 
-While it might appear obvious that `commonMain` sees `commonMain`, in fact, the behavior is more nuanced. For example, if our particular project compiles only to JVM and Native, then it is actually desirable to see the API from `kotlinx-coroutines-core.concurrentMain` as well.
+While it might appear obvious that `commonMain` sees `commonMain`, in fact, the behavior is more nuanced. For example, if our particular module compiles only to JVM and Native, then it is actually desirable to see the API from `kotlinx-coroutines-core.concurrentMain` as well.
 
 As the process of figuring out fragment-to-fragment dependencies is quite non-trivial, it is not feasible to require users to declare fragment-to-fragment dependencies themselves.
 
@@ -700,17 +700,17 @@ TODO: explain that this is suspended until we have the first design iteration es
 ### Host considerations
 > Q: Doesn't KMP require multiple hosts to assemble all outputs of a library? Will it require some complicated CI setup with a "merge"-step?
 
-At some point, indeed, cross-compilation capabilities were not rich enough, and for some projects, there was no single host that could compile all of the source sets to klibs.
+At some point, indeed, cross-compilation capabilities were not rich enough, and for some modules, there was no single host that could compile all of the source sets to klibs.
 
 This is largely irrelevant as of Kotlin 2.0:
-* If the project has Darwin-targets, it can be entirely compiled to klibs on Mac-host
+* If the module has Darwin-targets, it can be entirely compiled to klibs on Mac-host
 * Otherwise, it can be compiled to klibs on any host
 
-In other words, we can safely assume that in almost all cases, the project can be compiled on Mac-host
+In other words, we can safely assume that in almost all cases, the module can be compiled on Mac-host
 
 > [!note+] Advanced case where the statement doesn't hold:
-> The only case where you might be required to have several hosts for compilation of your project to klibs is if you use dependencies on custom native libraries via cinterop, and these libraries' API is essentially different on different platforms (or maybe you just use an entirely different set of libraries for each platform). 
-> This is a very advanced case, and we don't expect more that more than a handful of such projects will exist. 
+> You use dependencies on custom native libraries via cinterop, and these libraries' API is essentially different on different platforms (or maybe you just use an entirely different set of libraries for each platform). 
+> This is a very advanced case, and we don't expect that more than a handful of such projects will exist. 
 > For such projects, some tool for merging component klibs into uklib will be provided.
 
 > Q: Ok, but I heard that Mac agents are expensive. Are we ok saying to all of our users "use Mac on CI?"
@@ -781,9 +781,9 @@ There are two possible ways to support it:
 Both options introduce additional complexity, and the working group currently doesn't see it as a good tradeoff.
 
 **Real-life cases**. 
-In practice, bamboo-structures rarely appear as an intentionally designed part of the project. However, they do appear more or less frequently during the evolution of the project. 
+In practice, bamboo-structures rarely appear as an intentionally designed part of the project. However, they do appear more or less frequently during the evolution.
 
-As the simplest example, consider the migration from K/JVM-only project to a KMP project. As one of the very steps, one might want to create a project with only one target, and start moving the code from `jvmMain` to `commonMain`. At this point, `commonMain` will be a single-target fragment with only `{ jvm }`-attribute:
+As the simplest example, consider the migration from K/JVM-only module to a KMP module. As one of the very steps, one might want to create a module with only one target, and start moving the code from `jvmMain` to `commonMain`. At this point, `commonMain` will be a single-target fragment with only `{ jvm }`-attribute:
 ```mermaid
 graph BT;
 
@@ -805,7 +805,7 @@ Sometimes "in future" means "15 minutes later". Sometimes, however, it might tak
 
 Note that "bamboo" is not the ideal model for such cases. `commonMain` will have JVM language and JVM dependencies, and one has to track manually if the code is "common" indeed. 
 
-The ideal solution would allow declaring "phantom targets". Describing this solution is out of scope for this document, but in short: "phantom targets" allow the project to configure dependencies and the analyzer so the code is checked as if the target is a "real" one. 
+The ideal solution would allow declaring "phantom targets". Describing this solution is out of scope for this document, but in short: "phantom targets" allow the module to configure dependencies and the analyzer so the code is checked as if the target is a "real" one. 
 #### Non-bamboo cases
 
 Bamboo is a strict subset of "multiple fragments with the same attributes". The cases that are not bamboos are basically described as: "Several fragments have the same attributes, but they're not in a refines-relation". Simple example:
@@ -832,9 +832,9 @@ In practice, it is almost always the following case:
 * it's a library
 * there are multiple `jvm`-targets
 * each subtarget is a "variant" for a specific framework/dependency: 
-	* `jvm("okhttp")` vs `jvm("ktor")` if a project supports different HTTP clients
-	* `jvm("junit4")` vs `jvm("junit5")` vs `jvm("testng")` if a project supports different testing frameworks
-	* `jvm("gradle7")` vs `jvm("gradle8")` vs `jvm("gradle9")` if a project supports multiple versions of a particular dependency (Gradle in this case)
+	* `jvm("okhttp")` vs `jvm("ktor")` if a module supports different HTTP clients
+	* `jvm("junit4")` vs `jvm("junit5")` vs `jvm("testng")` if a module supports different testing frameworks
+	* `jvm("gradle7")` vs `jvm("gradle8")` vs `jvm("gradle9")` if a module supports multiple versions of a particular dependency (Gradle in this case)
 * There's no real need to use KMP for it, as the different variants have very few expect/actuals (if any at all) that can be replaced by the interfaces and usual dependency injection/service locator-like mechanisms
 
 Note that the kotlin-test is very seldom an exception where the library really needs an `expect`/`actual` mechanism. 
@@ -852,4 +852,4 @@ As such, the current resolution is to **forbid fragments with the same attribute
 
 > [!note]+ 
 > 
-> There's a small open question about what to do during local development. The working group is fine with accepting the baseline of "bamboos are forbidden during local development. If you're in the process of migrating/starting a new KMP project, you should declare at least two targets. Our tooling will help to create actual-stubs for expects". However, more ergonomic solution are not out of consideration as well, especially in the context of [KT-33578](https://youtrack.jetbrains.com/issue/KT-33578/Provide-an-ability-to-extend-the-set-of-platforms-that-the-source-set-is-analyzed-for-helping-project-future-evolution)
+> There's a small open question about what to do during local development. The working group is fine with accepting the baseline of "bamboos are forbidden during local development. If you're in the process of migrating/starting a new KMP module, you should declare at least two targets. Our tooling will help to create actual-stubs for expects". However, more ergonomic solution are not out of consideration as well, especially in the context of [KT-33578](https://youtrack.jetbrains.com/issue/KT-33578/Provide-an-ability-to-extend-the-set-of-platforms-that-the-source-set-is-analyzed-for-helping-project-future-evolution)
