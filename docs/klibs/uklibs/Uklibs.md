@@ -285,12 +285,19 @@ class Fragment(
 
 
 A couple of notes about other invariants/expectations:
-* Fragment `F` doesn't have refinees <=> it has exactly one `KotlinTarget`
-* Fragment `F1` refines fragment `F2` <=> targets of `F1` are compatible with `F2`
-	* Note that in Gradle implementation, only the implication from left to right holds. 
-* It's OK to have several Fragments with one and the same set of `KotlinTarget`. 
-  There are no cases where they behave differently from just having one merged fragment. Therefore, we might issue a warning or even an error on the publisher side, but there's no reason to reject such modules.
-* It's OK to have a fragment with more targets than all of its refinees. E.g.: `commonMain` has `jvm` across its targets, but there is no `jvmMain` fragment
+
+**Fragment `F` doesn't have refinees <=> it has exactly one `KotlinTarget`**
+* Note that "having a fragment with empty sources" and "not having a fragment" are not the same. For example, most libraries have only `nativeMain`/`iosMain` sources, but these fragments will still have refiners (`iosArm64Main`, `iosX64Main`, etc.), and it will be reflected in the umanifest of the uklib.
+* Note that "bamboos" violate this invariant. If bamboo structures are allowed, you can have `F1 { jvm } -> F2 { jvm }`. 
+
+**Fragment `F1` refines fragment `F2` <=> targets of `F1` are compatible with `F2`**
+* In Gradle implementation, only the implication from left to right holds. 
+
+**It's forbidden to have several fragments with the same attributes in uklib**
+* See [[#Multiple fragments with the same attributes]] section for a detailed discussion of this invariant and related cases.
+
+**It's OK to have a fragment with more targets than all of its refinees.** 
+* E.g.: `commonMain` has `jvm` across its targets, but there is no `jvmMain` fragment
 
 > [!note] Fate of `kotlin-project-structure-metadata.json`
 > `kotlin-project-structure-metadata.json` is a format that is used by the current (Kotlin 2.0) KMP implementation of KMP in Gradle. 
@@ -717,3 +724,121 @@ Indeed, it is a concern. There are two ways to mitigate that:
 
 ### IDE support
 TODO: explain that we don't care about IDE in the first design iteration because we control the whole stack
+
+
+### Multiple fragments with the same attributes
+
+#### Bamboos
+
+The most frequent case of several fragments with same attributes are "bamboos".
+
+We call a "bamboo" a (sub)hierarchy of fragments, such that all fragments in it have the same attributes. Example: `F1 { jvm } -> F2 { jvm } -> F3 { jvm }`.
+
+> [!note] Trivia
+> Intuition behind the name: usually, fragments with their refines-edges form a "tree" from a Graph Theory perspective (Directed Acyclic Graph in the general case). The situation we describe here is a degenerate case, where the tree has exactly one branch. "Bamboos" can be seen as a "tree" with only one "branch" :)
+> Note that "tree with only one branch" is just a quick, intuitive explanation. It covers fewer cases than the formal definition above. 
+
+
+The main problem is that we want to order fragments on the library on the consumer's side as per [[#Dependencies sorting]], but we do so based on Kotlin Attributes. The fragments of bamboo have the same Kotlin Attributes by definition. 
+
+If we don't sort them correctly, and bamboo fragments have `expect`/`actual` declarations, then the consumer might observe weird errors. 
+
+Specifically, consider that there's a bamboo: 
+```mermaid
+graph BT;
+
+jvmMain["
+jvmMain
+{ jvm }
+actual class E
+"]
+
+allJvm["
+allJvm
+{ jvm }
+expect class E
+"]
+
+jvmMain --> allJvm
+```
+Then, the compiler on the consumer side must receive `jvmMain` before `allJvm`, otherwise, it will think that `Foo` doesn't have actual (that was the original reason behind dependencies sorting).
+
+There are two possible ways to support it:
+* we can forbid expect/actuals in bamboo fragments,
+* we can store refines-edges in umanifest.
+
+Both options introduce additional complexity, and the working group currently doesn't see it as a good tradeoff.
+
+**Real-life cases**. 
+In practice, bamboo-structures rarely appear as an intentionally designed part of the project. However, they do appear more or less frequently during the evolution of the project. 
+
+As the simplest example, consider the migration from K/JVM-only project to a KMP project. As one of the very steps, one might want to create a project with only one target, and start moving the code from `jvmMain` to `commonMain`. At this point, `commonMain` will be a single-target fragment with only `{ jvm }`-attribute:
+```mermaid
+graph BT;
+
+jvmMain["
+jvmMain
+{ jvm }
+"]
+
+commonMain["
+commonMain
+{ jvm }
+"]
+
+jvmMain --> commonMain
+```
+It is not the final state: more targets will be added in the future, making proper use of `commonMain` and KMP. 
+
+Sometimes "in future" means "15 minutes later". Sometimes, however, it might take a very long time, with intermediate results being actually public and accessible to other people: for example, if a library considers supporting KMP in the future, does some preparation work with splitting the code into `jvmMain`/`commonMain`, but still not adding other targets yet and having public releases alongside.
+
+Note that "bamboo" is not the ideal model for such cases. `commonMain` will have JVM language and JVM dependencies, and one has to track manually if the code is "common" indeed. 
+
+The ideal solution would allow declaring "phantom targets". Describing this solution is out of scope for this document, but in short: "phantom targets" allow the project to configure dependencies and the analyzer so the code is checked as if the target is a "real" one. 
+#### Non-bamboo cases
+
+Bamboo is a strict subset of "multiple fragments with the same attributes". The cases that are not bamboos are basically described as: "Several fragments have the same attributes, but they're not in a refines-relation". Simple example:
+
+```mermaid
+graph BT;
+jvm1 --> common;
+jvm2 --> common;
+js --> common
+```
+
+Such cases have a critical distinction from bamboo-case: such fragments can't provide expect/actuals to each other (`jvm1` can't provide actuals for `jvm2`, nor vice versa. Therefore, their ordering on the consumer side doesn't matter, and we could allow them.
+
+Note that on the producer-side, during the compilation of `jvm1` and `jvm2`, at least in the current compilation model/Gradle implementation of KMP, `jvm1` and `jvm2` **won't see sources of each other**. 
+
+However, to maintain the same semantics on the consumer side, we'd have to serialize `refines`-graph as part of the publication format. Otherwise, they'll be put in the same classpath and will nominally "see" each other. 
+
+At the moment, we don't know any cases that lead to user-visible WTFs because of that.
+
+**Real-life cases**. 
+Usually, non-bamboo structures with multiple fragments with the same attributes appear when the author wants to split existing `KotlinTarget` further. 
+
+In practice, it is almost always the following case:
+* it's a library
+* there are multiple `jvm`-targets
+* each subtarget is a "variant" for a specific framework/dependency: 
+	* `jvm("okhttp")` vs `jvm("ktor")` if a project supports different HTTP clients
+	* `jvm("junit4")` vs `jvm("junit5")` vs `jvm("testng")` if a project supports different testing frameworks
+	* `jvm("gradle7")` vs `jvm("gradle8")` vs `jvm("gradle9")` if a project supports multiple versions of a particular dependency (Gradle in this case)
+* There's no real need to use KMP for it, as the different variants have very few expect/actuals (if any at all) that can be replaced by the interfaces and usual dependency injection/service locator-like mechanisms
+
+Note that the kotlin-test is very seldom an exception where the library really needs an `expect`/`actual` mechanism. 
+
+#### Resolution
+
+So, let's sum up:
+* There are subgroups of the case "multiple fragments with the same attributes": when all the fragments are connected by `refines`-relation (dubbed "bamboos") and when they're not.
+	* "Bamboos" are more problematic: by default, they can contain `expect`s and `actual`s, which then requires a particular ordering of them on the consumer side.
+	* Non-bamboo structures don't have inherent issues but still might have awkward pitfalls (behavior/visibility on producer-side is different from the behavior/visibility on consumer-side)
+* Both subgroups don't have use-cases that are both important **and** can't be covered by other mechanisms.
+* Issues can be resolved if we serialize the whole `refines`-graph into publication format.
+
+As such, the current resolution is to **forbid fragments with the same attributes in uklib**.
+
+> [!note]+ 
+> 
+> There's a small open question about what to do during local development. The working group is fine with accepting the baseline of "bamboos are forbidden during local development. If you're in the process of migrating/starting a new KMP project, you should declare at least two targets. Our tooling will help to create actual-stubs for expects". However, more ergonomic solution are not out of consideration as well, especially in the context of [KT-33578](https://youtrack.jetbrains.com/issue/KT-33578/Provide-an-ability-to-extend-the-set-of-platforms-that-the-source-set-is-analyzed-for-helping-project-future-evolution)
