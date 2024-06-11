@@ -212,15 +212,52 @@ kotlin {
 }
 ```
 
-By using such a declaration, `iosMain` will depend on `kotlinx-coroutines-core.iosMain`, but neither `jvmMain` nor `commonMain` will see any symbols from `kotlinx-coroutines-core` (even though they could, as Coroutines support all possible targets).
-
 **We intentionally restrict this feature in uklibs world.** 
 
 In the uklibs world, each Module has just one flat list of dependencies to other Modules. This is the surface mental model exposed to users and non-sophisticated build systems/analyzers. 
 
 Under the hood, the Kotlin toolchain will apply all of these dependencies to all fragments and run the resolution algorithm, selecting only parts of the dependencies visible in a particular fragment. 
 
-It naturally follows that sometimes a particular fragment-level dependency won't be resolvable. It's not an erroneous situation. For example, a user has declared a dependency on the Guava library. Indeed, in such cases, `dependencies("iosMain", "com.google.guava")` must return an empty set because Guava doesn't support iOS targets. It's OK because `dependencies("jvmMain", "com.google.guava")` will return the Guava library itself.
+**Consequence №1.** It's not possible to "restrict" visibility of a KMP library to only some fragments:
+
+```kotlin
+kotlin {
+	jvm()
+	ios() 
+	
+	sourceSets.iosMain.dependencies {
+		api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+	}
+}
+```
+In the current Gradle implementation of KMP nor `jvmMain`, neither `commonMain` won't see `kotlinx-coroutines-core`. In uklib world, that won't be possible: `jvmMain` and `commonMain` will see it, as `kotlinx-coroutines-core` has compatible fragments.
+
+**Consequences №2.** (partially sub-case of Consequence №1) It's not possible to depend on different versions of the same library in different fragments, or on different KMP libraries
+```kotlin
+kotlin {
+	sourceSets {
+		iosArm64Main.dependencies {
+			// native is experimental, so can bump versions faster
+			api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+
+			// like Ktor more for non-JVM targets
+			api("io.ktor:ktor-client-core:2.3.11")
+		}
+
+		jvmMain.dependencies {
+			// jvm is more slow-evolving, so can't bump version fast
+			api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+			// but for JVM-target, for some reason prefer OkHttp over Ktor
+			api("com.squareup.okhttp:okhttp:2.7.5")
+		}
+	}
+}
+```
+
+**Consequence №3**. If a particular fragment-level dependency is not attributes-compatible, it's not an erroneous situation. 
+
+For example, a user has declared a dependency on the Guava library. Indeed, in such cases, `dependencies("iosMain", "com.google.guava")` must return an empty set because Guava doesn't support iOS targets. It's OK because `dependencies("jvmMain", "com.google.guava")` will return the Guava library itself.
 
 > [!note] 
 > If none of the fragments could resolve anything from a particular dependency, then such dependency can be reported as "useless" (warning) or even "inapplicable" (error)
