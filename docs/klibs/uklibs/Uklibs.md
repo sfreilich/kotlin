@@ -122,7 +122,13 @@ On the other hand, we should make sure that we'll be able to provide support for
 ## uklibs dependencies
 
 ### Context
-Modules consist of potentially multiple "fragments" ("source sets" in the current Gradle implementation). Fragments are connected by `refines`-connection ("dependsOn" in the current Gradle implementation). All fragments refined by a particular fragment (directly or indirectly) are called "refined fragments". All fragments that refine a particilar fragment (directly or indirectly) are called "refinees"
+Modules consist of potentially multiple "fragments" ("source sets" in the current Gradle implementation). Fragments are connected by `refines`-connection ("dependsOn" in the current Gradle implementation). 
+
+We'll write `A refines B`, and say that:
+- A is a **refiner of** B
+- B is **refined by** A
+- "Set of **refiners fragments** of B consists of A"
+- "Set of **refined fragments** of A consists of B"
 
 Pseudo-code:
 ```kotlin
@@ -286,7 +292,7 @@ class Fragment(
 
 A couple of notes about other invariants/expectations:
 
-**Fragment `F` doesn't have refinees <=> it has exactly one `KotlinTarget`**
+**Fragment `F` doesn't have refiners <=> it has exactly one `KotlinTarget`**
 * Note that "having a fragment with empty sources" and "not having a fragment" are not the same. For example, most libraries have only `nativeMain`/`iosMain` sources, but these fragments will still have refiners (`iosArm64Main`, `iosX64Main`, etc.), and it will be reflected in the umanifest of the uklib.
 * Note that "bamboos" violate this invariant. If bamboo structures are allowed, you can have `F1 { jvm } -> F2 { jvm }`. 
 
@@ -296,7 +302,7 @@ A couple of notes about other invariants/expectations:
 **It's forbidden to have several fragments with the same attributes in uklib**
 * See [[#Multiple fragments with the same attributes]] section for a detailed discussion of this invariant and related cases.
 
-**It's OK to have a fragment with more targets than all of its refinees.** 
+**It's OK to have a fragment with more targets than all of its refiners.** 
 * E.g.: `commonMain` has `jvm` across its targets, but there is no `jvmMain` fragment
 
 > [!note] Fate of `kotlin-project-structure-metadata.json`
