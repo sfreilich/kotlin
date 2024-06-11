@@ -199,7 +199,7 @@ The whole process of dependency resolution consists of two parts:
 
 This work is expected to be done by a particular build system (Gradle, Maven, Bazel, etc.). Kotlin toolchain is intentionally not concerned with those matters.
 
-The output of "Module resolution" phase is that each `Module` receives a flat, ordered list of other *modules* (not fragments!). 
+The output of "Module resolution" phase is that each `Module` receives a flat list of other *modules* (not fragments!). See the [[#Dependencies sorting]] section on the matters of the order of that list.
 
 #### Flat dependencies list
 
