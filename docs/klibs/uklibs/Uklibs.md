@@ -241,7 +241,7 @@ Values of "Kotlin Platform" are sets of `KotlinTarget`s. Each `KotlinTarget` rep
 
 For example, `myApp.commonMain` from the picture above has a "Kotlin Platform" with a value like `{ jvm, iosArm64 }` .
 
-Additionally, we require that each Kotlin Attribute dimension also provides an `isCompatible`-relation on its attribute values, forming a [total order](https://en.wikipedia.org/wiki/Total_order). For "Kotlin Platform", its `isCompatible`-relation is effectively a "subset-of" relation of sets of `KotlinTarget`s. 
+Additionally, we require that each Kotlin Attribute dimension also provides an `isCompatible`-relation on its attribute values, forming a [partial order](https://en.wikipedia.org/wiki/Partially_ordered_set). For "Kotlin Platform", its `isCompatible`-relation is effectively a "subset-of" relation of sets of `KotlinTarget`s. 
 
 Pseudo-code for illustrative purposes:
 ```kotlin
@@ -354,29 +354,40 @@ fun resolved(from: Fragment, to: Fragment) {
 ```
 #### Dependencies sorting
 
-[[#Algorithm]]-section mentioned that the Fragment Resolution outputs a mapping from each `consumer`-fragment to an **ordered** list of dependencies' fragments. Where this order comes from?
+> [!warning] This is an open design question
 
-For resulting fragments from one and the same `Module`, we sort them from the most specific to the least specific. Note that the requirement that `KotlinAttribute`s values form a total order guarantees that fragments of one and the same module are sortable unamniguously
+There's one strict requirement that we should maintain: fragments with `actual`s come before `expect`.
 
-This ensures that fragments with `actual`s come before `expect`, which allows the compiler to work more efficiently. If `expect` is encountered, then scanning the rest of the classpath in search of `actual` is unnecessary as it is guaranteed that it won't be found. 
+This allows the compiler to work more efficiently. If `expect` is encountered, then scanning the rest of the classpath in search of `actual` is unnecessary as it is guaranteed that it won't be found. 
 
-Note that fragments of different modules are **unordered**. 
+If we sort the fragments according to their `isCompatible`-relation from the most specific to the least specific, such order guarantees the needed invariant. However, it is just a partial order. Specifically, the following fragments can't be compared using just `isCompatible`:
 
-Let's demonstrate the ordering in the example. Suppose the Module Resolution-phase resulted in the following flat list of Module-dependencies: `A, B, C`. Suppose the Fragment Resolution-phase selected the following fragments for a `consumer.jvmMain`:
-* From `A`: `A.commonMain, A.jvmMain` 
-* From `B`: `B.commonMain`, `B.jvmAndJsMain`, `B.jvmMain`
-* From `C`: `C.commonMain`, `C.jvmMain`
+**1. Fragments of one and the same module that are not connected to each other via `refines`-edges. **
+```mermaid
+graph BT;
 
-Then, all of the following lists are correctly ordered outputs of Fragment Resolution:
-* `A.jvmMain, A.commonMain, B.jvmMain, B.jvmAndJsMain, B.commonMain, C.jvmMain, C.commonMain`
-* `C.jvmMain, C.commonMain, A.jvmMain, A.commonMain, B.jvmMain, B.jvmAndJsMain, B.commonMain`
-* `A.jvmMain, B.jvmMain, A.commonMain, C.jvmMain, C.commonMain, B.jvmAndJsMain, B.commonMain`
+commonMain
 
-However, the following list is not ordered correctly: `B.jvmAndJsMain` must go before `B.commonMain`:
-* `A.jvmMain, A.commonMain, B.jvmMain, B.commonMain, B.jvmAndJsMain, C.jvmMain, C.commonMain`
+jvmAndJs --> commonMain
+jsAndNative --> commonMain
+
+jvm --> jvmAndJs
+js --> jvmAndJs
+js --> jsAndNative
+native --> jsAndNative
+```
+In this example, `jvmAndJs` and `jsAndNative` are not orderable using `isCompatible`-relation, but they can appear in the list of the resolved fragments (e.g., if the consumer is a `js`-fragment)
+
+**2. Fragments from different modules, e.g. `A.commonMain` and `B.commonMain`. **
+
+For this order, we might use the order of the passed module dependencies, i.e. the output of the "Module resolution"-phase. So, if `A` comes before `B` in module dependencies list, then all fragments of A should come before all fragments of B.
+
+The concept of "ordered classpath" generally comes from the JVM world and its way of resolving "split classpath" / "classpath hell" (when there are multiple libraries with the same symbols on a classpath). 
+
+While it might appear that it's natural to have the same mechanism for uklibs, in fact, klib compilation model differs noticeably from the JVM model. An additional design is needed to understand, whether JVM "classpath substitution" model is useful, or even possible in Kotlin klibs world. As such, this section is an open design question.
 
 > [!note] 
->  While there's no single specified order of fragments between modules, Kotlin Toolchain guarantees that given one same input to the whole dependency resolution (attributes of consumer & dependencies), the resulting fragment list will have some stable order. This is useful for purposes of reproducibility/tooling.
+> Regardless of the decision about "classpath substitution", it generally makes sense to guarantee _some_ stable order of dependencies, for the sake of builds reproducibility
 #### Transitive KMP dependencies
 
 We'd like to highlight that transitive dependencies are resolved **with the consumer's attributes, not the attributes of the dependency that brought this transitive dependency**. 
