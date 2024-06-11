@@ -28,7 +28,8 @@ In some other cases, there initially was a use for the provided flexibility, but
 
 _Def. "Fragment"_: the smallest unit of grouping KMP sources together. Known as a "Kotlin Source Set" in Gradle implementation.
 
-_Def. "Refines-edge"_: a relation between fragments. `A refines B` means that `A` sees all symbols of `B`, including `internal`-ones, and can provide `actual`s for `expect`s from `B`. Known as a `dependsOn`-relation in Gradle implementation.
+_Def. "Refines-edge"_: a relation between fragments. `A refines B` means that `A` sees all symbols of `B`, including `internal`-ones, and can provide `actual`s for `expect`s from `B`. Known as a `dependsOn`-relation in Gradle implementation. 
+Note that it's a stronger relation than usual "dependency" (`myProject.commonMain -> kotlinx-coroutines-core.commonMain`) or "friend dependency" (`myProject.commonTest -> myProject.commonMain`)
 
 _Def. "(Kotlin) Module"_: a set of Fragments (source sets) that are connected with refines (dependsOn) edges. In the Gradle world, given that there's no custom configuration of the KMP project model, each KMP module maps to precisely one Gradle project. 
 
