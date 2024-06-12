@@ -584,6 +584,8 @@ val stdlibBuildTask by tasks.registering(KonanCompileTask::class) {
             "-api-version",
             "2.0",
             "-Xdont-warn-on-error-suppression",
+            "-Xstdlib-compilation",
+            "-Xfragment-refines=nativeMain:common",
     )
 
     val common by sourceSets.creating {
