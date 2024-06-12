@@ -12,14 +12,20 @@ import java.io.File
 
 internal inline fun <T> File.ifExists(f: File.() -> T): T? = if (exists()) f() else null
 
-class WasmSrcFileArtifact(val srcFilePath: String, private val fragments: WasmIrProgramFragments?, private val astArtifact: File? = null):
+class WasmSrcFileArtifact(
+    val srcFilePath: String,
+    private val fragments: WasmIrProgramFragments?,
+    private val astArtifact: File? = null,
+    private val skipLocalNames: Boolean = false,
+    private val skipSourceLocations: Boolean
+):
     SrcFileArtifactBase() {
     override fun loadJsIrFragments(): WasmIrProgramFragments? {
         if (fragments != null) {
             return fragments
         }
         return astArtifact?.ifExists { readBytes() }
-            ?.let { WasmIrProgramFragments(WasmDeserializer(it.inputStream()).deserialize()) }
+            ?.let { WasmIrProgramFragments(WasmDeserializer(it.inputStream(), skipLocalNames, skipSourceLocations).deserialize()) }
     }
 
     override fun isModified() = fragments != null

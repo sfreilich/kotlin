@@ -15,7 +15,11 @@ import org.jetbrains.kotlin.ir.util.dump
 import java.io.File
 import java.util.*
 
-class WasmICContext(private val allowIncompleteImplementations: Boolean) : PlatformDependentICContext {
+class WasmICContext(
+    private val allowIncompleteImplementations: Boolean,
+    private val skipLocalNames: Boolean = false,
+    private val skipSourceLocations: Boolean = false,
+) : PlatformDependentICContext {
     override fun createIrFactory(): IrFactory =
         IrFactoryImplForWasmIC(WholeWorldStageController())
 
@@ -23,7 +27,7 @@ class WasmICContext(private val allowIncompleteImplementations: Boolean) : Platf
         WasmCompilerWithIC(mainModule, configuration, allowIncompleteImplementations)
 
     override fun createSrcFileArtifact(srcFilePath: String, fragments: IrProgramFragments?, astArtifact: File?): SrcFileArtifactBase =
-        WasmSrcFileArtifact(srcFilePath, fragments as? WasmIrProgramFragments, astArtifact)
+        WasmSrcFileArtifact(srcFilePath, fragments as? WasmIrProgramFragments, astArtifact, skipLocalNames, skipSourceLocations)
 
     override fun createModuleArtifact(
         moduleName: String,

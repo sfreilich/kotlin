@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.backend.wasm.serialization
 
 import org.jetbrains.kotlin.backend.wasm.ir2wasm.*
+import org.jetbrains.kotlin.backend.wasm.ir2wasm.WasmCompiledModuleFragment.ReferencableElements
 import org.jetbrains.kotlin.ir.util.IdSignature
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.utils.newLinkedHashMapWithExpectedSize
@@ -28,7 +29,7 @@ import kotlin.collections.LinkedHashSet
  *  use [deserializeReference]
  */
 
-class WasmDeserializer(inputStream: InputStream) {
+class WasmDeserializer(inputStream: InputStream, private val skipLocalNames: Boolean = false, private val skipSourceLocations: Boolean) {
 
     private val input: MyByteReader = MyByteReader(inputStream)
 
@@ -181,7 +182,13 @@ class WasmDeserializer(inputStream: InputStream) {
 
     private fun deserializeLocal(): WasmLocal {
         val id = deserializeInt()
-        val name = deserializeString()
+        val name: String
+        if (skipLocalNames) {
+            skipString()
+            name = ""
+        } else {
+            name = deserializeString()
+        }
         val type = deserializeType()
         val isParameter = b.readUByte().toBoolean()
         return WasmLocal(id, name, type, isParameter)
@@ -326,13 +333,13 @@ class WasmDeserializer(inputStream: InputStream) {
         return WasmImportDescriptor(moduleName, declarationName)
     }
 
-    private fun <A, B> deserializePair(deserializeAFunc: () -> A, deserializeBFunc: () -> B): Pair<A, B> {
+    private inline fun <A, B> deserializePair(deserializeAFunc: () -> A, deserializeBFunc: () -> B): Pair<A, B> {
         val a = deserializeAFunc()
         val b = deserializeBFunc()
         return Pair(a, b)
     }
 
-    private fun <T> deserializeList(itemDeserializeFunc: () -> T): MutableList<T> {
+    private inline fun <T> deserializeList(itemDeserializeFunc: () -> T): MutableList<T> {
         val size = deserializeInt()
         val list = ArrayList<T>(size)
         repeat(size) {
@@ -341,7 +348,7 @@ class WasmDeserializer(inputStream: InputStream) {
         return list
     }
 
-    private fun <T> deserializeSet(itemDeserializeFunc: () -> T): LinkedHashSet<T> {
+    private inline fun <T> deserializeSet(itemDeserializeFunc: () -> T): LinkedHashSet<T> {
         val size = deserializeInt()
         val set = newLinkedHashSetWithExpectedSize<T>(size)
         repeat(size) {
@@ -350,7 +357,7 @@ class WasmDeserializer(inputStream: InputStream) {
         return set
     }
 
-    private fun <K, V> deserializeMap(deserializeKeyFunc: () -> K, deserializeValueFunc: () -> V): LinkedHashMap<K, V> {
+    private inline fun <K, V> deserializeMap(deserializeKeyFunc: () -> K, deserializeValueFunc: () -> V): LinkedHashMap<K, V> {
         val size = deserializeInt()
         val map = newLinkedHashMapWithExpectedSize<K, V>(size)
         repeat(size) {
@@ -366,19 +373,26 @@ class WasmDeserializer(inputStream: InputStream) {
             when (id) {
                 0 -> SourceLocation.NoLocation
                 else -> {
-                    val file = deserializeString()
-                    val line = deserializeInt()
-                    val column = deserializeInt()
-                    when (id) {
-                        1 -> SourceLocation.Location(file, line, column)
-                        2 -> SourceLocation.IgnoredLocation(file, line, column)
-                        else -> idError()
+                    if (skipSourceLocations) {
+                        skipString()
+                        skipInt()
+                        skipInt()
+                        SourceLocation.NoLocation
+                    } else {
+                        val file = deserializeString()
+                        val line = deserializeInt()
+                        val column = deserializeInt()
+                        when (id) {
+                            1 -> SourceLocation.Location(file, line, column)
+                            2 -> SourceLocation.IgnoredLocation(file, line, column)
+                            else -> idError()
+                        }
                     }
                 }
             }
         }
 
-    private fun <T> deserializeNullable(deserializeFunc: () -> T): T? = withId {
+    private inline fun <T> deserializeNullable(crossinline deserializeFunc: () -> T): T? = withId {
         when (it) {
             0 -> null
             1 -> deserializeFunc()
@@ -522,20 +536,29 @@ class WasmDeserializer(inputStream: InputStream) {
         return String(bytes)
     }
 
+    private fun skipString() {
+        val length = b.readUInt32().toInt()
+        b.skip(length)
+    }
+
     private fun deserializeInt() = b.readUInt32().toInt()
+
+    private fun skipInt() {
+        b.skip(4)
+    }
 
     private fun deserializeLong() = b.readUInt64().toLong()
 
-    private fun <Ir, Wasm : Any> deserializeReferencableElements(
-        irDeserializeFunc: () -> Ir,
-        wasmDeserializeFunc: () -> Wasm
+    private inline fun <Ir, Wasm : Any> deserializeReferencableElements(
+        crossinline irDeserializeFunc: () -> Ir,
+        crossinline wasmDeserializeFunc: () -> Wasm
     ) = WasmCompiledModuleFragment.ReferencableElements(
         unbound = deserializeMap(irDeserializeFunc) { deserializeSymbol(wasmDeserializeFunc) }
     )
 
-    private fun <Ir, Wasm : Any> deserializeReferencableAndDefinable(
-        irDeserializeFunc: () -> Ir,
-        wasmDeserializeFunc: () -> Wasm
+    private inline fun <Ir, Wasm : Any> deserializeReferencableAndDefinable(
+        crossinline irDeserializeFunc: () -> Ir,
+        crossinline wasmDeserializeFunc: () -> Wasm
     ) = WasmCompiledModuleFragment.ReferencableAndDefinable(
         unbound = deserializeMap(irDeserializeFunc) { deserializeSymbol(wasmDeserializeFunc) },
         defined = deserializeMap(irDeserializeFunc, wasmDeserializeFunc),
@@ -543,7 +566,7 @@ class WasmDeserializer(inputStream: InputStream) {
         wasmToIr = deserializeMap(wasmDeserializeFunc, irDeserializeFunc)
     )
 
-    private fun <T : Any> deserializeSymbol(deserializeFunc: () -> T): WasmSymbol<T> =
+    private inline fun <T : Any> deserializeSymbol(crossinline deserializeFunc: () -> T): WasmSymbol<T> =
         deserializeReference {
             withFlags { flags ->
                 val owner = if (flags.consume()) null else deserializeFunc()
@@ -552,46 +575,76 @@ class WasmDeserializer(inputStream: InputStream) {
         }
 
     private fun deserializeCompiledFileFragment() = WasmCompiledFileFragment(
-        functions = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeFunction),
-        globalFields = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeGlobal),
-        globalVTables = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeGlobal),
-        globalClassITables = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeGlobal),
-        functionTypes = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeFunctionType),
-        gcTypes = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeTypeDeclaration),
-        vTableGcTypes = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeTypeDeclaration),
-        classITableGcType = deserializeReferencableElements(::deserializeIdSignature, ::deserializeTypeDeclaration),
-        classITableInterfaceSlot = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt),
-        classITableInterfaceTableSize = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt),
-        classITableInterfaceHasImplementors = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt),
-        typeInfo = deserializeMap(::deserializeIdSignature, ::deserializeConstantDataElement),
-        classIds = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt),
-        interfaceIds = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt),
-        stringLiteralAddress = deserializeReferencableElements(::deserializeString, ::deserializeInt),
-        stringLiteralPoolId = deserializeReferencableElements(::deserializeString, ::deserializeInt),
-        constantArrayDataSegmentId = deserializeReferencableElements({ deserializePair({ deserializeList(::deserializeLong) }, ::deserializeType) }, ::deserializeInt),
-        interfaceUnions = deserializeList { deserializeList(::deserializeIdSignature) },
-        uniqueJsFunNames = deserializeReferencableElements(::deserializeString, ::deserializeString),
-        jsFuns = deserializeList(::deserializeJsCodeSnippet),
-        jsModuleImports = deserializeSet(::deserializeString),
-        exports = deserializeList(::deserializeExport),
-        scratchMemAddr = deserializeSymbol(::deserializeInt),
-        stringPoolSize = deserializeSymbol(::deserializeInt),
-        fieldInitializers = deserializeList { deserializePair(::deserializeIdSignature, { deserializeList(::deserializeInstr) }) },
-        mainFunctionWrappers = deserializeList(::deserializeIdSignature),
-        testFun = deserializeNullable(::deserializeIdSignature),
-        closureCallExports = deserializeList { deserializePair(::deserializeString, ::deserializeIdSignature) },
-        jsModuleAndQualifierReferences = deserializeSet(::deserializeJsModuleAndQualifierReference)
+        functions = deserializeFunctions(),
+        globalFields = deserializeGlobalFields(),
+        globalVTables = deserializeGlobalVTables(),
+        globalClassITables = deserializeGlobalClassITables(),
+        functionTypes = deserializeFunctionTypes(),
+        gcTypes = deserializeGcTypes(),
+        vTableGcTypes = deserializeVTableGcTypes(),
+        classITableGcType = deserializeClassITableGcType(),
+        classITableInterfaceSlot = deserializeClassITableInterfaceSlot(),
+        classITableInterfaceTableSize = deserializeClassITableInterfaceTableSize(),
+        classITableInterfaceHasImplementors = deserializeClassITableInterfaceHasImplementors(),
+        typeInfo = deserializeTypeInfo(),
+        classIds = deserializeClassIds(),
+        interfaceIds = deserializeInterfaceIds(),
+        stringLiteralAddress = deserializeStringLiteralAddress(),
+        stringLiteralPoolId = deserializeStringLiteralPoolId(),
+        constantArrayDataSegmentId = deserializeConstantArrayDataSegmentId(),
+        interfaceUnions = deserializeInterfaceUnions(),
+        uniqueJsFunNames = deserializeUniqueJsFunNames(),
+        jsFuns = deserializeJsFuns(),
+        jsModuleImports = deserializeJsModuleImports(),
+        exports = deserializeExports(),
+        scratchMemAddr = deserializeScratchMemAddr(),
+        stringPoolSize = deserializeStringPoolSize(),
+        fieldInitializers = deserializeFieldInitializers(),
+        mainFunctionWrappers = deserializeMainFunctionWrappers(),
+        testFun = deserializeTestFun(),
+        closureCallExports = deserializeClosureCallExports(),
+        jsModuleAndQualifierReferences = deserializeJsModuleAndQualifierReferences(),
     )
+
+    private fun deserializeFunctions() = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeFunction)
+    private fun deserializeGlobalFields() = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeGlobal)
+    private fun deserializeGlobalVTables() = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeGlobal)
+    private fun deserializeGlobalClassITables() = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeGlobal)
+    private fun deserializeFunctionTypes() = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeFunctionType)
+    private fun deserializeGcTypes() = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeTypeDeclaration)
+    private fun deserializeVTableGcTypes() = deserializeReferencableAndDefinable(::deserializeIdSignature, ::deserializeTypeDeclaration)
+    private fun deserializeClassITableGcType() = deserializeReferencableElements(::deserializeIdSignature, ::deserializeTypeDeclaration)
+    private fun deserializeClassITableInterfaceSlot() = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt)
+    private fun deserializeClassITableInterfaceTableSize() = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt)
+    private fun deserializeClassITableInterfaceHasImplementors() = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt)
+    private fun deserializeTypeInfo() = deserializeMap(::deserializeIdSignature, ::deserializeConstantDataElement)
+    private fun deserializeClassIds() = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt)
+    private fun deserializeInterfaceIds() = deserializeReferencableElements(::deserializeIdSignature, ::deserializeInt)
+    private fun deserializeStringLiteralAddress() = deserializeReferencableElements(::deserializeString, ::deserializeInt)
+    private fun deserializeStringLiteralPoolId() = deserializeReferencableElements(::deserializeString, ::deserializeInt)
+    private fun deserializeConstantArrayDataSegmentId(): ReferencableElements<Pair<List<Long>, WasmType>, Int> = deserializeReferencableElements({ deserializePair({ deserializeList(::deserializeLong) }, ::deserializeType) }, ::deserializeInt)
+    private fun deserializeInterfaceUnions(): MutableList<List<IdSignature>> = deserializeList { deserializeList(::deserializeIdSignature) }
+    private fun deserializeUniqueJsFunNames() = deserializeReferencableElements(::deserializeString, ::deserializeString)
+    private fun deserializeJsFuns() = deserializeList(::deserializeJsCodeSnippet)
+    private fun deserializeJsModuleImports() = deserializeSet(::deserializeString)
+    private fun deserializeExports() = deserializeList(::deserializeExport)
+    private fun deserializeScratchMemAddr() = deserializeSymbol(::deserializeInt)
+    private fun deserializeStringPoolSize() = deserializeSymbol(::deserializeInt)
+    private fun deserializeFieldInitializers(): MutableList<Pair<IdSignature, List<WasmInstr>>> = deserializeList { deserializePair(::deserializeIdSignature, { deserializeList(::deserializeInstr) }) }
+    private fun deserializeMainFunctionWrappers() = deserializeList(::deserializeIdSignature)
+    private fun deserializeTestFun() = deserializeNullable(::deserializeIdSignature)
+    private fun deserializeClosureCallExports() = deserializeList { deserializePair(::deserializeString, ::deserializeIdSignature) }
+    private fun deserializeJsModuleAndQualifierReferences() = deserializeSet(::deserializeJsModuleAndQualifierReference)
 
     private fun deserializeJsModuleAndQualifierReference(): JsModuleAndQualifierReference = JsModuleAndQualifierReference(
         module = deserializeNullable(::deserializeString),
         qualifier = deserializeNullable(::deserializeString)
     )
 
-    private fun <T : WasmNamedModuleField> deserializeNamedModuleField(deserializeFunc: (String) -> T) =
+    private inline fun <T : WasmNamedModuleField> deserializeNamedModuleField(crossinline deserializeFunc: (String) -> T) =
         deserializeNamedModuleField { name, _ -> deserializeFunc(name) }
 
-    private fun <T : WasmNamedModuleField> deserializeNamedModuleField(deserializeFunc: (String, Flags) -> T) =
+    private inline fun <T : WasmNamedModuleField> deserializeNamedModuleField(crossinline deserializeFunc: (String, Flags) -> T) =
         deserializeReference {
             withFlags { flags ->
                 // Deserializes the common part of WasmNamedModuleField.
@@ -601,13 +654,13 @@ class WasmDeserializer(inputStream: InputStream) {
             }
         }
 
-    private fun <T> withId(deserializeFunc: (Int) -> T) =
+    private inline fun <T> withId(deserializeFunc: (Int) -> T) =
         deserializeFunc(b.readUByte().toInt())
 
-    private fun <T> withFlags(deserializeFunc: (Flags) -> T) =
+    private inline fun <T> withFlags(deserializeFunc: (Flags) -> T) =
         deserializeFunc(Flags(b.readUByte().toUInt()))
 
-    private fun <T> deserializeReference(deserializeFunc: () -> T): T {
+    private inline fun <T> deserializeReference(crossinline deserializeFunc: () -> T): T {
         val index = deserializeInt()
         return referenceTable[index].getOrCreate { bytes ->
             val oldB = b
@@ -643,7 +696,7 @@ class WasmDeserializer(inputStream: InputStream) {
     @Suppress("UNCHECKED_CAST")
     private class Symbol(private val bytes: ByteArray, private var obj: Any? = null) {
         private var inConstruction = false
-        fun <T> getOrCreate(deserialize: (ByteArray) -> T): T {
+        inline fun <T> getOrCreate(deserialize: (ByteArray) -> T): T {
             if (obj == null) {
                 if (inConstruction) {
                     error("Dependency cycle detected between reference table elements.")

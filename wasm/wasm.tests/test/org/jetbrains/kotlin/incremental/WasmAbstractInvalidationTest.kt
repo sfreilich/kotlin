@@ -264,7 +264,7 @@ abstract class WasmAbstractInvalidationTest(
 
                 val configuration = createConfiguration(projStep.order.last(), projStep.language, projectInfo.moduleKind)
 
-                val icContext = WasmICContext(allowIncompleteImplementations = false)
+                val icContext = WasmICContext(allowIncompleteImplementations = false, skipLocalNames = false, skipSourceLocations = false)
 
                 val cacheUpdater = CacheUpdater(
                     mainModule = mainModuleInfo.modulePath,
