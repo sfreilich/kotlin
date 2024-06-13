@@ -199,7 +199,7 @@ The whole process of dependency resolution consists of two parts:
 
 This work is expected to be done by a particular build system (Gradle, Maven, Bazel, etc.). Kotlin toolchain is intentionally not concerned with those matters.
 
-The output of "Module resolution" phase is that each `Module` receives a flat list of other *modules* (not fragments!). See the [[#Dependencies sorting]] section on the matters of the order of that list.
+The output of "Module resolution" phase is that each `Module` receives a flat list of other *modules* (not fragments!). See the [Dependencies sorting](#dependencies-sorting) section on the matters of the order of that list.
 
 #### Flat dependencies list
 
@@ -316,7 +316,7 @@ class KotlinPlatformAttribute(val targets: Set<KotlinTarget>) : KotlinAttribute 
 > 
 > This *does* mean that some already existing cases will have to be deprecated and phased out, e.g. cases like `jvm("okhttp") + jvm("ktor")`. Almost all of them can be refactored into multiple modules and use of `ServiceLocator`-like mechanisms.
 > 
-> One problematic case is `kotlin-test`. See [[#kotlin-test]] section on how it is proposed to handle it
+> One problematic case is `kotlin-test`. See [kotlin-test](#kotlin-test) section on how it is proposed to handle it
 
 So, expanding previously introduced pseudo-code for `Fragment` with a concept of Kotlin Attributes:
 ```kotlin
@@ -338,7 +338,7 @@ A couple of notes about other invariants/expectations:
 * In Gradle implementation, only the implication from left to right holds. 
 
 **It's forbidden to have several fragments with the same attributes in uklib**
-* See [[#Multiple fragments with the same attributes]] section for a detailed discussion of this invariant and related cases.
+* See [Multiple fragments with the same attributes](#multiple-fragments-with-the-same-attributes) section for a detailed discussion of this invariant and related cases.
 
 **It's OK to have a fragment with more targets than all of its refiners.** 
 * E.g.: `commonMain` has `jvm` across its targets, but there is no `jvmMain` fragment
@@ -466,7 +466,7 @@ The working group deemed that it contradicts the requirements to simplify the in
 > Module Dependencies are flat lists of all modules (including transitive ones) rather than a graph. Fragment resolution runs separately from the consumer to each of these modules. 
 > As such, if there's a direct dependency A that brought a transitive dependency B, a consumer might see **more fragments from B than A saw during the publication**.
 
-Note that there's a peculiar corner case born by the intersection of this design decision and the layout of publication to MaveCentral. It is described in [[#Transitive KMP dependencies through Java-modules]] section. 
+Note that there's a peculiar corner case born by the intersection of this design decision and the layout of publication to MaveCentral. It is described in [Transitive KMP dependencies through Java-modules](#transitive-kmp-dependencies-through-java-modules) section. 
 
 
 ## Contents
@@ -515,10 +515,10 @@ So, if `commonMain` has symbol `MyClass`, it will be repeated across `jsMain`, `
 
 `umanifest` encodes the meta-information about uklib:
 * List of fragments
-* Their attributes (see [[#Kotlin Attributes]])
+* Their attributes (see [Kotlin Attributes](#kotlin-attributes))
 * Type of the content of the fragment: 
 	* `BINARY` - for compiler output
-	* `SOURCE` - for sources (see [[#Sources]]) section
+	* `SOURCE` - for sources (see [Sources](#sources)) section
 	* Other values can be added in the future for evolution.
 
 `umanifest` should use a machine-parsable & human-readable format for storing its contents. `JSON` is the option suggested in the current iteration of the design.
@@ -547,7 +547,7 @@ fragments: [
 manifestVersion = "1.0.1"
 ```
 
-Note that `umanifest` doesn't store `refines`-edges. We remind that `A refines B` <=> `A.attributes.isCompatibleWith(B.attributes)` (see note at the end of [[#Kotlin attributes]]]-section), so all edges can be restored based on umanifest contents. 
+Note that `umanifest` doesn't store `refines`-edges. We remind that `A refines B` <=> `A.attributes.isCompatibleWith(B.attributes)` (see note at the end of [Kotlin attributes](#kotlin-attributes)-section), so all edges can be restored based on umanifest contents. 
 #### Dependencies identifiers in `umanifest` and `uklib`
 
 It is strictly forbidden for the umanifest or any contents to contain any identifiers of dependencies (e.g. Maven coordinates of dependencies). Note that, for example, `klib` manifest circa Kotlin 2.0 contains identifiers of dependencies. As such, `klib` manifests violate this rule and will have to be fixed.
@@ -580,7 +580,7 @@ Context:
 * At the moment, there's a `resources`-folder inside klibs, i.e. inside all folders inside uklib except for JVM-specific fragments. JVM-specific fragments have resources placed inside as per typical rules of JAR-layout. 
 As such, we don't feel the need to reserve some special places for resources in uklib. With a high possibility, KMP resources will be fragment-scoped i.e. will be placed in particular fragment' klibs (and therefore won't be a concern of uklib design). 
 
-Even if we need dedicated places for resources in uklib, it can be done via `umanifest` (see [[#umanifest]] section) 
+Even if we need dedicated places for resources in uklib, it can be done via `umanifest` (see [umanifest](#umanifest) section) 
 
 ### Sources
 
@@ -604,7 +604,7 @@ Kotlin Multiplatform Library publishes to one Maven module, i.e. each publicatio
 The whole publication will consist of:
 * `.uklib`-artifact
 	* potentially with `-sources.uklib` counterpart for sources
-* `.jar`-artifact with JVM classfiles for Java clients (see [[#JVM classfiles inside and outside klib]])
+* `.jar`-artifact with JVM classfiles for Java clients (see [JVM classfiles inside and outside klib](#jvm-classfiles-inside-and-outside-klib))
 	* potentially with `-sources.jar` counterpart for sources for Java clients
 * Other additional artifacts (e.g., `.aar` for KMP libraries with Android target) can be published alongside `.uklib`
 * potential meta-files for tooling/indexers, like `kotlin-tooling-metadata.json` 
@@ -706,7 +706,7 @@ TODO: explain that this part is suspended until we understand how compilation of
 
 TODO: collect all .jar-related decisions and considerations in one section
 
-As we saw in section [[#Contents]], uklib contains compiled .classfiles for JVM variants. On the other hand, [[#Publishing to MavenCentral]] section explains that the publication of KMP library will contain a separate `.jar`-file for Java clients. 
+As we saw in section [Contents](#contents), uklib contains compiled .classfiles for JVM variants. On the other hand, [Publishing to MavenCentral](#publishing-to-mavencentral) section explains that the publication of KMP library will contain a separate `.jar`-file for Java clients. 
 
 In this section, we'll explain the need behind each of these decisions, and how it works together.
 
@@ -752,7 +752,7 @@ This is largely irrelevant as of Kotlin 2.0:
 
 In other words, we can safely assume that in almost all cases, the module can be compiled on Mac-host
 
-> [!note+] Advanced case where the statement doesn't hold:
+> [!note]+ Advanced case where the statement doesn't hold:
 > You use dependencies on custom native libraries via cinterop, and these libraries' API is essentially different on different platforms (or maybe you just use an entirely different set of libraries for each platform). 
 > This is a very advanced case, and we don't expect that more than a handful of such projects will exist. 
 > For such projects, some tool for merging component klibs into uklib will be provided.
@@ -773,7 +773,7 @@ If that won't be enough and we face the problem of "Mac is too expensive", we ha
 > Q: Is it OK that we're putting all klibs together and forcing people to download all of them, even if only a part is needed? Isn't that a lot of extra megabytes per dependency?
 
 Indeed, it is a concern. There are two ways to mitigate that:
-* Use good compression algorithms (see [[#Container format]]-section)
+* Use good compression algorithms (see [Container format](#container-format)-section)
 * Compile fragments content to a klib. Indeed, most of the weight of the current publication is IR 
 
 
@@ -794,7 +794,7 @@ We call a "bamboo" a (sub)hierarchy of fragments, such that all fragments in it 
 > Note that "tree with only one branch" is just a quick, intuitive explanation. It covers fewer cases than the formal definition above. 
 
 
-The main problem is that we want to order fragments on the library on the consumer's side as per [[#Dependencies sorting]], but we do so based on Kotlin Attributes. The fragments of bamboo have the same Kotlin Attributes by definition. 
+The main problem is that we want to order fragments on the library on the consumer's side as per [Dependencies sorting](#dependencies-sorting), but we do so based on Kotlin Attributes. The fragments of bamboo have the same Kotlin Attributes by definition. 
 
 If we don't sort them correctly, and bamboo fragments have `expect`/`actual` declarations, then the consumer might observe weird errors. 
 
