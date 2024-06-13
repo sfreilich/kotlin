@@ -406,7 +406,7 @@ This allows the compiler to work more efficiently. If `expect` is encountered, t
 
 If we sort the fragments according to their `isCompatible`-relation from the most specific to the least specific, such order guarantees the needed invariant. However, it is just a partial order. Specifically, the following fragments can't be compared using just `isCompatible`:
 
-**1. Fragments of one and the same module that are not connected to each other via `refines`-edges. **
+**1. Fragments of one and the same module that are not connected to each other via `refines`-edges.**
 ```mermaid
 graph BT;
 
@@ -422,7 +422,7 @@ native --> jsAndNative
 ```
 In this example, `jvmAndJs` and `jsAndNative` are not orderable using `isCompatible`-relation, but they can appear in the list of the resolved fragments (e.g., if the consumer is a `js`-fragment)
 
-**2. Fragments from different modules, e.g. `A.commonMain` and `B.commonMain`. **
+**2. Fragments from different modules, e.g. `A.commonMain` and `B.commonMain`.**
 
 For this order, we might use the order of the passed module dependencies, i.e. the output of the "Module resolution"-phase. So, if `A` comes before `B` in module dependencies list, then all fragments of A should come before all fragments of B.
 
