@@ -109,7 +109,8 @@ fun deserializeClassToSymbol(
             flexibleTypeFactory,
             constDeserializer,
             containerSource,
-            symbol
+            symbol,
+            origin = origin
         )
     if (status.isCompanion) {
         parentContext?.let {
