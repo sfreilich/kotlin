@@ -6,19 +6,14 @@
 package org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport
 
 import org.gradle.api.Project
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Input
-import org.jetbrains.kotlin.swiftexport.ExperimentalSwiftExportDsl
+import org.jetbrains.kotlin.swiftexport.ExperimentalSwiftExportApi
 import javax.inject.Inject
 
-@ExperimentalSwiftExportDsl
+@ExperimentalSwiftExportApi
 abstract class SwiftExportExtension @Inject constructor(private val project: Project) {
 
     /**
      * Configure name of the swift export built from this project.
      */
-    var name: String? = null
-
-    internal val nameProvider: Provider<String> = project.provider { name ?: project.name }
+    var name: String = project.name
 }

@@ -6,7 +6,6 @@
 package org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport
 
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinProjectSetupAction
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider.Companion.kotlinPropertiesProvider
@@ -18,7 +17,6 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.registerEmbedSwiftExportTask
 import org.jetbrains.kotlin.swiftexport.ExperimentalSwiftExportDsl
 
 internal object SwiftExportDSLConstants {
-    const val SWIFT_EXPORT_LIBRARY_PREFIX = "swiftExport"
     const val SWIFT_EXPORT_EXTENSION_NAME = "swiftexport"
     const val TASK_GROUP = "SwiftExport"
 }
@@ -32,7 +30,6 @@ internal val SetUpSwiftExportAction = KotlinProjectSetupAction {
     kotlinExtension.addExtension(SwiftExportDSLConstants.SWIFT_EXPORT_EXTENSION_NAME, swiftExportExtension)
 
     createDefaultStaticLibs(kotlinExtension)
-
     registerSwiftExportPipeline(project, swiftExportExtension)
 }
 
@@ -49,16 +46,16 @@ private fun registerSwiftExportPipeline(
     project: Project,
     swiftExportExtension: SwiftExportExtension,
 ) {
-    val environment = XcodeEnvironment(project)
-
     project
         .multiplatformExtension
         .supportedTargets()
         .all { target ->
-            target.binaries
-                .matching { it.name.startsWith(SwiftExportDSLConstants.SWIFT_EXPORT_LIBRARY_PREFIX) }
-                .withType(StaticLibrary::class.java).all { library ->
-                    project.registerEmbedSwiftExportTask(library, environment, swiftExportExtension)
-                }
+            target.binaries.withType(Framework::class.java).all { framework ->
+                project.registerSwiftExportTask(
+                    swiftExportExtension.name,
+                    SwiftExportDSLConstants.TASK_GROUP,
+                    framework
+                )
+            }
         }
 }
