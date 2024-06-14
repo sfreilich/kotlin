@@ -10,5 +10,6 @@ kotlin {
     @OptIn(org.jetbrains.kotlin.swiftexport.ExperimentalSwiftExportDsl::class)
     swiftexport {
         name = "Shared"
+        flattenPackage = "com.github.jetbrains.swiftexport"
     }
 }
