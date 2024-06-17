@@ -643,11 +643,11 @@ Example:
 * Gradle Module metadata is very flexible and rich, so supporting proper resolution is pretty straightforward.
 * For example, we can publish two variants: one looking like a usual JVM publication and pointing to .jar-file, another with our own special multiplatform attributes and pointing to .uklib
 Example of .module:
-```json
-...
+```json5
+// ...
 "variants": [
 	{
-		"name": "jvmApiElements-published", // for Java cleints
+		"name": "jvmApiElements-published", // for Java clients
 		"attributes": {
 			"org.gradle.category": "library",
 			"org.gradle.libraryelements": "jar",
