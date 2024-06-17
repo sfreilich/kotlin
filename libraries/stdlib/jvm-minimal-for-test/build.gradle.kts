@@ -56,7 +56,7 @@ tasks.compileKotlin {
     ).map { copySources.get().destinationDir.resolve(it) }
     @Suppress("DEPRECATION")
     kotlinOptions {
-        languageVersion = "2.0"
+        languageVersion = "1.9"
         apiVersion = "2.0"
         freeCompilerArgs += listOf(
             "-Xallow-kotlin-package",
@@ -65,6 +65,7 @@ tasks.compileKotlin {
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=kotlin.contracts.ExperimentalContracts",
             "-opt-in=kotlin.ExperimentalMultiplatform",
+            "-Xsuppress-api-version-greater-than-language-version-error",
         )
         moduleName = "kotlin-stdlib"
     }
