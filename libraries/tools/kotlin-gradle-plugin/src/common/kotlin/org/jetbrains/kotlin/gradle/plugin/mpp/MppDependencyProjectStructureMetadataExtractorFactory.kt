@@ -26,14 +26,14 @@ private constructor(
 ) {
     fun create(
         metadataArtifact: ResolvedArtifactResult,
-        resolvedMetadataConfiguration: LazyResolvedConfiguration,
+        projectStructureMetadataResolvableConfiguration: LazyResolvedConfiguration,
     ): MppDependencyProjectStructureMetadataExtractor {
         val moduleId = metadataArtifact.variant.owner
 
         return if (moduleId is ProjectComponentIdentifier) {
             if (moduleId in currentBuild) {
                 val projectStructureMetadataFileForCurrentModuleId =
-                    getProjectStructureMetadataFileForCurrentModuleId(resolvedMetadataConfiguration, moduleId)
+                    getProjectStructureMetadataFileForCurrentModuleId(projectStructureMetadataResolvableConfiguration, moduleId)
                         ?: error("Project structure metadata not found for project '${moduleId.projectPath}'")
 
                 ProjectMppDependencyProjectStructureMetadataExtractor(
@@ -43,10 +43,10 @@ private constructor(
             } else {
                 /*
                     For MPP projects strarting from 2.0.20 we are consumable/resolvable configurations to get PSM
-                    Such approach prevents project-isolation violations.
+                    Such an approach prevents project-isolation violations.
                  */
                 val projectStructureMetadataFileForCurrentModuleId =
-                    getProjectStructureMetadataFileForCurrentModuleId(resolvedMetadataConfiguration, moduleId)
+                    getProjectStructureMetadataFileForCurrentModuleId(projectStructureMetadataResolvableConfiguration, moduleId)
                 if (projectStructureMetadataFileForCurrentModuleId != null) {
                     IncludedBuildMppDependencyProjectStructureMetadataExtractor(
                         primaryArtifact = metadataArtifact.file,

@@ -53,12 +53,6 @@ internal fun Project.setupProjectStructureMetadataOutgoingArtifacts() {
             project,
             project.configurations.getByName(metadataTarget.apiElementsConfigurationName)
         )
-
-        // TODO(Dmitrii Krasnov): write test for checking that in published artifact there is no PSM file
-        project.artifacts.add(
-            metadataTarget.apiElementsConfigurationName,
-            generateProjectStructureMetadata.map { task -> task.resultFile }
-        )
     }
 
 }
