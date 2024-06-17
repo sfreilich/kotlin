@@ -20,21 +20,25 @@ import org.jetbrains.kotlin.util.ImplementationStatus
 
 public interface KaSymbolRelationProvider {
     /**
-     * Returns containing declaration for symbol:
-     *   for top-level declarations returns null
-     *   for class members returns containing class
-     *   for local declaration returns declaration it was declared it
+     * A containing declaration for the given symbol.
+     *
+     * For top-level declarations, `null` is returned.
+     * For class members, the containing class is returned.
+     * For local declarations, the declaration that the given was declared in is returned.
      */
     public val KaSymbol.containingSymbol: KaDeclarationSymbol?
 
     /**
-     * Returns containing [KtFile] as [KaFileSymbol]
+     * Returns the containing file symbol.
      *
      * Caveat: returns `null` if the given symbol is already [KaFileSymbol], since there is no containing file.
-     *  Similarly, no containing file for libraries and Java, hence `null`.
+     * Also, returns `null` for Java and library declarations.
      */
     public val KaSymbol.containingFile: KaFileSymbol?
 
+    /**
+     * Returns the containing module for the given symbol.
+     */
     public val KaSymbol.containingModule: KaModule
 
     /**
@@ -43,7 +47,7 @@ public interface KaSymbolRelationProvider {
     public val KaClassLikeSymbol.samConstructor: KaSamConstructorSymbol?
 
     /**
-     * Return a list of **all** explicitly declared symbols that are overridden by symbol
+     * A list of **all** explicitly declared symbols that are overridden by symbol
      *
      * E.g., if we have `A.foo` overrides `B.foo` overrides `C.foo`, all two super declarations `B.foo`, `C.foo` will be returned
      *
@@ -57,7 +61,7 @@ public interface KaSymbolRelationProvider {
     public val KaCallableSymbol.allOverriddenSymbols: Sequence<KaCallableSymbol>
 
     /**
-     * Return a list of explicitly declared symbols which are **directly** overridden by symbol
+     * A list of explicitly declared symbols which are **directly** overridden by symbol
      **
      * E.g., if we have `A.foo` overrides `B.foo` overrides `C.foo`, only declarations directly overridden `B.foo` will be returned
      *
@@ -84,11 +88,31 @@ public interface KaSymbolRelationProvider {
      */
     public fun KaClassSymbol.isDirectSubClassOf(superClass: KaClassSymbol): Boolean
 
+    /**
+     * Returns the list of all overridden symbols for the given intersection override callable.
+     *
+     * Example:
+     *
+     * ```kotlin
+     * interface Foo<T> {
+     *     fun foo(value: T)
+     * }
+     *
+     * interface Bar {
+     *     fun foo(value: String)
+     * }
+     *
+     * interface Both : Foo<String>, Bar
+     * ```
+     *
+     * The `Both` interface contains an automatically generated intersection override for `foo()`.
+     * For it, [intersectionOverriddenSymbols] will return a list of two *unsubstituted* symbols: `Foo.foo(T)` and `Bar.foo(Int)`.
+     */
     public val KaCallableSymbol.intersectionOverriddenSymbols: List<KaCallableSymbol>
 
     /**
-     * Gets the [ImplementationStatus] of the [this] member symbol in the given [parentClassSymbol]. Or null if this symbol is not a
-     * member.
+     * Returns the [ImplementationStatus] of the [this] member symbol in the given [parentClassSymbol],
+     * or `null` if this symbol is not a member.
      */
     @KaExperimentalApi
     public fun KaCallableSymbol.getImplementationStatus(parentClassSymbol: KaClassSymbol): ImplementationStatus?
@@ -133,15 +157,26 @@ public interface KaSymbolRelationProvider {
     public val KaCallableSymbol.originalContainingClassForOverride: KaClassSymbol?
 
     /**
-     * Gives expect symbol for the actual one if it is available.
+     * Returns `expect` symbols for the given `actual` one if it is available.
      *
-     * @return a single expect declaration corresponds to the [KaDeclarationSymbol] on valid code or multiple expects in a case of erroneous code with multiple expects.
+     * @return a single expect declaration that corresponds to the [KaDeclarationSymbol] on valid code,
+     * or multiple `expect`s in a case of erroneous code with multiple `expect`s.
      **/
     @KaExperimentalApi
     public fun KaDeclarationSymbol.getExpectsForActual(): List<KaDeclarationSymbol>
 
+    /**
+     * Inheritors of the given sealed class.
+     *
+     * @throws IllegalArgumentException if the given class is not a sealed class.
+     */
     public val KaNamedClassSymbol.sealedClassInheritors: List<KaNamedClassSymbol>
 
+    /**
+     * Enum entries of the given enum class.
+     *
+     * @throws IllegalArgumentException if the given class is not an enum class.
+     */
     @Deprecated("Use the declaration scope instead.")
     public val KaNamedClassSymbol.enumEntries: List<KaEnumEntrySymbol>
 }
