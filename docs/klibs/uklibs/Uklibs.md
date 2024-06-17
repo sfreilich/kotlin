@@ -42,7 +42,8 @@ Examples of analyzers: Kotlin compiler itself, IDE, kotlinx-metadata library, et
 
 You can intuitively think of it as taking all artifacts currently published for a KMP module and packing them together into one archive + adding some metainformation on top of it.
 
-> [!note] Trivia: the name "uklib" stands for "uber-klib". The idea is that "uber-klib" is basically couple of klibs packed together, just like ["uber-jar"](https://stackoverflow.com/questions/11947037/what-is-an-uber-jar-file) is a couple of jars packed together
+> [!tip] 
+> Trivia: the name "uklib" stands for "uber-klib". The idea is that "uber-klib" is basically couple of klibs packed together, just like ["uber-jar"](https://stackoverflow.com/questions/11947037/what-is-an-uber-jar-file) is a couple of jars packed together
 
 Before going into details, let's quickly give some intuition on how this solution addresses the problems outlined in the previous section:
 
@@ -103,7 +104,9 @@ So, we can see that:
 * `xz` provides a whopping 60x compression at the cost of the slowest compression time
 * `zstd` provides a balanced profile with great compression ratio, the fastest uncompression time, and very good compression time
 
-> [!note]+ Why there's such a big difference between compression ratios?
+> [!note] 
+>
+> **Why there's such a big difference between compression ratios?**
 > 
 > Compression algorithms usually have some duplicate detection and encode duplicates in form of a "backreferences". The details of that process are out of the scope of this document, but what is important is that deduplication works via a "sliding window", in which the duplicates should appear. If the duplicated data in the input stream is spread out on a distance more than this "sliding window", it won't have the optimized encoded presentation. 
 >
@@ -117,7 +120,9 @@ So, ideally, we'd go with `zstd` or `xz`. `zstd` appears to be pretty modern, we
 
 On the other hand, we should make sure that we'll be able to provide support for a chosen format for all popular hosts and OSes.
 
-> [!warning] Inconclusive design decision: compression algorithm. 
+> [!warning] 
+> **Inconclusive design decision: compression algorithm.**
+> 
 > We can make it much later (even as one of the last tasks before uklib release).
 
 ## uklibs dependencies
@@ -309,7 +314,9 @@ class KotlinPlatformAttribute(val targets: Set<KotlinTarget>) : KotlinAttribute 
 }
 ```
 
-> [!warning] Conservative design decision
+> [!warning] 
+> **Conservative design decision**
+> 
 > At the moment, we don't see a need for a second dimension. It's OK to think that only one dimension exists (abolishing the need for the "dimension" concept altogether), and the implementation can follow this simplified model.
 > 
 > The main reason why the working group is not very eager to support multiple dimensions is because then some non-trivial questions arise as soon as you have more than one attribute. For example, what to do if two dimensions "disagreed" on the compatibility? How to treat the absence of a value in the dimension? etc.
@@ -343,7 +350,9 @@ A couple of notes about other invariants/expectations:
 **It's OK to have a fragment with more targets than all of its refiners.** 
 * E.g.: `commonMain` has `jvm` across its targets, but there is no `jvmMain` fragment
 
-> [!note] Fate of `kotlin-project-structure-metadata.json`
+> [!note] 
+> **Fate of `kotlin-project-structure-metadata.json`**
+> 
 > `kotlin-project-structure-metadata.json` is a format that is used by the current (Kotlin 2.0) KMP implementation of KMP in Gradle. 
 
 #### Algorithm
@@ -398,7 +407,8 @@ fun resolved(from: Fragment, to: Fragment) {
 ```
 #### Dependencies sorting
 
-> [!warning] This is an open design question
+> [!warning] 
+> This is an open design question
 
 There's one strict requirement that we should maintain: fragments with `actual`s come before `expect`.
 
@@ -462,7 +472,9 @@ It is expected that **Module Resolution** to be performed by build systems. So, 
 
 The working group deemed that it contradicts the requirements to simplify the integration of KMP to third-party build systems (and implementation in existing ones) and rejected that approach.
 
-> [!note] Design decision
+> [!note] 
+> **Design decision**
+> 
 > Module Dependencies are flat lists of all modules (including transitive ones) rather than a graph. Fragment resolution runs separately from the consumer to each of these modules. 
 > As such, if there's a direct dependency A that brought a transitive dependency B, a consumer might see **more fragments from B than A saw during the publication**.
 
@@ -572,7 +584,9 @@ There's no specific timeline or plans for phasing out `klib`'s manifests or even
 
 ### Resources
 
-> [!warning] Inconclusive design decision: resources handling in uklib. 
+> [!warning] 
+> **Inconclusive design decision: resources handling in uklib.** 
+> 
 > More detailed resources KMP resources design is required, but overall, the uklib format is flexible enough to accommodate most reasonable options.
 
 Context:
@@ -669,7 +683,9 @@ Example of .module:
 ```
 
 
-> [!warning]+ Concerns about several artifacts in one Maven module
+> [!warning] 
+> **Concerns about several artifacts in one Maven module**
+> 
 > Formally, the layout described above should work, and all the actors support it.
 > In fact, we're concerned that this might not be a very frequently used feature, and therefore, different tools might have assumptions contradicting this feature, or just simply a buggy support. 
 > We explicitly don't want to be the only big client of this feature. The working group is going to prepare research on how frequently the feature of "multiple artifacts in one maven module" is used in the ecosystem. It might be possible that we'll have to roll back to publication setup with multiple suffixed Maven modules (`-jvm`, etc.)
@@ -752,7 +768,9 @@ This is largely irrelevant as of Kotlin 2.0:
 
 In other words, we can safely assume that in almost all cases, the module can be compiled on Mac-host
 
-> [!note]+ Advanced case where the statement doesn't hold:
+> [!note] 
+> **Advanced case where the statement doesn't hold**
+> 
 > You use dependencies on custom native libraries via cinterop, and these libraries' API is essentially different on different platforms (or maybe you just use an entirely different set of libraries for each platform). 
 > This is a very advanced case, and we don't expect that more than a handful of such projects will exist. 
 > For such projects, some tool for merging component klibs into uklib will be provided.
@@ -789,7 +807,9 @@ The most frequent case of several fragments with same attributes are "bamboos".
 
 We call a "bamboo" a (sub)hierarchy of fragments, such that all fragments in it have the same attributes. Example: `F1 { jvm } -> F2 { jvm } -> F3 { jvm }`.
 
-> [!note] Trivia
+> [!note] 
+> **Trivia**
+> 
 > Intuition behind the name: usually, fragments with their refines-edges form a "tree" from a Graph Theory perspective (Directed Acyclic Graph in the general case). The situation we describe here is a degenerate case, where the tree has exactly one branch. "Bamboos" can be seen as a "tree" with only one "branch" :)
 > Note that "tree with only one branch" is just a quick, intuitive explanation. It covers fewer cases than the formal definition above. 
 
@@ -894,6 +914,6 @@ So, let's sum up:
 
 As such, the current resolution is to **forbid fragments with the same attributes in uklib**.
 
-> [!note]+ 
+> [!note] 
 > 
 > There's a small open question about what to do during local development. The working group is fine with accepting the baseline of "bamboos are forbidden during local development. If you're in the process of migrating/starting a new KMP module, you should declare at least two targets. Our tooling will help to create actual-stubs for expects". However, more ergonomic solution are not out of consideration as well, especially in the context of [KT-33578](https://youtrack.jetbrains.com/issue/KT-33578/Provide-an-ability-to-extend-the-set-of-platforms-that-the-source-set-is-analyzed-for-helping-project-future-evolution)
