@@ -538,25 +538,23 @@ So, if `commonMain` has symbol `MyClass`, it will be repeated across `jsMain`, `
 Rough example of umanifest:
 
 ```json
-fragments: [
+{
+"fragments": 
+[
 	{
-		name = "commonMain"
-		platforms = [ jvm, js, linux_x64, iosArm64 ]
-		contentType = "MetadataKlib"
-		// content type defines the internal content
-		// layout entirely
-	},
-	
-	... ,
-	
+		"name": "commonMain",
+		"platforms": ["jvm", "js", "linux_x64", "iosArm64"],
+		"contentType": "MetadataKlib"
+	}, 
 	{
-		name = "jvmMain"
-		platforms = [ jvm ]
-		contentType = "JvmJar"
-	},
-]
-
-manifestVersion = "1.0.1"
+		"name": "jvmMain",
+		"platforms": ["jvm"],
+		"contentType": "JvmJar"	
+	}
+],
+	
+"manifestVersion": "1.0.1"
+}
 ```
 
 Note that `umanifest` doesn't store `refines`-edges. We remind that `A refines B` <=> `A.attributes.isCompatibleWith(B.attributes)` (see note at the end of [Kotlin attributes](#kotlin-attributes)-section), so all edges can be restored based on umanifest contents. 
