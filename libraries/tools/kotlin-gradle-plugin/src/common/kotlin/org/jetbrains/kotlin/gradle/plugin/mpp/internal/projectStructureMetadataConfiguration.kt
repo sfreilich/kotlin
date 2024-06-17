@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.gradle.plugin.sources.disambiguateName
 import org.jetbrains.kotlin.gradle.targets.metadata.locateOrRegisterGenerateProjectStructureMetadataTask
 import org.jetbrains.kotlin.gradle.utils.*
 
-internal val psmAttribute = Attribute.of("psmFile", Boolean::class.javaObjectType)
+internal val psmAttribute = Attribute.of("org.jetbrains.kotlin.psmFile", Boolean::class.javaObjectType)
 
 /**
  * This method does two things:
@@ -49,6 +49,7 @@ internal fun setupProjectStructureMetadataOutgoingArtifacts(project: Project) {
             project.configurations.getByName(metadataTarget.apiElementsConfigurationName)
         )
 
+        // TODO(Dmitrii Krasnov): write test for checking that in published artifact there is no PSM file
         // Adding psm generated for this project to the metadata `apiElements` configuration
         project.artifacts.add(
             metadataTarget.apiElementsConfigurationName,
