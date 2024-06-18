@@ -26173,6 +26173,12 @@ public class LLFirPreresolvedReversedDiagnosticCompilerFE10TestDataTestGenerated
       }
 
       @Test
+      @TestMetadata("dontDeprioritizeExpectFunIfShapeIsMoreSpecific.kt")
+      public void testDontDeprioritizeExpectFunIfShapeIsMoreSpecific() {
+        runTest("compiler/testData/diagnostics/tests/multiplatform/dontDeprioritizeExpectFunIfShapeIsMoreSpecific.kt");
+      }
+
+      @Test
       @TestMetadata("expectAbstractToString.kt")
       public void testExpectAbstractToString() {
         runTest("compiler/testData/diagnostics/tests/multiplatform/expectAbstractToString.kt");
