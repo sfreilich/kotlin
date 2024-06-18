@@ -746,7 +746,7 @@ TODO: write down the timeline
 	- That’s 4-5 months of work left
 	- Could be possible if we had a full-time person working on it, but we don’t have one.
 
-Despite that, the prototype should be started sooner rather than later. Stas will discuss it with [Yahor Berdnikau](mailto:yahor.berdnikau@jetbrains.com)
+Despite that, the prototype should be started sooner rather than later. 
 
 #### Migration
 
