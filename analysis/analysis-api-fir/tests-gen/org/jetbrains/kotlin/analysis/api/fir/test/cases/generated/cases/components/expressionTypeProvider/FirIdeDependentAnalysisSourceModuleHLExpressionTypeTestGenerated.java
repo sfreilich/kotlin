@@ -430,9 +430,45 @@ public class FirIdeDependentAnalysisSourceModuleHLExpressionTypeTestGenerated ex
     }
 
     @Test
+    @TestMetadata("callableReferenceQualifier.kt")
+    public void testCallableReferenceQualifier() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/callableReferenceQualifier.kt");
+    }
+
+    @Test
+    @TestMetadata("callableReferenceQualifier2.kt")
+    public void testCallableReferenceQualifier2() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/callableReferenceQualifier2.kt");
+    }
+
+    @Test
     @TestMetadata("capturedBoundType.kt")
     public void testCapturedBoundType() {
       runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/capturedBoundType.kt");
+    }
+
+    @Test
+    @TestMetadata("classLiteralQualifier.kt")
+    public void testClassLiteralQualifier() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/classLiteralQualifier.kt");
+    }
+
+    @Test
+    @TestMetadata("classLiteralQualifier2.kt")
+    public void testClassLiteralQualifier2() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/classLiteralQualifier2.kt");
+    }
+
+    @Test
+    @TestMetadata("companionObject.kt")
+    public void testCompanionObject() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/companionObject.kt");
+    }
+
+    @Test
+    @TestMetadata("companionObject2.kt")
+    public void testCompanionObject2() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/companionObject2.kt");
     }
 
     @Test
@@ -541,6 +577,18 @@ public class FirIdeDependentAnalysisSourceModuleHLExpressionTypeTestGenerated ex
     @TestMetadata("propertyCall_safeAccess.kt")
     public void testPropertyCall_safeAccess() {
       runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/propertyCall_safeAccess.kt");
+    }
+
+    @Test
+    @TestMetadata("qualifier.kt")
+    public void testQualifier() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/qualifier.kt");
+    }
+
+    @Test
+    @TestMetadata("qualifier2.kt")
+    public void testQualifier2() {
+      runTest("analysis/analysis-api/testData/components/expressionTypeProvider/expressionType/nameReference/qualifier2.kt");
     }
   }
 }

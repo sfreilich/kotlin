@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.fir.resolve.constructFunctionType
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.types.*
+import org.jetbrains.kotlin.fir.types.resolvedType
 import org.jetbrains.kotlin.fir.utils.exceptions.withFirEntry
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi
@@ -93,6 +94,18 @@ internal class KaFirExpressionTypeProvider(
                 fir.rValue.resolvedType.asKtType()
             } else {
                 analysisSession.builtinTypes.unit
+            }
+        }
+        is FirResolvedQualifier -> {
+            val psi = fir.source.psi
+            val providedFirCorrespondsToExpression = psi == expression || (psi as? KtQualifiedExpression)?.selectorExpression == expression
+            if (providedFirCorrespondsToExpression) {
+                fir.resolvedType
+                    // only use the type of qualifier if qualifier's class is not `Unit` and has an instance, i.e., is a singleton
+                    .takeIf { !it.isUnit && it.toClassSymbol(firResolveSession.useSiteFirSession)?.classKind?.isSingleton == true }
+                    ?.asKtType()
+            } else {
+                null
             }
         }
         is FirExpression -> fir.resolvedType.asKtType()

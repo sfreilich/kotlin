@@ -18,6 +18,7 @@ public interface KaExpressionTypeProvider {
      * Return:
      * - [KtExpression] type if given [KtExpression] is real expression;
      * - `null` for [KtExpression] inside pacakges and import declarations;
+     * - `null` for qualifiers that do not have corresponding instances, e.g., containers of nested classes and packages;
      * - `Unit` type for statements;
      */
     public val KtExpression.expressionType: KaType?

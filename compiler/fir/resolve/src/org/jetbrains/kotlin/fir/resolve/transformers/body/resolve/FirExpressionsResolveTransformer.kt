@@ -1123,6 +1123,10 @@ open class FirExpressionsResolveTransformer(transformer: FirAbstractBodyResolveT
                 if (this is FirResolvedQualifier && callableReferenceAccess.hasQuestionMarkAtLHS) {
                     replaceIsNullableLHSForCallableReference(true)
                 }
+                if (this is FirResolvedQualifier && this.resolvedToCompanionObject) {
+                    replaceResolvedToCompanionObject(newResolvedToCompanionObject = false)
+                    replaceConeTypeOrNull(newConeTypeOrNull = builtinTypes.unitType.type)
+                }
             }
 
         transformedLHS?.let { callableReferenceAccess.replaceExplicitReceiver(transformedLHS) }
