@@ -121,7 +121,7 @@ class Fir2IrDeclarationStorage(
         }
 
         fun getOriginal(fir: FirProperty): IrPropertySymbol? {
-            return if (fir.origin == FirDeclarationOrigin.CommonArtefact) {
+            return if (fir.origin == FirDeclarationOrigin.CommonArtefact || fir.moduleData.isFromCommonArtefact) {
                 when (fir) {
                     is FirSyntheticProperty -> synthetic.getCachedIrSymbolByCommonFunction(fir.cacheKey)
                     else -> normal.getCachedIrSymbolByCommonCallable(fir)
@@ -321,9 +321,11 @@ class Fir2IrDeclarationStorage(
             return localStorage.getLocalFunctionSymbol(function)
         }
 
-        runIf(function.origin.generatedAnyMethod) {
-            val containingClass = function.getContainingClass(session)!!
-            val cache = dataClassGeneratedFunctionsCache.computeIfAbsent(containingClass) { DataClassGeneratedFunctionsStorage() }
+        runIf(function.origin.generatedAnyMethod || function.origin == FirDeclarationOrigin.CommonArtefact) {
+            val containingClass = function.getContainingClass(session) ?: return@runIf
+            val cache = getDataClassGeneratedFunctionsStorage(containingClass) ?:
+                if (function.origin == FirDeclarationOrigin.CommonArtefact) return@runIf
+                else dataClassGeneratedFunctionsCache.computeIfAbsent(containingClass) { DataClassGeneratedFunctionsStorage() }
             val cachedFunction = when (function.nameOrSpecialName) {
                 OperatorNameConventions.EQUALS -> cache.equalsSymbol
                 OperatorNameConventions.HASH_CODE -> cache.hashCodeSymbol
@@ -333,7 +335,7 @@ class Fir2IrDeclarationStorage(
             return cachedFunction?.let(symbolsMappingForLazyClasses::remapFunctionSymbol)
         }
         val cachedIrCallable =
-            if (function.origin == FirDeclarationOrigin.CommonArtefact) {
+            if (function.origin == FirDeclarationOrigin.CommonArtefact || function.moduleData.isFromCommonArtefact) {
                 functionCache.getCachedIrSymbolByCommonFunction(function)
             } else {
                 getCachedIrCallableSymbol(
@@ -344,6 +346,14 @@ class Fir2IrDeclarationStorage(
             }
         return cachedIrCallable?.let(symbolsMappingForLazyClasses::remapFunctionSymbol)
     }
+
+    private fun getDataClassGeneratedFunctionsStorage(containingClass: FirRegularClass) =
+        runIf(containingClass.origin == FirDeclarationOrigin.CommonArtefact || containingClass.moduleData.isFromCommonArtefact) {
+            val classId = containingClass.symbol.classId
+            dataClassGeneratedFunctionsCache.asIterable().firstOrNull {
+                it.key.symbol.classId == classId && it.key.symbol.isExpect == containingClass.symbol.isExpect
+            }?.value
+        }
 
     /**
      * @param allowLazyDeclarationsCreation should be passed only during fake-override generation
@@ -450,7 +460,8 @@ class Fir2IrDeclarationStorage(
 
     internal fun cacheGeneratedFunction(firFunction: FirSimpleFunction, irFunction: IrSimpleFunction) {
         val containingClass = firFunction.getContainingClass(session)!!
-        val cache = dataClassGeneratedFunctionsCache.computeIfAbsent(containingClass) { DataClassGeneratedFunctionsStorage() }
+        val cache = getDataClassGeneratedFunctionsStorage(containingClass)
+            ?: dataClassGeneratedFunctionsCache.computeIfAbsent(containingClass) { DataClassGeneratedFunctionsStorage() }
         val irSymbol = irFunction.symbol
         when (val name = firFunction.nameOrSpecialName) {
             OperatorNameConventions.EQUALS -> cache.equalsSymbol = irSymbol
@@ -463,7 +474,7 @@ class Fir2IrDeclarationStorage(
     // ------------------------------------ constructors ------------------------------------
 
     fun getCachedIrConstructorSymbol(constructor: FirConstructor): IrConstructorSymbol? {
-        return if (constructor.origin == FirDeclarationOrigin.CommonArtefact) {
+        return if (constructor.origin == FirDeclarationOrigin.CommonArtefact || constructor.moduleData.isFromCommonArtefact) {
             constructorCache.getCachedIrSymbolByCommonFunction(constructor)
         } else constructorCache.get(constructor)
     }
