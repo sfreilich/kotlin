@@ -84,7 +84,7 @@ There are two options to solve that:
 
 Payload: all published artifacts of `kotlinx-coroutines-core`, unpacked. Input size: 47.24 Mb
 
-[Full comparison data](https://docs.google.com/spreadsheets/d/1zJ7WF4Ylr75hjWn-2_bCZwz1hPHiDHUf99HQRLhc53k/edit?usp=sharing). Here, we will provide a few most interesting and important highlights:
+[Full comparison data](https://docs.google.com/spreadsheets/d/1sDHk8DnchdzXJotXjEQR021Hqh8mzGEh1kFb25RTeeA/edit?usp=sharing). Here, we will provide a few most interesting and important highlights:
 
 1. zip/gzip: 
 	* compression ratio ~= 2.75 
