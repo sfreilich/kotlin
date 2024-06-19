@@ -5310,6 +5310,12 @@ public class FirPsiDiagnosticTestGenerated extends AbstractFirPsiDiagnosticTest 
       }
 
       @Test
+      @TestMetadata("extensions.kt")
+      public void testExtensions() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/extensions.kt");
+      }
+
+      @Test
       @TestMetadata("incorrectJava.kt")
       public void testIncorrectJava() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/incorrectJava.kt");
