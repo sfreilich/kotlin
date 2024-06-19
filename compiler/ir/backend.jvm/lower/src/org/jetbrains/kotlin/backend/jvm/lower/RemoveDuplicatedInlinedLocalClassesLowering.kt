@@ -9,15 +9,14 @@ import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.ir.getDefaultAdditionalStatementsFromInlinedBlock
 import org.jetbrains.kotlin.backend.common.ir.getNonDefaultAdditionalStatementsFromInlinedBlock
 import org.jetbrains.kotlin.backend.common.ir.getOriginalStatementsFromInlinedBlock
+import org.jetbrains.kotlin.backend.common.ir.isTmpForInline
 import org.jetbrains.kotlin.backend.common.lower.LocalDeclarationsLowering
 import org.jetbrains.kotlin.backend.common.lower.LoweredDeclarationOrigins
 import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
 import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrCompositeImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstructorCallImpl
@@ -83,6 +82,14 @@ private class RemoveDuplicatedInlinedLocalClassesTransformer(val context: JvmBac
             reuseConstructorFromOriginalClass(result, anonymousClass, data)
         }
         return result
+    }
+
+    override fun visitVariable(declaration: IrVariable, data: Data): IrStatement {
+        if (declaration.isTmpForInline) {
+            val newData = data.copy(insideInlineBlock = true)
+            return super.visitVariable(declaration, newData.copy(classDeclaredOnCallSiteOrIsDefaultLambda = false))
+        }
+        return super.visitVariable(declaration, data)
     }
 
     private fun reuseConstructorFromOriginalClass(block: IrBlock, anonymousClass: IrClass, data: Data) {
