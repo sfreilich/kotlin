@@ -66,7 +66,8 @@ private class RemoveDuplicatedInlinedLocalClassesTransformer(val context: JvmBac
 
     override fun visitInlinedFunctionBlock(inlinedBlock: IrInlinedFunctionBlock, data: Data): IrExpression {
         val newData = data.copy(insideInlineBlock = true, classDeclaredOnCallSiteOrIsDefaultLambda = true)
-        return super.visitInlinedFunctionBlock(inlinedBlock, newData)
+        inlinedBlock.transformChildren(this, newData)
+        return inlinedBlock
     }
 
     override fun visitBlock(expression: IrBlock, data: Data): IrExpression {
