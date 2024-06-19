@@ -57,6 +57,18 @@ internal class KaFirCompletionCandidateChecker(
             }
         }
     }
+
+    override fun checkExtensionFitsCandidate(
+        firSymbolForCandidate: KaCallableSymbol,
+        originalFile: KtFile,
+        nameExpression: KtSimpleNameExpression,
+        possibleExplicitReceiver: KtExpression?,
+    ): KaExtensionApplicabilityResult = analysisSession.withValidityAssertion {
+        val checker = KaFirCompletionExtensionCandidateChecker(analysisSession, nameExpression, possibleExplicitReceiver, originalFile)
+        return with(analysisSession) {
+            checker.computeApplicability(firSymbolForCandidate)
+        }
+    }
 }
 
 private class KaFirCompletionExtensionCandidateChecker(

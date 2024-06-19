@@ -35,6 +35,14 @@ public interface KaCompletionCandidateChecker {
         nameExpression: KtSimpleNameExpression,
         explicitReceiver: KtExpression?
     ): KaCompletionExtensionCandidateChecker
+
+    @OptIn(KaExperimentalApi::class)
+    public fun checkExtensionFitsCandidate(
+        firSymbolForCandidate: KaCallableSymbol,
+        originalFile: KtFile,
+        nameExpression: KtSimpleNameExpression,
+        possibleExplicitReceiver: KtExpression?,
+    ): KaExtensionApplicabilityResult
 }
 
 @KaIdeApi
