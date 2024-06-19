@@ -6,9 +6,7 @@
 package org.jetbrains.kotlin.backend.common.lower
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
-import org.jetbrains.kotlin.backend.common.ir.getAdditionalStatementsFromInlinedBlock
-import org.jetbrains.kotlin.backend.common.ir.getNonDefaultAdditionalStatementsFromInlinedBlock
-import org.jetbrains.kotlin.backend.common.ir.getOriginalStatementsFromInlinedBlock
+import org.jetbrains.kotlin.backend.common.ir.*
 import org.jetbrains.kotlin.ir.util.isFunctionInlining
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.*
@@ -53,17 +51,21 @@ abstract class InventNamesForLocalClasses(private val generateNamesForRegenerate
 
         override fun visitInlinedFunctionBlock(inlinedBlock: IrInlinedFunctionBlock, data: NameInventorData) {
             if (!generateNamesForRegeneratedObjects) {
-                return inlinedBlock.getNonDefaultAdditionalStatementsFromInlinedBlock().forEach { it.accept(this, data) }
+                return inlinedBlock.statements
+                    .filter { it is IrCall && it.symbol.owner.name.asString() == "singleArgumentInlineFunction" }
+                    .forEach { it.accept(this, data) }
             }
 
             if (!data.processingInlinedFunction && inlinedBlock.isFunctionInlining()) {
-                inlinedBlock.getAdditionalStatementsFromInlinedBlock().forEach { it.accept(this, data) }
+                inlinedBlock.getDefaultAdditionalStatementsFromInlinedBlock().forEach { it.accept(this, data) }
 
                 val inlinedAt = inlinedBlock.inlineCall.symbol.owner.name.asString()
                 val newData = data.copy(
                     enclosingName = data.enclosingName + "$\$inlined\$$inlinedAt", isLocal = true, processingInlinedFunction = true
                 )
-                inlinedBlock.getOriginalStatementsFromInlinedBlock().forEach { it.accept(this, newData) }
+                inlinedBlock.getOriginalStatementsFromInlinedBlock()
+                    .filterNot { it is IrCall && it.symbol.owner.name.asString() == "singleArgumentInlineFunction" }
+                    .forEach { it.accept(this, newData) }
 
                 return
             }

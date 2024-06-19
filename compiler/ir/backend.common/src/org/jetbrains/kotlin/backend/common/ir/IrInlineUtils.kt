@@ -5,15 +5,11 @@
 
 package org.jetbrains.kotlin.backend.common.ir
 
-import org.jetbrains.kotlin.backend.common.lower.LoweredStatementOrigins.INLINED_FUNCTION_ARGUMENTS
-import org.jetbrains.kotlin.backend.common.lower.LoweredStatementOrigins.INLINED_FUNCTION_DEFAULT_ARGUMENTS
 import org.jetbrains.kotlin.backend.common.lower.VariableRemapper
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
-import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.IrStatementsBuilder
-import org.jetbrains.kotlin.ir.builders.irComposite
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.*
@@ -21,7 +17,6 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrReturnImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrReturnableBlockImpl
-import org.jetbrains.kotlin.ir.symbols.IrFileSymbol
 import org.jetbrains.kotlin.ir.symbols.IrReturnTargetSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrReturnableBlockSymbolImpl
 import org.jetbrains.kotlin.ir.types.getClass
@@ -131,30 +126,17 @@ fun IrInlinable.inline(target: IrDeclarationParent, arguments: List<IrValueDecla
         }
     }
 
-// `getAdditionalStatementsFromInlinedBlock` == `getNonDefaultAdditionalStatementsFromInlinedBlock` + `getDefaultAdditionalStatementsFromInlinedBlock`
-fun IrInlinedFunctionBlock.getAdditionalStatementsFromInlinedBlock(): List<IrStatement> {
-    return this.statements
-        .filterIsInstance<IrComposite>()
-        .filter { it.origin == INLINED_FUNCTION_ARGUMENTS || it.origin == INLINED_FUNCTION_DEFAULT_ARGUMENTS }
-        .flatMap { it.statements }
+fun IrReturnableBlock.getInlinedVariablesFromCallSite(): List<IrVariable> {
+    if (statements.lastOrNull() !is IrInlinedFunctionBlock) return emptyList()
+    return statements.filterIsInstance<IrVariable>().filter { it.isTmpForInline }
 }
 
-fun IrInlinedFunctionBlock.getNonDefaultAdditionalStatementsFromInlinedBlock(): List<IrStatement> {
-    return this.statements
-        .filterIsInstance<IrComposite>()
-        .singleOrNull { it.origin == INLINED_FUNCTION_ARGUMENTS }?.statements ?: emptyList()
+fun IrInlinedFunctionBlock.getDefaultAdditionalStatementsFromInlinedBlock(): List<IrVariable> {
+    return this.statements.filterIsInstance<IrVariable>().filter { it.isTmpForInline }
 }
 
-fun IrInlinedFunctionBlock.getDefaultAdditionalStatementsFromInlinedBlock(): List<IrStatement> {
-    return this.statements
-        .filterIsInstance<IrComposite>()
-        .singleOrNull { it.origin == INLINED_FUNCTION_DEFAULT_ARGUMENTS }?.statements ?: emptyList()
-}
-
-// `IrInlinedFunctionBlock`.statements == `getAdditionalStatementsFromInlinedBlock` + `getOriginalStatementsFromInlinedBlock`
 fun IrInlinedFunctionBlock.getOriginalStatementsFromInlinedBlock(): List<IrStatement> {
-    return this.statements
-        .filter { it !is IrComposite || !(it.origin == INLINED_FUNCTION_ARGUMENTS || it.origin == INLINED_FUNCTION_DEFAULT_ARGUMENTS) }
+    return this.statements.filterNot { it is IrVariable && it.isTmpForInline }
 }
 
 fun IrInlinedFunctionBlock.putStatementsInFrontOfInlinedFunction(statements: List<IrStatement>) {
