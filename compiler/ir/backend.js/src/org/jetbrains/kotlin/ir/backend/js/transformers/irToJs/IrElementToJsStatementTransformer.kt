@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.ir.backend.js.transformers.irToJs
 
+import org.jetbrains.kotlin.backend.common.ir.isTmpForInline
 import org.jetbrains.kotlin.ir.util.inlineFunction
 import org.jetbrains.kotlin.ir.util.innerInlinedBlockOrThis
 import org.jetbrains.kotlin.ir.backend.js.ir.JsIrBuilder
@@ -172,10 +173,8 @@ class IrElementToJsStatementTransformer : BaseIrElementToJsNodeTransformer<JsSta
 
         val syntheticVariable = when (declaration.origin) {
             IrDeclarationOrigin.IR_TEMPORARY_VARIABLE -> true
-            IrDeclarationOrigin.IR_TEMPORARY_VARIABLE_FOR_INLINED_PARAMETER -> true
-            IrDeclarationOrigin.IR_TEMPORARY_VARIABLE_FOR_INLINED_EXTENSION_RECEIVER -> true
             ES6_DELEGATING_CONSTRUCTOR_CALL_REPLACEMENT -> true
-            else -> false
+            else -> declaration.isTmpForInline
         }
 
         val variable = JsVars.JsVar(varName, jsInitializer).apply {
