@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.fir.resolve.calls.tower
 
 import org.jetbrains.kotlin.KtFakeSourceElementKind
 import org.jetbrains.kotlin.KtSourceElement
-import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.fakeElement
 import org.jetbrains.kotlin.fir.declarations.ContextReceiverGroup
 import org.jetbrains.kotlin.fir.declarations.FirTowerDataContext
@@ -18,12 +17,8 @@ import org.jetbrains.kotlin.fir.expressions.FirResolvedQualifier
 import org.jetbrains.kotlin.fir.expressions.builder.buildExpressionStub
 import org.jetbrains.kotlin.fir.expressions.builder.buildResolvedQualifier
 import org.jetbrains.kotlin.fir.languageVersionSettings
-import org.jetbrains.kotlin.fir.resolve.BodyResolveComponents
-import org.jetbrains.kotlin.fir.resolve.DoubleColonLHS
-import org.jetbrains.kotlin.fir.resolve.ResolutionMode
+import org.jetbrains.kotlin.fir.resolve.*
 import org.jetbrains.kotlin.fir.resolve.calls.*
-import org.jetbrains.kotlin.fir.resolve.fullyExpandedClassFromContext
-import org.jetbrains.kotlin.fir.resolve.setTypeOfQualifier
 import org.jetbrains.kotlin.fir.scopes.FirScope
 import org.jetbrains.kotlin.fir.scopes.impl.FirWhenSubjectImportingScope
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
@@ -190,9 +185,20 @@ internal abstract class FirBaseTowerResolveTask(
 
         if (session.languageVersionSettings.supportsContextSensitiveResolution) {
             val contextClass = resolutionMode?.fullyExpandedClassFromContext(components, session)
+
             val contextScope = contextClass?.staticScope(session, components.scopeSession)
             if (contextScope != null) {
-                onScope(contextScope, contextClass.symbol, TowerGroup.QualifierOrClassifier)
+                onScope(contextScope, contextClass.symbol, TowerGroup.Last)
+            }
+
+            val companionObject = contextClass?.companionObjectSymbol?.fir
+            val companionReceiver = companionObject?.let { companion ->
+                ImplicitDispatchReceiverValue(
+                    companion.symbol, session, components.scopeSession
+                )
+            }
+            if (companionReceiver != null) {
+                onImplicitReceiver(companionReceiver, TowerGroup.Last)
             }
         }
 
