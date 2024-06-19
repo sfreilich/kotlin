@@ -7,15 +7,15 @@ package org.jetbrains.kotlin.backend.jvm.lower
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.ir.getAdditionalStatementsFromInlinedBlock
-import org.jetbrains.kotlin.backend.common.ir.putStatementBeforeActualInline
+import org.jetbrains.kotlin.backend.common.lower.LoweredStatementOrigins.INLINED_FUNCTION_ARGUMENTS
 import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
 import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
-import org.jetbrains.kotlin.backend.jvm.ir.createJvmIrBuilder
 import org.jetbrains.kotlin.backend.jvm.ir.isInlineParameter
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrCompositeImpl
 import org.jetbrains.kotlin.ir.util.getArgumentsWithIr
 import org.jetbrains.kotlin.ir.util.isFunctionInlining
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
@@ -41,9 +41,9 @@ class CreateSeparateCallForInlinedLambdasLowering(val context: JvmBackendContext
 
             // we don't need to transform body of original function, just arguments that were extracted as variables
             inlinedBlock.getAdditionalStatementsFromInlinedBlock().forEach { it.transformChildrenVoid() }
-            newCalls.reversed().forEach {
-                inlinedBlock.putStatementBeforeActualInline(context.createJvmIrBuilder(it.symbol), it)
-            }
+            val newBlock = IrCompositeImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, context.irBuiltIns.unitType, INLINED_FUNCTION_ARGUMENTS)
+                .apply { statements += newCalls }
+            inlinedBlock.statements.add(0, newBlock)
             return inlinedBlock
         }
         return super.visitInlinedFunctionBlock(inlinedBlock)

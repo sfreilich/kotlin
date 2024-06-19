@@ -157,28 +157,10 @@ fun IrInlinedFunctionBlock.getOriginalStatementsFromInlinedBlock(): List<IrState
         .filter { it !is IrComposite || !(it.origin == INLINED_FUNCTION_ARGUMENTS || it.origin == INLINED_FUNCTION_DEFAULT_ARGUMENTS) }
 }
 
-fun IrInlinedFunctionBlock.putStatementBeforeActualInline(builder: IrBuilderWithScope, statement: IrStatement) {
-    val evaluateStatements = this.statements
-        .filterIsInstance<IrComposite>()
-        .singleOrNull { it.origin == INLINED_FUNCTION_ARGUMENTS }?.statements
-
-    if (evaluateStatements != null) {
-        evaluateStatements.add(0, statement)
-        return
-    }
-
-    val newInlinedArgumentsBlock = builder
-        .irComposite(UNDEFINED_OFFSET, UNDEFINED_OFFSET, INLINED_FUNCTION_ARGUMENTS, builder.context.irBuiltIns.unitType) { +statement }
-    this.statements.add(0, newInlinedArgumentsBlock)
-}
-
 fun IrInlinedFunctionBlock.putStatementsInFrontOfInlinedFunction(statements: List<IrStatement>) {
-    val insertAfter = this.statements
-        .indexOfLast { it is IrComposite && (it.origin == INLINED_FUNCTION_ARGUMENTS || it.origin == INLINED_FUNCTION_DEFAULT_ARGUMENTS) }
-
+    val insertAfter = this.statements.indexOfLast { it is IrVariable && it.isTmpForInline }
     this.statements.addAll(if (insertAfter == -1) 0 else insertAfter + 1, statements)
 }
-
 
 fun List<IrInlinedFunctionBlock>.extractDeclarationWhereGivenElementWasInlined(inlinedElement: IrElement): IrDeclaration? {
     val originalInlinedElement = ((inlinedElement as? IrAttributeContainer)?.attributeOwnerId ?: inlinedElement)
