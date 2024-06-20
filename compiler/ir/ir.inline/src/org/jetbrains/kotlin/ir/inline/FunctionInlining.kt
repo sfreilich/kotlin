@@ -664,8 +664,8 @@ open class FunctionInlining(
                 } else {
                     val newVariable =
                         currentScope.scope.createTemporaryVariable(
-                            startOffset = if (it.isDefaultArg) irExpression.startOffset else UNDEFINED_OFFSET,
-                            endOffset = if (it.isDefaultArg) irExpression.startOffset else UNDEFINED_OFFSET,
+                            startOffset = UNDEFINED_OFFSET,
+                            endOffset = UNDEFINED_OFFSET,
                             irExpression = irExpression,
                             // If original type of parameter is T, then `it.parameter.type` is T after substitution or erasure,
                             // depending on whether T reified or not.
