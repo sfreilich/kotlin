@@ -815,7 +815,7 @@ open class FunctionInlining(
                 }
             )
 
-//            variable.name = Name.identifier(parameter.name.asStringStripSpecialMarkers())
+            variable.name = Name.identifier(parameter.name.asStringStripSpecialMarkers())
 
             return variable
         }
