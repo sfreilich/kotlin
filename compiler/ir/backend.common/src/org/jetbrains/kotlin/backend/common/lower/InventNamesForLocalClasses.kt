@@ -50,12 +50,6 @@ abstract class InventNamesForLocalClasses(private val generateNamesForRegenerate
         private val localFunctionNames = mutableMapOf<IrFunctionSymbol, String>()
 
         override fun visitInlinedFunctionBlock(inlinedBlock: IrInlinedFunctionBlock, data: NameInventorData) {
-            if (!generateNamesForRegeneratedObjects) {
-                return inlinedBlock.statements
-                    .filter { it is IrCall && it.symbol.owner.name.asString() == "singleArgumentInlineFunction" }
-                    .forEach { it.accept(this, data) }
-            }
-
             if (!data.processingInlinedFunction && inlinedBlock.isFunctionInlining()) {
                 inlinedBlock.getDefaultAdditionalStatementsFromInlinedBlock().forEach { it.accept(this, data) }
 
@@ -64,7 +58,6 @@ abstract class InventNamesForLocalClasses(private val generateNamesForRegenerate
                     enclosingName = data.enclosingName + "$\$inlined\$$inlinedAt", isLocal = true, processingInlinedFunction = true
                 )
                 inlinedBlock.getOriginalStatementsFromInlinedBlock()
-                    .filterNot { it is IrCall && it.symbol.owner.name.asString() == "singleArgumentInlineFunction" }
                     .forEach { it.accept(this, newData) }
 
                 return
@@ -135,7 +128,7 @@ abstract class InventNamesForLocalClasses(private val generateNamesForRegenerate
                     }
                 }
 
-                declaration is IrVariable && generateNamesForRegeneratedObjects || data.processingInlinedFunction -> enclosingName
+                declaration is IrVariable && declaration.isTmpForInline || data.processingInlinedFunction -> enclosingName
                 enclosingName != null -> "$enclosingName$$simpleName"
                 else -> simpleName
             }

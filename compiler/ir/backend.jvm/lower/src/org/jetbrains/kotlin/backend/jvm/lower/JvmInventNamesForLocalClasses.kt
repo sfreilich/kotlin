@@ -24,7 +24,7 @@ import org.jetbrains.org.objectweb.asm.Type
     // MainMethodGeneration introduces lambdas, needing names for their local classes.
     prerequisite = [MainMethodGenerationLowering::class],
 )
-internal class JvmInventNamesForLocalClasses(context: JvmBackendContext) : JvmInventNamesForLocalClassesImpl(context, false)
+internal class JvmInventNamesForLocalClasses(context: JvmBackendContext) : JvmInventNamesForLocalClassesImpl(context, true)
 
 open class JvmInventNamesForLocalClassesImpl(
     protected val context: JvmBackendContext,
@@ -49,6 +49,7 @@ open class JvmInventNamesForLocalClassesImpl(
     }
 
     override fun putLocalClassName(declaration: IrAttributeContainer, localClassName: String) {
+        if (declaration.localClassType != null) return
         declaration.localClassType = Type.getObjectType(localClassName)
     }
 }

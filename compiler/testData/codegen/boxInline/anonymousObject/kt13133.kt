@@ -1,6 +1,6 @@
 // TARGET_BACKEND: JVM
 // WITH_REFLECT
-// IGNORE_INLINER_K2: IR
+// IGNORE_INLINER: IR
 // FILE: 1.kt
 
 package test
@@ -29,6 +29,7 @@ fun box(): String {
         javaClass.name
     }()
 
+    // IR inliner generates class with the name `_2Kt\$box\$name\$\$inlined\$inf\$1\$1`
     if (name != "_2Kt\$box$\$inlined\$inf$2$1" ) return "fail 2: $name"
 
 

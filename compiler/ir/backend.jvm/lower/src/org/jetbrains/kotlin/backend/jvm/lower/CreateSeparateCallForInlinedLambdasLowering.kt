@@ -7,9 +7,11 @@ package org.jetbrains.kotlin.backend.jvm.lower
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.ir.getDefaultAdditionalStatementsFromInlinedBlock
+import org.jetbrains.kotlin.backend.common.ir.getInlinedVariablesFromCallSite
 import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
 import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
 import org.jetbrains.kotlin.backend.jvm.ir.isInlineParameter
+import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.expressions.*
@@ -30,19 +32,25 @@ class CreateSeparateCallForInlinedLambdasLowering(val context: JvmBackendContext
         }
     }
 
-    override fun visitInlinedFunctionBlock(inlinedBlock: IrInlinedFunctionBlock): IrExpression {
+    override fun visitReturnableBlock(expression: IrReturnableBlock): IrExpression {
+        val inlinedBlock = expression.statements.lastOrNull() as? IrInlinedFunctionBlock ?: return super.visitReturnableBlock(expression)
         if (inlinedBlock.isFunctionInlining()) {
-            val newCalls = inlinedBlock.getOnlyInlinableArguments().map { arg ->
+            val newStatements = mutableListOf<IrStatement>()
+            newStatements += expression.getInlinedVariablesFromCallSite().map { it.transform(this, null) as IrStatement }
+            newStatements += inlinedBlock.getOnlyInlinableArguments().map { arg ->
                 IrCallImpl.fromSymbolOwner(UNDEFINED_OFFSET, UNDEFINED_OFFSET, context.ir.symbols.singleArgumentInlineFunction)
                     .also { it.putValueArgument(0, arg.transform(this, null)) }
             }
 
             // we don't need to transform body of original function, just arguments that were extracted as variables
             inlinedBlock.getDefaultAdditionalStatementsFromInlinedBlock().forEach { it.transformChildrenVoid() }
-            inlinedBlock.statements.addAll(0, newCalls)
-            return inlinedBlock
+
+            expression.statements.clear()
+            expression.statements.addAll(newStatements)
+            expression.statements.add(inlinedBlock)
+            return expression
         }
-        return super.visitInlinedFunctionBlock(inlinedBlock)
+        return super.visitReturnableBlock(expression)
     }
 
     private fun IrInlinedFunctionBlock.getOnlyInlinableArguments(): List<IrExpression> {

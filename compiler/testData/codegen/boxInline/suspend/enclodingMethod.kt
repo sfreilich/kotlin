@@ -2,6 +2,7 @@
 // WITH_STDLIB
 // FULL_JDK
 // TARGET_BACKEND: JVM
+// IGNORE_INLINER: IR
 // FILE: flow.kt
 
 package flow
@@ -46,6 +47,7 @@ import flow.*
 
 fun box() : String {
     decorate()
+    // IR inliner don't have `invokeSuspend` or `doResume` prefix because names are generated once, before `SuspendLambdaLowering`
     val enclosingMethod = try {
         Class.forName("flow.FlowKt\$decorate\$1\$invokeSuspend\$\$inlined\$map\$1\$1").enclosingMethod
     } catch (ignore: ClassNotFoundException) {
