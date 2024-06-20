@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.name.NameUtils
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import kotlin.collections.set
 
-abstract class InventNamesForLocalClasses(private val generateNamesForRegeneratedObjects: Boolean = false) : FileLoweringPass {
+abstract class InventNamesForLocalClasses : FileLoweringPass {
 
     protected abstract fun computeTopLevelClassName(clazz: IrClass): String
     protected abstract fun sanitizeNameIfNeeded(name: String): String

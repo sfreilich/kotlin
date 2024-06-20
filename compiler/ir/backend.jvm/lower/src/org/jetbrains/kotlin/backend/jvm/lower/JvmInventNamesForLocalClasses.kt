@@ -24,12 +24,9 @@ import org.jetbrains.org.objectweb.asm.Type
     // MainMethodGeneration introduces lambdas, needing names for their local classes.
     prerequisite = [MainMethodGenerationLowering::class],
 )
-internal class JvmInventNamesForLocalClasses(context: JvmBackendContext) : JvmInventNamesForLocalClassesImpl(context, true)
+internal class JvmInventNamesForLocalClasses(context: JvmBackendContext) : JvmInventNamesForLocalClassesImpl(context)
 
-open class JvmInventNamesForLocalClassesImpl(
-    protected val context: JvmBackendContext,
-    generateNamesForRegeneratedObjects: Boolean = false
-) : InventNamesForLocalClasses(generateNamesForRegeneratedObjects) {
+open class JvmInventNamesForLocalClassesImpl(protected val context: JvmBackendContext) : InventNamesForLocalClasses() {
     override fun computeTopLevelClassName(clazz: IrClass): String {
         val file = clazz.parent as? IrFile
             ?: throw AssertionError("Top-level class expected: ${clazz.render()}")
@@ -50,25 +47,6 @@ open class JvmInventNamesForLocalClassesImpl(
 
     override fun putLocalClassName(declaration: IrAttributeContainer, localClassName: String) {
         if (declaration.localClassType != null) return
-        declaration.localClassType = Type.getObjectType(localClassName)
-    }
-}
-
-// TODO try to use only one "InventNames"
-@PhaseDescription(
-    name = "InventNamesForInlinedLocalClasses",
-    description = "Invent names for INLINED local classes and anonymous objects",
-    prerequisite = [JvmInventNamesForLocalClasses::class, RemoveDuplicatedInlinedLocalClassesLowering::class]
-)
-internal class JvmInventNamesForInlinedAnonymousObjects(context: JvmBackendContext) : JvmInventNamesForLocalClassesImpl(context, true) {
-    override fun lower(irFile: IrFile) {
-        if (context.config.enableIrInliner) {
-            super.lower(irFile)
-        }
-    }
-
-    override fun putLocalClassName(declaration: IrAttributeContainer, localClassName: String) {
-        if (declaration.originalBeforeInline == null) return
         declaration.localClassType = Type.getObjectType(localClassName)
     }
 }
