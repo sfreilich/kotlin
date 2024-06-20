@@ -146,7 +146,8 @@ class ReturnableBlockTransformer(val context: CommonBackendContext, val containe
         }
 
         val newStatements = expression.statements.mapIndexed { i, currentStatement ->
-            if (currentStatement is IrInlinedFunctionBlock) {
+            val isLastInReturnableBlock = i == expression.statements.lastIndex
+            if (isLastInReturnableBlock && currentStatement is IrInlinedFunctionBlock) {
                 val lastIndex = currentStatement.statements.lastIndex
                 for ((j, statement) in currentStatement.statements.withIndex()) {
                     val lastInList = j == lastIndex
@@ -158,7 +159,7 @@ class ReturnableBlockTransformer(val context: CommonBackendContext, val containe
                 }
                 currentStatement
             } else {
-                transformSingleStatement(currentStatement, i == expression.statements.lastIndex)
+                transformSingleStatement(currentStatement, isLastInReturnableBlock)
             }
         }
 
