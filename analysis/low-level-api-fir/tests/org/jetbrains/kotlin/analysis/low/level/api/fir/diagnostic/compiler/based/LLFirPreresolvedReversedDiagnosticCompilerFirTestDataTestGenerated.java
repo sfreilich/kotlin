@@ -5310,6 +5310,12 @@ public class LLFirPreresolvedReversedDiagnosticCompilerFirTestDataTestGenerated 
       }
 
       @Test
+      @TestMetadata("lambas.kt")
+      public void testLambas() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/lambas.kt");
+      }
+
+      @Test
       @TestMetadata("nested.kt")
       public void testNested() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/nested.kt");
