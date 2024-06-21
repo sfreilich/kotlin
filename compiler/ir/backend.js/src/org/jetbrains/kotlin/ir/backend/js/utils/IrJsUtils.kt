@@ -49,9 +49,9 @@ fun IrDeclaration?.isExportedInterface(context: JsIrBackendContext) =
     this is IrClass && kind.isInterface && isExported(context)
 
 fun IrReturn.isTheLastReturnStatementIn(target: IrReturnableBlockSymbol): Boolean {
-    val ownerFirstStatement = target.owner.statements.singleOrNull()
-    if (ownerFirstStatement is IrInlinedFunctionBlock) {
-        return ownerFirstStatement.statements.lastOrNull() === this
+    val ownerLastStatement = target.owner.statements.lastOrNull()
+    if (ownerLastStatement is IrInlinedFunctionBlock) {
+        return ownerLastStatement.statements.lastOrNull() === this
     }
     return target.owner.statements.lastOrNull() === this
 }
