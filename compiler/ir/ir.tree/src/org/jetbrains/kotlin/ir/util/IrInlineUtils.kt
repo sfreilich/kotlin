@@ -47,8 +47,6 @@ val IrContainerExpression.allStatements: List<IrStatement>
         }
         else -> this.statements
     }
-val IrContainerExpression.innerInlinedBlockOrThis: IrContainerExpression
-    get() = (this as? IrReturnableBlock)?.statements?.lastOrNull() as? IrInlinedFunctionBlock ?: this
 val IrReturnableBlock.inlineFunction: IrFunction?
     get() = (this.statements.lastOrNull() as? IrInlinedFunctionBlock)?.inlineFunction
 val IrReturnableBlock.sourceFileSymbol: IrFileSymbol?
