@@ -750,7 +750,9 @@ class K2JsIrCompiler : CLICompiler<K2JSCompilerArguments>() {
 
             val icContext = if (arguments.wasm) {
                 WasmICContext(
-                    allowIncompleteImplementations = false
+                    allowIncompleteImplementations = false,
+                    skipLocalNames = !arguments.wasmDebug,
+                    skipSourceLocations = !arguments.wasmGenerateWat
                 )
             } else {
                 JsICContext(
