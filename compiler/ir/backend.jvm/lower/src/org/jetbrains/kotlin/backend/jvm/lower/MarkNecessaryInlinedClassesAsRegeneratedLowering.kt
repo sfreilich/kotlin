@@ -149,20 +149,20 @@ internal class MarkNecessaryInlinedClassesAsRegeneratedLowering(val context: Jvm
                 super.visitCall(expression)
             }
 
-            override fun visitContainerExpression(expression: IrContainerExpression) {
-                if (expression is IrInlinedFunctionBlock && expression.isFunctionInlining()) {
-                    val additionalInlinableParameters = expression.getInlinableParameters()
-                    val additionalTypeArguments = expression.getReifiedArguments()
+            override fun visitInlinedFunctionBlock(inlinedBlock: IrInlinedFunctionBlock) {
+                if (inlinedBlock.isFunctionInlining()) {
+                    val additionalInlinableParameters = inlinedBlock.getInlinableParameters()
+                    val additionalTypeArguments = inlinedBlock.getReifiedArguments()
 
                     inlinableParameters.addAll(additionalInlinableParameters)
                     reifiedArguments.addAll(additionalTypeArguments)
-                    super.visitContainerExpression(expression)
+                    super.visitContainerExpression(inlinedBlock)
                     inlinableParameters.dropLast(additionalInlinableParameters.size)
                     reifiedArguments.dropLast(additionalTypeArguments.size)
                     return
                 }
 
-                super.visitContainerExpression(expression)
+                super.visitInlinedFunctionBlock(inlinedBlock)
             }
         })
         return classesToRegenerate
