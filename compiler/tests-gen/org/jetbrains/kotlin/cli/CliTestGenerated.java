@@ -1692,6 +1692,11 @@ public class CliTestGenerated extends AbstractCliTest {
       runTest("compiler/testData/cli/metadata/anonymousObjectType.args");
     }
 
+    @TestMetadata("commonAndPlatformStdlibPathInLibraries.args")
+    public void testCommonAndPlatformStdlibPathInLibraries() {
+      runTest("compiler/testData/cli/metadata/commonAndPlatformStdlibPathInLibraries.args");
+    }
+
     @TestMetadata("complexAnnotationArgument.args")
     public void testComplexAnnotationArgument() {
       runTest("compiler/testData/cli/metadata/complexAnnotationArgument.args");
