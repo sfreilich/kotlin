@@ -38,9 +38,9 @@ fun IrInlinedFunctionBlock.isLambdaInlining(): Boolean {
 }
 
 val IrContainerExpression.innerInlinedBlockOrThis: IrContainerExpression
-    get() = (this as? IrReturnableBlock)?.statements?.singleOrNull() as? IrInlinedFunctionBlock ?: this
+    get() = (this as? IrReturnableBlock)?.statements?.lastOrNull() as? IrInlinedFunctionBlock ?: this
 val IrReturnableBlock.inlineFunction: IrFunction?
-    get() = (this.statements.singleOrNull() as? IrInlinedFunctionBlock)?.inlineFunction
+    get() = (this.statements.lastOrNull() as? IrInlinedFunctionBlock)?.inlineFunction
 val IrReturnableBlock.sourceFileSymbol: IrFileSymbol?
     get() = inlineFunction?.fileOrNull?.symbol
 
