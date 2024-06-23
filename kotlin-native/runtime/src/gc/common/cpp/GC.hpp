@@ -95,6 +95,14 @@ bool isMarked(ObjHeader* object) noexcept;
 // If the mark bit was unset, this will return `false`.
 bool tryResetMark(GC::ObjectData& objectData) noexcept;
 
+void incCounter(ObjHeader* obj) noexcept;
+void decCounter(ObjHeader* obj) noexcept;
+void globalise(ObjHeader* obj) noexcept;
+bool tryRecycle(GC::ObjectData& obj) noexcept;
+void initToRC(GC::ObjectData& obj) noexcept;
+bool isRCed(GC::ObjectData& obj) noexcept;
+int refCount(GC::ObjectData& obj) noexcept;
+
 inline constexpr bool kSupportsMultipleMutators = true;
 
 } // namespace gc

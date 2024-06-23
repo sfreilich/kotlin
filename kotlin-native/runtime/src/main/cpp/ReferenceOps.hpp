@@ -95,6 +95,11 @@ private:
     ObjHeader*& ref_;
 };
 
+namespace internal {
+void incCounter(ObjHeader* obj) noexcept ;
+void decCounter(ObjHeader* obj) noexcept ;
+}
+
 /**
  * Represents Koltin-level operations on Koltin references.
  * With all the necessary GC barriers etc.
@@ -139,23 +144,31 @@ public:
 
     ALWAYS_INLINE void store(ObjHeader* desired) noexcept {
         AssertThreadState(ThreadState::kRunnable);
+        internal::incCounter(desired);
+        auto prev = direct().load();
         beforeStore(desired);
         direct_.store(desired);
+        internal::decCounter(prev); // FIXME non-atomic :c
         afterStore(desired);
     }
 
     ALWAYS_INLINE void storeAtomic(ObjHeader* desired, std::memory_order order) noexcept {
         AssertThreadState(ThreadState::kRunnable);
+        internal::incCounter(desired);
+        auto prev = direct().load();
         beforeStore(desired);
         direct_.storeAtomic(desired, order);
+        internal::decCounter(prev); // FIXME non-atomic :c
         afterStore(desired);
     }
 
     ALWAYS_INLINE ObjHeader* exchange(ObjHeader* desired, std::memory_order order) noexcept {
         AssertThreadState(ThreadState::kRunnable);
         beforeLoad();
+        internal::incCounter(desired);
         beforeStore(desired);
         auto result = direct_.exchange(desired, order);
+        // internal::decCounter(result); // FIXME this is where result dies))
         afterStore(desired);
         afterLoad();
         return result;
@@ -164,8 +177,13 @@ public:
     ALWAYS_INLINE bool compareAndExchange(ObjHeader*& expected, ObjHeader* desired, std::memory_order order) noexcept {
         AssertThreadState(ThreadState::kRunnable);
         beforeLoad();
+        internal::incCounter(desired);
         beforeStore(desired);
         bool result = direct_.compareAndExchange(expected, desired, order);
+        if (!result) {
+            internal::decCounter(desired);
+        }
+        // FIXME do something with the old value????
         afterStore(desired);
         afterLoad();
         return result;
