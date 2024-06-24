@@ -195,7 +195,7 @@ public interface KaScopeProvider {
     public val KaType.scope: KaTypeScope?
 
     /**
-     * Returns a [KaScope] containing unsubstituted declarations from the type of the given [KaType].
+     * A [KaScope] containing unsubstituted declarations from the type of the given [KaType].
      */
     @KaExperimentalApi
     public val KaTypeScope.declarationScope: KaScope
