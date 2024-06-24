@@ -29,7 +29,7 @@ public interface KaSymbolRelationProvider {
     public val KaSymbol.containingSymbol: KaDeclarationSymbol?
 
     /**
-     * Returns the containing file symbol.
+     * The containing file symbol.
      *
      * Caveat: returns `null` if the given symbol is already [KaFileSymbol], since there is no containing file.
      * Also, returns `null` for Java and library declarations.
