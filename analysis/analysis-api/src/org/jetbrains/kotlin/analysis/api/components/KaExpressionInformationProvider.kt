@@ -69,7 +69,7 @@ public interface KaExpressionInformationProvider {
      *   - `x + 8`
      *   - `when (x) { 1 -> ...; else -> ... }
      *
-     * In these, expressions, `x` is not used as a value (`x.isUsedAsExpression == false`)
+     * In these expressions, `x` is not used as a value (`x.isUsedAsExpression == false`)
      *   - `run { x; println(50) }`
      *   - `when (x) { else -> ... }`
      *
