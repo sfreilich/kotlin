@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     api(project(":compiler:config"))
+    implementation(project(":core:metadata"))
     compileOnly(intellijCore())
 }
 
