@@ -37,7 +37,7 @@ public interface KaSymbolRelationProvider {
     public val KaSymbol.containingFile: KaFileSymbol?
 
     /**
-     * Returns the containing module for the given symbol.
+     * The containing module for the given symbol.
      */
     public val KaSymbol.containingModule: KaModule
 
