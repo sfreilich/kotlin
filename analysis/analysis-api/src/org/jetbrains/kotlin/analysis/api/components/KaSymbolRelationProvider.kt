@@ -89,7 +89,7 @@ public interface KaSymbolRelationProvider {
     public fun KaClassSymbol.isDirectSubClassOf(superClass: KaClassSymbol): Boolean
 
     /**
-     * Returns the list of all overridden symbols for the given intersection override callable.
+     * The list of all overridden symbols for the given intersection override callable.
      *
      * Example:
      *
