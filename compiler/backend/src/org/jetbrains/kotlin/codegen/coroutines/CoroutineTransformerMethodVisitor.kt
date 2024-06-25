@@ -625,9 +625,9 @@ class CoroutineTransformerMethodVisitor(
         val livenessFrames = analyzeLiveness(methodNode)
 
         // References shall be cleaned up after unspill (during spill in next suspension point) to prevent memory leaks,
-        val referencesToSpillBySuspensionPointIndex = arrayListOf<List<ReferenceToSpill>>()
+        val referencesToSpillBySuspensionPointIndex = arrayListOf<List<SpillableVariable>>()
         // while primitives shall not
-        val primitivesToSpillBySuspensionPointIndex = arrayListOf<List<PrimitiveToSpill>>()
+        val primitivesToSpillBySuspensionPointIndex = arrayListOf<List<SpillableVariable>>()
 
         // Collect information about spillable variables, that we use to determine which variables we need to cleanup
         for (suspension in suspensionPoints) {
@@ -645,13 +645,12 @@ class CoroutineTransformerMethodVisitor(
                 methodNode, frames, livenessFrames, suspensionCallBeginIndex, varsCountByType
             )
 
-            val (referencesToSpill, primitivesToSpill) = variablesToSpill.partition { (_, variable) ->
-                variable == null || variable.normalizedType == AsmTypes.OBJECT_TYPE
+            val (referencesToSpill, primitivesToSpill) = variablesToSpill.partition { variable ->
+                variable.normalizedType == AsmTypes.OBJECT_TYPE
             }
 
             referencesToSpillBySuspensionPointIndex += referencesToSpill
-            @Suppress("UNCHECKED_CAST")
-            primitivesToSpillBySuspensionPointIndex += primitivesToSpill as List<PrimitiveToSpill>
+            primitivesToSpillBySuspensionPointIndex += primitivesToSpill
 
             for ((type, index) in varsCountByType) {
                 maxVarsCountByType[type] = max(maxVarsCountByType[type] ?: 0, index)
@@ -669,8 +668,8 @@ class CoroutineTransformerMethodVisitor(
         // Mutate method node
         for (suspensionPointIndex in suspensionPoints.indices) {
             val suspension = suspensionPoints[suspensionPointIndex]
-            for ((slot, referenceToSpill) in referencesToSpillBySuspensionPointIndex[suspensionPointIndex]) {
-                generateSpillAndUnspill(methodNode, suspension, slot, referenceToSpill)
+            for (referenceToSpill in referencesToSpillBySuspensionPointIndex[suspensionPointIndex]) {
+                generateSpillAndUnspill(methodNode, suspension, referenceToSpill)
             }
 
             if (shouldOptimiseUnusedVariables) {
@@ -682,8 +681,8 @@ class CoroutineTransformerMethodVisitor(
                 }
             }
 
-            for ((slot, primitiveToSpill) in primitivesToSpillBySuspensionPointIndex[suspensionPointIndex]) {
-                generateSpillAndUnspill(methodNode, suspension, slot, primitiveToSpill)
+            for (primitiveToSpill in primitivesToSpillBySuspensionPointIndex[suspensionPointIndex]) {
+                generateSpillAndUnspill(methodNode, suspension, primitiveToSpill)
             }
         }
 
@@ -703,15 +702,14 @@ class CoroutineTransformerMethodVisitor(
     private fun generateSpillAndUnspill(
         methodNode: MethodNode,
         suspension: SuspensionPoint,
-        slot: Int,
-        spillableVariable: SpillableVariable?
+        spillableVariable: SpillableVariable
     ) {
         // Find and remove the local variable node, if any, in the local variable table corresponding to the slot that is spilled.
         var local: LocalVariableNode? = null
         val iterator = methodNode.localVariables.listIterator()
         while (iterator.hasNext()) {
             val node = iterator.next()
-            if (node.index == slot &&
+            if (node.index == spillableVariable.slot &&
                 methodNode.instructions.indexOf(node.start) <= methodNode.instructions.indexOf(suspension.suspensionCallBegin) &&
                 methodNode.instructions.indexOf(node.end) > methodNode.instructions.indexOf(suspension.tryCatchBlockEndLabelAfterSuspensionCall)
             ) {
@@ -721,11 +719,11 @@ class CoroutineTransformerMethodVisitor(
             }
         }
 
-        if (spillableVariable == null) {
+        if (spillableVariable.isNull) {
             with(methodNode.instructions) {
                 insert(suspension.tryCatchBlockEndLabelAfterSuspensionCall, withInstructionAdapter {
                     aconst(null)
-                    store(slot, AsmTypes.OBJECT_TYPE)
+                    store(spillableVariable.slot, AsmTypes.OBJECT_TYPE)
                 })
             }
             val newStart = suspension.tryCatchBlocksContinuationLabel.findNextOrNull { it is LabelNode } as? LabelNode ?: return
@@ -738,7 +736,7 @@ class CoroutineTransformerMethodVisitor(
             // store variable before suspension call
             insertBefore(suspension.suspensionCallBegin, withInstructionAdapter {
                 load(continuationIndex, AsmTypes.OBJECT_TYPE)
-                load(slot, spillableVariable.type)
+                load(spillableVariable.slot, spillableVariable.type)
                 StackValue.coerce(spillableVariable.type, spillableVariable.normalizedType, this)
                 putfield(
                     classBuilderForCoroutineState.thisName,
@@ -756,7 +754,7 @@ class CoroutineTransformerMethodVisitor(
                     spillableVariable.normalizedType.descriptor
                 )
                 StackValue.coerce(spillableVariable.normalizedType, spillableVariable.type, this)
-                store(slot, spillableVariable.type)
+                store(spillableVariable.slot, spillableVariable.type)
                 if (local != null) {
                     visitLabel(localRestart.label)
                 }
@@ -825,10 +823,10 @@ class CoroutineTransformerMethodVisitor(
         livenessFrames: List<VariableLivenessFrame>,
         suspensionCallBeginIndex: Int,
         varsCountByType: MutableMap<Type, Int>,
-    ): ArrayList<VariableToSpill> {
+    ): ArrayList<SpillableVariable> {
         val frame = frames[suspensionCallBeginIndex].sure { "Suspension points containing in dead code must be removed" }
         val localsCount = frame.locals
-        val variablesToSpill = arrayListOf<VariableToSpill>()
+        val variablesToSpill = arrayListOf<SpillableVariable>()
 
         val livenessFrame = livenessFrames[suspensionCallBeginIndex]
 
@@ -843,9 +841,10 @@ class CoroutineTransformerMethodVisitor(
             if (isForNamedFunction && slot == getLastParameterIndex(methodNode.desc, methodNode.access)) continue
             val value = frame.getLocal(slot)
             if (value.type == null) continue
+            var visibleByDebugger = false
             if (!livenessFrame.isAlive(slot)) {
                 if (!shouldOptimiseUnusedVariables) {
-                    val visibleByDebugger = methodNode.localVariables.any {
+                    visibleByDebugger = methodNode.localVariables.any {
                         if (it.index != slot) return@any false
                         methodNode.instructions.indexOf(it.start) < suspensionCallBeginIndex &&
                                 suspensionCallBeginIndex < methodNode.instructions.indexOf(it.end)
@@ -857,7 +856,7 @@ class CoroutineTransformerMethodVisitor(
             }
 
             if (value === StrictBasicValue.NULL_VALUE) {
-                variablesToSpill += slot to null
+                variablesToSpill += SpillableVariable(value, AsmTypes.OBJECT_TYPE, AsmTypes.OBJECT_TYPE, null, slot, visibleByDebugger)
                 continue
             }
 
@@ -868,7 +867,7 @@ class CoroutineTransformerMethodVisitor(
             varsCountByType[normalizedType] = indexBySort
 
             val fieldName = normalizedType.fieldNameForVar(indexBySort)
-            variablesToSpill += slot to SpillableVariable(value, type, normalizedType, fieldName)
+            variablesToSpill += SpillableVariable(value, type, normalizedType, fieldName, slot, visibleByDebugger)
         }
         return variablesToSpill
     }
@@ -876,8 +875,8 @@ class CoroutineTransformerMethodVisitor(
     private fun mapFieldNameToVariable(
         methodNode: MethodNode,
         suspensionPoints: List<SuspensionPoint>,
-        referencesToSpillBySuspensionPointIndex: ArrayList<List<ReferenceToSpill>>,
-        primitivesToSpillBySuspensionPointIndex: ArrayList<List<PrimitiveToSpill>>,
+        referencesToSpillBySuspensionPointIndex: ArrayList<List<SpillableVariable>>,
+        primitivesToSpillBySuspensionPointIndex: ArrayList<List<SpillableVariable>>,
     ): ArrayList<List<SpilledVariableAndField>> {
         val spilledToVariableMapping = arrayListOf<List<SpilledVariableAndField>>()
         for (suspensionPointIndex in suspensionPoints.indices) {
@@ -885,11 +884,11 @@ class CoroutineTransformerMethodVisitor(
 
             val spilledToVariable = arrayListOf<SpilledVariableAndField>()
 
-            referencesToSpillBySuspensionPointIndex[suspensionPointIndex].mapNotNullTo(spilledToVariable) { (slot, spillableVariable) ->
-                calculateSpilledVariableAndField(methodNode, suspension, slot, spillableVariable)
+            referencesToSpillBySuspensionPointIndex[suspensionPointIndex].mapNotNullTo(spilledToVariable) { spillableVariable ->
+                calculateSpilledVariableAndField(methodNode, suspension, spillableVariable)
             }
-            primitivesToSpillBySuspensionPointIndex[suspensionPointIndex].mapNotNullTo(spilledToVariable) { (slot, spillableVariable) ->
-                calculateSpilledVariableAndField(methodNode, suspension, slot, spillableVariable)
+            primitivesToSpillBySuspensionPointIndex[suspensionPointIndex].mapNotNullTo(spilledToVariable) { spillableVariable ->
+                calculateSpilledVariableAndField(methodNode, suspension, spillableVariable)
             }
 
             spilledToVariableMapping += spilledToVariable
@@ -902,7 +901,7 @@ class CoroutineTransformerMethodVisitor(
     private fun calculateVariablesToCleanup(
         methodNode: MethodNode,
         suspensionPoints: List<SuspensionPoint>,
-        referencesToSpillBySuspensionPointIndex: List<List<ReferenceToSpill>>,
+        referencesToSpillBySuspensionPointIndex: List<List<SpillableVariable>>,
         initialSpilledVariablesCount: Int,
     ): ArrayList<Pair<Int, Int>> {
         val predSuspensionPoints = calculateSuspensionPointPredecessorsMapping(methodNode, suspensionPoints)
@@ -965,20 +964,19 @@ class CoroutineTransformerMethodVisitor(
     }
 
     // Calculate all pairs SuspensionPoint -> C and P, where P is minimum of all preds' Cs
-    private fun countVariablesToSpill(referencesToSpillBySuspensionPointIndex: List<List<ReferenceToSpill>>, index: Int): Int =
-        referencesToSpillBySuspensionPointIndex[index].count { (_, variable) -> variable != null }
+    private fun countVariablesToSpill(referencesToSpillBySuspensionPointIndex: List<List<SpillableVariable>>, index: Int): Int =
+        referencesToSpillBySuspensionPointIndex[index].count { variable -> !variable.isNull }
 
     // Calculate debug metadata mapping before modifying method node to make it easier to locate
     // locals alive across suspension points.
     private fun calculateSpilledVariableAndField(
         methodNode: MethodNode,
         suspension: SuspensionPoint,
-        slot: Int,
-        spillableVariable: SpillableVariable?
+        spillableVariable: SpillableVariable
     ): SpilledVariableAndField? {
-        if (spillableVariable == null) return null
-        val name = localVariableName(methodNode, slot, methodNode.instructions.indexOf(suspension.suspensionCallBegin)) ?: return null
-        return SpilledVariableAndField(spillableVariable.fieldName, name)
+        if (spillableVariable.isNull) return null
+        val name = localVariableName(methodNode, spillableVariable.slot, methodNode.instructions.indexOf(suspension.suspensionCallBegin)) ?: return null
+        return SpilledVariableAndField(spillableVariable.fieldName!!, name)
     }
 
     private fun localVariableName(
@@ -1171,12 +1169,22 @@ private class SpillableVariable(
     val value: BasicValue,
     val type: Type,
     val normalizedType: Type,
-    val fieldName: String
-)
+    val fieldName: String?,
+    val slot: Int,
+    val isVisible: Boolean,
+) {
+    init {
+        require(
+            value !== StrictBasicValue.NULL_VALUE && fieldName != null ||
+                    value === StrictBasicValue.NULL_VALUE && fieldName == null
+        ) {
+            "Value is $value, fieldName is $fieldName"
+        }
+    }
 
-private typealias ReferenceToSpill = Pair<Int, SpillableVariable?>
-private typealias VariableToSpill = Pair<Int, SpillableVariable?>
-private typealias PrimitiveToSpill = Pair<Int, SpillableVariable>
+    val isNull: Boolean
+        get() = value === StrictBasicValue.NULL_VALUE
+}
 
 internal fun InstructionAdapter.generateContinuationConstructorCall(
     objectTypeForState: Type?,
