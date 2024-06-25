@@ -569,6 +569,10 @@ class FirElementSerializer private constructor(
             }
         }
 
+        property.getDelegatedWrappedDataProto(local)?.let {
+            builder.setDelegatedWrappedData(it)
+        }
+
         versionRequirementTable?.run {
             builder.addAllVersionRequirement(serializeVersionRequirements(property))
 
@@ -662,6 +666,10 @@ class FirElementSerializer private constructor(
 
         contractSerializer.serializeContractOfFunctionIfAny(function, builder, this)
 
+        function.getDelegatedWrappedDataProto(local)?.let {
+            builder.setDelegatedWrappedData(it)
+        }
+
         extension.serializeFunction(function, builder, versionRequirementTable, local)
 
         if (serializeTypeTableToFunction) {
@@ -678,6 +686,19 @@ class FirElementSerializer private constructor(
 
         return builder
     }
+
+    private fun FirCallableDeclaration.getDelegatedWrappedDataProto(local: FirElementSerializer): ProtoBuf.DelegatedWrapperData.Builder? =
+        delegatedWrapperData?.let { delegated ->
+            val callableId = delegated.wrapped.symbol.callableId
+            val classId = callableId.classId
+            if (classId != null) {
+                val p = ProtoBuf.DelegatedWrapperData.newBuilder().apply {
+                    setWrappedClassId(stringTable.getQualifiedClassNameIndex(classId))
+                    setWrappedNameId(local.getSimpleNameIndex(callableId.callableName))
+                }
+                p
+            } else null
+        }
 
     private fun FirFunction.memberKind(): MemberKind {
         return when (origin) {
