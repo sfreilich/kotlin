@@ -569,12 +569,12 @@ internal fun PhaseEngine<NativeGenerationState>.getLoweringsUpToAndIncludingInli
         lowerOuterThisInInlineFunctionsPhase,
         extractLocalClassesFromInlineBodies,
         inlineCallableReferenceToLambdaPhase,
-        arrayConstructorPhase,
         wrapInlineDeclarationsWithReifiedTypeParametersLowering,
         inlinePhase,
 )
 
 internal fun PhaseEngine<NativeGenerationState>.getLoweringsAfterInlining(): LoweringList = listOfNotNull(
+        arrayConstructorPhase,
         removeExpectDeclarationsPhase,
         stripTypeAliasDeclarationsPhase,
         assertsRemovalPhase.takeUnless { context.config.assertsEnabled },

@@ -656,12 +656,12 @@ val loweringList = listOf(
     localClassesExtractionFromInlineFunctionsPhase,
 
     inlineCallableReferenceToLambdaPhase,
-    arrayConstructorPhase,
     wrapInlineDeclarationsWithReifiedTypeParametersPhase,
 
     functionInliningPhase,
     validateIrAfterInliningPhase,
     constEvaluationPhase,
+    arrayConstructorPhase,
     removeInlineDeclarationsWithReifiedTypeParametersLoweringPhase,
 
     tailrecLoweringPhase,
