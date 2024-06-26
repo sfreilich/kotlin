@@ -380,7 +380,7 @@ private val inlinePhase = createFileLoweringPhase(
         },
         name = "Inline",
         description = "Functions inlining",
-        prerequisite = setOf(lowerBeforeInlinePhase, arrayConstructorPhase, extractLocalClassesFromInlineBodies)
+        prerequisite = setOf(lowerBeforeInlinePhase, extractLocalClassesFromInlineBodies)
 )
 
 private val interopPhase = createFileLoweringPhase(
