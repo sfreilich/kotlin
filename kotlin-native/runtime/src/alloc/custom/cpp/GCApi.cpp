@@ -6,6 +6,7 @@
 #include "GCApi.hpp"
 
 #include <atomic>
+#include <memory>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -25,6 +26,7 @@
 #include "GCStatistics.hpp"
 #include "KAssert.h"
 #include "Memory.h"
+#include "KString.h"
 
 namespace {
 
@@ -91,8 +93,22 @@ bool TryRecycleObject(uint8_t* object) noexcept {
     }
     auto* extraObject = mm::ExtraObjectData::Get(heapObjHeader->object());
     if (extraObject) {
-        CustomAllocDebug("TryRecycleObject(%p): not recyclable due to extra data", heapObjHeader);
-        return false;
+        CustomAllocDebug("TryRecycleObject(%p): has extra object", heapObjHeader);
+        if (!extraObject->getFlag(mm::ExtraObjectData::FLAGS_IN_FINALIZER_QUEUE)) {
+//            CustomAllocDebug("TryRecycleObject(%p): needs to be finalized, extraObject at %p", heapObjHeader, extraObject);
+//            extraObject->setFlag(mm::ExtraObjectData::FLAGS_IN_FINALIZER_QUEUE);
+//            extraObject->ClearRegularWeakReferenceImpl();
+//            CustomAllocDebug("TryRecycleObject: fromExtraObject(%p) = %p", extraObject, ExtraObjectCell::fromExtraObject(extraObject));
+//            RunFinalizersSoft(heapObjHeader->object());
+//            // The object has a finalizer, but all the data for it resides in `ExtraObjectData`. So, detach the object from it, and free it.
+//            extraObject->UnlinkFromBaseObject();
+            //CustomAllocDebug("TryRecycleObject(%p): recycled", heapObjHeader);
+            return false;
+        }
+        if (!extraObject->getFlag(mm::ExtraObjectData::FLAGS_FINALIZED)) {
+            CustomAllocDebug("TryRecycleObject(%p): already waiting to be finalized", heapObjHeader);
+            return false;
+        }
     }
     CustomAllocDebug("TryRecycleObject(%p): recycled", heapObjHeader);
     return true;

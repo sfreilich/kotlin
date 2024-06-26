@@ -95,11 +95,11 @@ ALWAYS_INLINE inline bool freezingChecksEnabled() noexcept {
 }
 
 ALWAYS_INLINE inline bool concurrentWeakSweep() noexcept {
-    return Kotlin_concurrentWeakSweep != 0;
+    return false;//Kotlin_concurrentWeakSweep != 0;
 }
 
 ALWAYS_INLINE inline bool gcMarkSingleThreaded() noexcept {
-    return Kotlin_gcMarkSingleThreaded != 0;
+    return true; //Kotlin_gcMarkSingleThreaded != 0;
 }
 
 

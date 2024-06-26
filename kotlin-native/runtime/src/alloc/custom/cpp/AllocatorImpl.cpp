@@ -33,10 +33,6 @@ ALWAYS_INLINE void alloc::Allocator::ThreadData::destroyUnattachedExtraObjectDat
     extraObject.setFlag(mm::ExtraObjectData::FLAGS_SWEEPABLE);
 }
 
-ALWAYS_INLINE void freeReferenceCounted(gc::GC::ObjectData* object) noexcept {
-    // TODO remove?
-}
-
 void alloc::Allocator::ThreadData::prepareForGC() noexcept {
     impl_->alloc().PrepareForGC();
 }
@@ -97,4 +93,8 @@ void alloc::Allocator::ThreadData::freeReferenceCounted(gc::GC::ObjectData& objD
     RuntimeAssert(cellCount <= FIXED_BLOCK_PAGE_MAX_BLOCK_SIZE, "");
     auto& page = FixedBlockPage::containing(object);
     page.countDied();
+}
+
+void alloc::Allocator::recycleAll() noexcept {
+    impl_->heap().RecycleAll();
 }

@@ -9,15 +9,15 @@
 
 using namespace kotlin;
 
-ALWAYS_INLINE void mm::internal::incCounter(ObjHeader* obj) noexcept {
+ALWAYS_INLINE void mm::internal::incCounter(ObjHeader* obj, const char* reason) noexcept {
     if (obj && obj->heap()) {
-        gc::incCounter(obj);
+        gc::incCounter(obj, reason);
     }
 }
 
-ALWAYS_INLINE void mm::internal::decCounter(ObjHeader* obj) noexcept {
+ALWAYS_INLINE void mm::internal::decCounter(ObjHeader* obj, const char* reason) noexcept {
     if (obj && obj->heap()) {
-        gc::decCounter(obj);
+        gc::decCounter(obj, reason);
     }
 }
 

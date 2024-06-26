@@ -13,6 +13,7 @@
 #include "CustomLogging.hpp"
 #include "CustomAllocConstants.hpp"
 #include "GCApi.hpp"
+#include "KString.h"
 
 namespace kotlin::alloc {
 
@@ -111,6 +112,15 @@ void FixedBlockPage::Recycle() noexcept {
                 // We should null this cell out, but we will do so in batch later.
                 continue;
             }
+
+//            auto& objData = reinterpret_cast<HeapObjHeader*>(cells_[cell].data)->objectData();
+//            ObjHeader* obj = objectForObjectData(objData);
+//            int rc = -1;
+//            if (gc::isRCed(objData)) rc = gc::refCount(objData);
+//            auto pkg = std::unique_ptr<char>{CreateCStringFromString(obj->type_info()->packageName_)};
+//            auto name = std::unique_ptr<char>{CreateCStringFromString(obj->type_info()->relativeName_)};
+//            CustomAllocDebug("TryRecycleObject(%p): not recyclable of type %s.%s RC=%d", obj, pkg.get(), name.get(), rc);
+
             ++aliveBlocksCount;
             if (prevLive + blockSize_ < cell) {
                 // We found an alive cell that ended a run of swept cells or a known unoccupied range.
@@ -140,7 +150,6 @@ void FixedBlockPage::Recycle() noexcept {
 
     allocatedSizeTracker_.afterSweep(aliveBlocksCount * blockSize_ * sizeof(FixedBlockCell));
 
-    escapedCount_ = aliveBlocksCount;
     diedCount_ = 0;
 }
 

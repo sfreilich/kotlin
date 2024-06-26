@@ -71,7 +71,7 @@ class SpecialRefRegistry : private Pinned {
                 registry.insertIntoRootsHead(*this);
                 if (obj->heap()) {
                     for (int i = 0; i < rc; ++i) {
-                        gc::incCounter(obj);
+                        gc::incCounter(obj, "spec ref");
                     }
                 }
             }
@@ -125,7 +125,7 @@ class SpecialRefRegistry : private Pinned {
             RuntimeAssert(rc >= 0, "Retaining StableRef@%p with rc %d", this, rc);
             auto obj = obj_.load(std::memory_order_relaxed);
             if (obj && obj->heap()) {
-                gc::decCounter(obj);
+                gc::decCounter(obj, "spec ref");
             }
             if (rc == 0) {
                 if (!obj_.load(std::memory_order_relaxed)) {
@@ -159,7 +159,7 @@ class SpecialRefRegistry : private Pinned {
         void releaseRef() noexcept {
             auto obj = obj_.load(std::memory_order_relaxed);
             if (obj && obj->heap()) {
-                gc::decCounter(obj);
+                gc::decCounter(obj, nullptr);
             }
             auto rc = rc_.fetch_sub(1, std::memory_order_relaxed);
             RuntimeAssert(rc > 0, "Releasing StableRef@%p with rc %d", this, rc);

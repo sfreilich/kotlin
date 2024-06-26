@@ -7,12 +7,12 @@
 #include "ThreadData.hpp"
 #include "ObjectTraversal.hpp"
 
-void kotlin::gc::GC::ObjectData::incRefCounter(mm::ThreadData& thread) noexcept {
+ALWAYS_INLINE void kotlin::gc::GC::ObjectData::incRefCounter(mm::ThreadData& thread, const char* reason) noexcept {
     uint32_t currentTid = thread.threadId();
     auto word = gcWord_.load(std::memory_order_relaxed);
     if (word.isRefCounted()) {
         if (word.ownerTid() == currentTid) {
-            //RuntimeLogDebug({kTagGC}, "inc(%p) ++%u", this, word.refCount());
+            RuntimeLogDebug({kTagGC}, "inc(%p) %s %u->%u", this, reason, word.refCount(), word.refCount() + 1);
             auto desired = word.incCounter();
             gcWord_.compare_exchange_strong(word, desired, std::memory_order_relaxed);
             // if swapped: object remains local
@@ -27,25 +27,17 @@ void kotlin::gc::GC::ObjectData::incRefCounter(mm::ThreadData& thread) noexcept 
     }
 }
 
-void kotlin::gc::GC::ObjectData::decRefCounter(mm::ThreadData& thread) noexcept {
+ALWAYS_INLINE void kotlin::gc::GC::ObjectData::decRefCounter(mm::ThreadData& thread, const char* reason) noexcept {
     uint32_t currentTid = thread.threadId();
     auto word = gcWord_.load(std::memory_order_relaxed);
     if (word.isRefCounted()) {
         if (word.ownerTid() == currentTid) {
             if (word.refCount() > 0) {
-                //RuntimeLogDebug({kTagGC}, "dec(%p) --%u", this, word.refCount());
+                RuntimeLogDebug({kTagGC}, "dec(%p) %s %u->%u", this, reason, word.refCount(), word.refCount() - 1);
                 auto desired = word.decCounter();
                 bool swapped = gcWord_.compare_exchange_strong(word, desired, std::memory_order_relaxed);
                 if (swapped && desired.refCount() == 0) {
-                    thread.allocator().freeReferenceCounted(*this);
-
-                    traverseReferredObjects(alloc::objectForObjectData(*this), [](ObjHeader* referred) {
-                        if (referred->heap()) {
-                            decCounter(referred);
-                        }
-                    });
-
-                    // TODO run finalizers
+                    killObj(thread);
                 }
             }
             // if not swapped: object has escaped, nothing to do
@@ -59,7 +51,17 @@ void kotlin::gc::GC::ObjectData::decRefCounter(mm::ThreadData& thread) noexcept 
     }
 }
 
-void kotlin::gc::GC::ObjectData::initToRC(kotlin::mm::ThreadData& thread) noexcept {
+NO_INLINE void kotlin::gc::GC::ObjectData::killObj(mm::ThreadData& thread) noexcept {
+    thread.allocator().freeReferenceCounted(*this);
+
+    traverseReferredObjects(alloc::objectForObjectData(*this), [](ObjHeader* referred) {
+        if (referred->heap()) {
+            decCounter(referred, "parent died");
+        }
+    });
+}
+
+ALWAYS_INLINE void kotlin::gc::GC::ObjectData::initToRC(kotlin::mm::ThreadData& thread) noexcept {
     RuntimeAssert(gcWord_.load(std::memory_order_relaxed).isTraced(), "");
     gcWord_.store(internal::GCWord::refCounted(0, thread.threadId()));
 }

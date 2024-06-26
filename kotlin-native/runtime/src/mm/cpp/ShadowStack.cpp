@@ -31,7 +31,7 @@ void mm::ShadowStack::EnterFrame(ObjHeader** start, int parameters, int count) n
     frame->count = count;
 }
 
-void mm::ShadowStack::LeaveFrame(ObjHeader** start, int parameters, int count) noexcept {
+ALWAYS_INLINE void mm::ShadowStack::LeaveFrame(ObjHeader** start, int parameters, int count) noexcept {
     FrameOverlay* frame = reinterpret_cast<FrameOverlay*>(start);
     RuntimeAssert(currentFrame_ == frame, "Frame to leave is expected to be %p, but current frame is %p", frame, currentFrame_);
     ObjHeader** begin = reinterpret_cast<ObjHeader**>(frame + 1) + frame->parameters;

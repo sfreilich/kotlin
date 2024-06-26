@@ -155,6 +155,7 @@ void gc::ParallelMarkConcurrentSweep::PerformFullGC(int64_t epoch) noexcept {
 
     state_.start(epoch);
 
+    //allocator_.recycleAll();
     markDispatcher_.runMainInSTW();
 
     markDispatcher_.endMarkingEpoch();
@@ -190,7 +191,7 @@ void gc::ParallelMarkConcurrentSweep::PerformFullGC(int64_t epoch) noexcept {
     checkMarkCorrectness(*objectFactoryIterable);
 #endif
 
-    resumeTheWorld(gcHandle);
+     resumeTheWorld(gcHandle);
 
 #ifndef CUSTOM_ALLOCATOR
     alloc::SweepExtraObjects<alloc::DefaultSweepTraits<alloc::ObjectFactoryImpl>>(gcHandle, *extraObjectFactoryIterable);

@@ -119,8 +119,9 @@ public:
     }
     void initToRC(mm::ThreadData& thread) noexcept;
 
-    void incRefCounter(mm::ThreadData& thread) noexcept;
-    void decRefCounter(mm::ThreadData& thread) noexcept;
+    void incRefCounter(mm::ThreadData& thread, const char* reason) noexcept;
+    void decRefCounter(mm::ThreadData& thread, const char* reason) noexcept;
+    void killObj(mm::ThreadData& thread) noexcept;
 
     void globalise() noexcept {
         auto word = gcWord_.load(std::memory_order_relaxed);

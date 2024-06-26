@@ -49,6 +49,7 @@ public:
     Impl& impl() noexcept { return *impl_; }
 
     void prepareForGC() noexcept;
+    void recycleAll() noexcept;
 
     // TODO: Move into AllocatorTestSupport.hpp
     void clearForTests() noexcept;

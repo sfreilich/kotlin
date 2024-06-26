@@ -103,10 +103,10 @@ ALWAYS_INLINE bool gc::tryResetMark(GC::ObjectData& objectData) noexcept {
     return objectData.tryResetMark();
 }
 
-ALWAYS_INLINE void gc::incCounter(ObjHeader* obj) noexcept {}
-ALWAYS_INLINE void gc::decCounter(ObjHeader* obj) noexcept {}
+ALWAYS_INLINE void gc::incCounter(ObjHeader* obj, const char* reason) noexcept {}
+ALWAYS_INLINE void gc::decCounter(ObjHeader* obj, const char* reason) noexcept {}
 ALWAYS_INLINE void gc::globalise(ObjHeader* obj) noexcept {}
-ALWAYS_INLINE bool gc::tryRecycle(GC::ObjectData& obj) noexcept { return true; }
+ALWAYS_INLINE bool gc::tryRecycle(GC::ObjectData& obj) noexcept { return false; }
 ALWAYS_INLINE void gc::initToRC(GC::ObjectData& obj) noexcept {}
 ALWAYS_INLINE bool gc::isRCed(GC::ObjectData& obj) noexcept { return false; }
 ALWAYS_INLINE int gc::refCount(GC::ObjectData& obj) noexcept { return 0; }

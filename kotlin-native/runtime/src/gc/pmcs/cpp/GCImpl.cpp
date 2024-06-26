@@ -101,13 +101,13 @@ ALWAYS_INLINE bool gc::tryResetMark(GC::ObjectData& objectData) noexcept {
     return objectData.tryResetMark();
 }
 
-ALWAYS_INLINE void gc::incCounter(ObjHeader* obj) noexcept {
+ALWAYS_INLINE void gc::incCounter(ObjHeader* obj, const char* reason) noexcept {
     RuntimeAssert(obj->heap(), "");
-    alloc::objectDataForObject(obj).incRefCounter(*mm::ThreadRegistry::Instance().CurrentThreadData());
+    alloc::objectDataForObject(obj).incRefCounter(*mm::ThreadRegistry::Instance().CurrentThreadData(), reason);
 }
-ALWAYS_INLINE void gc::decCounter(ObjHeader* obj) noexcept {
+ALWAYS_INLINE void gc::decCounter(ObjHeader* obj, const char* reason) noexcept {
     RuntimeAssert(obj->heap(), "");
-    alloc::objectDataForObject(obj).decRefCounter(*mm::ThreadRegistry::Instance().CurrentThreadData());
+    alloc::objectDataForObject(obj).decRefCounter(*mm::ThreadRegistry::Instance().CurrentThreadData(), reason);
 }
 ALWAYS_INLINE void gc::globalise(ObjHeader* obj) noexcept {
     RuntimeAssert(obj->heap(), "");

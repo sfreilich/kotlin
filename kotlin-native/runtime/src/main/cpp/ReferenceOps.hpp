@@ -96,8 +96,8 @@ private:
 };
 
 namespace internal {
-void incCounter(ObjHeader* obj) noexcept ;
-void decCounter(ObjHeader* obj) noexcept ;
+void incCounter(ObjHeader* obj, const char* reason) noexcept ;
+void decCounter(ObjHeader* obj, const char* reason) noexcept ;
 }
 
 /**
@@ -107,6 +107,7 @@ void decCounter(ObjHeader* obj) noexcept ;
  */
 template<bool kOnStack>
 class RefAccessor {
+    static constexpr const char* reason = kOnStack ? "stack" : "heap";
 public:
     RefAccessor() = delete;
     RefAccessor& operator=(const RefAccessor&) = delete;
@@ -144,28 +145,28 @@ public:
 
     ALWAYS_INLINE void store(ObjHeader* desired) noexcept {
         AssertThreadState(ThreadState::kRunnable);
-        internal::incCounter(desired);
+        internal::incCounter(desired, reason);
         auto prev = direct().load();
         beforeStore(desired);
         direct_.store(desired);
-        internal::decCounter(prev); // FIXME non-atomic :c
+        internal::decCounter(prev, reason); // FIXME non-atomic :c
         afterStore(desired);
     }
 
     ALWAYS_INLINE void storeAtomic(ObjHeader* desired, std::memory_order order) noexcept {
         AssertThreadState(ThreadState::kRunnable);
-        internal::incCounter(desired);
+        internal::incCounter(desired, reason);
         auto prev = direct().load();
         beforeStore(desired);
         direct_.storeAtomic(desired, order);
-        internal::decCounter(prev); // FIXME non-atomic :c
+        internal::decCounter(prev, reason); // FIXME non-atomic :c
         afterStore(desired);
     }
 
     ALWAYS_INLINE ObjHeader* exchange(ObjHeader* desired, std::memory_order order) noexcept {
         AssertThreadState(ThreadState::kRunnable);
         beforeLoad();
-        internal::incCounter(desired);
+        internal::incCounter(desired, reason);
         beforeStore(desired);
         auto result = direct_.exchange(desired, order);
         // internal::decCounter(result); // FIXME this is where result dies))
@@ -177,11 +178,11 @@ public:
     ALWAYS_INLINE bool compareAndExchange(ObjHeader*& expected, ObjHeader* desired, std::memory_order order) noexcept {
         AssertThreadState(ThreadState::kRunnable);
         beforeLoad();
-        internal::incCounter(desired);
+        internal::incCounter(desired, reason);
         beforeStore(desired);
         bool result = direct_.compareAndExchange(expected, desired, order);
         if (!result) {
-            internal::decCounter(desired);
+            internal::decCounter(desired, reason);
         }
         // FIXME do something with the old value????
         afterStore(desired);
