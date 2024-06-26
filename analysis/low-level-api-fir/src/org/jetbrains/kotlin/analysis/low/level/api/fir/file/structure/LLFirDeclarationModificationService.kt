@@ -14,13 +14,13 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.analysis.api.platform.analysisMessageBus
+import org.jetbrains.kotlin.analysis.api.platform.modification.KaElementModificationType
 import org.jetbrains.kotlin.analysis.api.platform.modification.KotlinModificationTopics
 import org.jetbrains.kotlin.analysis.low.level.api.fir.LLFirInternals
 import org.jetbrains.kotlin.analysis.low.level.api.fir.api.getFirResolveSession
 import org.jetbrains.kotlin.analysis.low.level.api.fir.api.getOrBuildFirFile
 import org.jetbrains.kotlin.analysis.low.level.api.fir.api.resolveToFirSymbol
 import org.jetbrains.kotlin.analysis.low.level.api.fir.element.builder.getNonLocalContainingOrThisDeclaration
-import org.jetbrains.kotlin.analysis.low.level.api.fir.file.structure.LLFirDeclarationModificationService.ModificationType
 import org.jetbrains.kotlin.analysis.low.level.api.fir.sessions.LLFirResolvableModuleSession
 import org.jetbrains.kotlin.analysis.low.level.api.fir.sessions.llFirResolvableSession
 import org.jetbrains.kotlin.analysis.low.level.api.fir.util.codeFragment
@@ -58,6 +58,7 @@ import org.jetbrains.kotlin.psi.psiUtil.isContractDescriptionCallPsiCheck
  * @see getNonLocalReanalyzableContainingDeclaration
  * @see KotlinModificationTopics.MODULE_OUT_OF_BLOCK_MODIFICATION
  * @see org.jetbrains.kotlin.analysis.api.platform.modification.KotlinModuleOutOfBlockModificationListener
+ * @see org.jetbrains.kotlin.analysis.api.platform.modification.KaSourceModificationService
  */
 @LLFirInternals
 class LLFirDeclarationModificationService(val project: Project) : Disposable {
@@ -133,39 +134,10 @@ class LLFirDeclarationModificationService(val project: Project) : Disposable {
         inBlockModificationQueue = null
     }
 
-    sealed class ModificationType {
-        /**
-         * The element passed to [elementModified] has been added as a new element.
-         */
-        object ElementAdded : ModificationType()
-
-        /**
-         * The element passed to [elementModified] is the parent of a removed element, which is additionally passed via the modification
-         * type as [removedElement]. The removed element itself cannot be the modification "anchor" because it has already been removed and
-         * is not part of the `KtFile` anymore, but it might still be used to determine the modification's change type.
-         */
-        class ElementRemoved(val removedElement: PsiElement) : ModificationType()
-
-        object Unknown : ModificationType()
-    }
-
     /**
-     * This method should be called during some [PsiElement] modification.
-     * This method must be called from write action.
-     *
-     * Will publish event to [KotlinModificationTopics.MODULE_OUT_OF_BLOCK_MODIFICATION] in case of out-of-block modification.
-     *
-     * @param element is an element that we want to/did already modify, remove, or add.
-     * Some examples:
-     * * [element] is [KtNamedFunction][org.jetbrains.kotlin.psi.KtNamedFunction] if we
-     * dropped body ([KtBlockExpression][org.jetbrains.kotlin.psi.KtBlockExpression]) of this function
-     * * [element] is [KtBlockExpression][org.jetbrains.kotlin.psi.KtBlockExpression] if we replaced one body-expression with another one
-     * * [element] is [KtBlockExpression][org.jetbrains.kotlin.psi.KtBlockExpression] if added a body to the function without body
-     * * [element] is the parent of an already removed element, while [ModificationType.ElementRemoved] will contain the removed element
-     *
-     * @param modificationType additional information to make more accurate decisions
+     * @see org.jetbrains.kotlin.analysis.api.platform.modification.KaSourceModificationService.handleElementModification
      */
-    fun elementModified(element: PsiElement, modificationType: ModificationType = ModificationType.Unknown) {
+    fun elementModified(element: PsiElement, modificationType: KaElementModificationType) {
         ApplicationManager.getApplication().assertWriteIntentLockAcquired()
 
         when (val changeType = calculateChangeType(element, modificationType)) {
@@ -175,7 +147,7 @@ class LLFirDeclarationModificationService(val project: Project) : Disposable {
         }
     }
 
-    private fun calculateChangeType(element: PsiElement, modificationType: ModificationType): ChangeType {
+    private fun calculateChangeType(element: PsiElement, modificationType: KaElementModificationType): ChangeType {
         if (!element.isValid) {
             // If PSI is not valid, well something bad happened; OOBM won't hurt
             return ChangeType.OutOfBlock
@@ -209,8 +181,8 @@ class LLFirDeclarationModificationService(val project: Project) : Disposable {
     /**
      * This check covers cases such as a new body that was added to a function, which should cause an out-of-block modification.
      */
-    private fun PsiElement.isNewDirectChildOf(inBlockModificationOwner: KtAnnotated, modificationType: ModificationType): Boolean =
-        modificationType == ModificationType.ElementAdded && parent == inBlockModificationOwner
+    private fun PsiElement.isNewDirectChildOf(inBlockModificationOwner: KtAnnotated, modificationType: KaElementModificationType): Boolean =
+        modificationType == KaElementModificationType.ElementAdded && parent == inBlockModificationOwner
 
     /**
      * Contract changes are always out-of-block modifications. If a contract is removed all at once, e.g. via [PsiElement.delete],
@@ -230,8 +202,8 @@ class LLFirDeclarationModificationService(val project: Project) : Disposable {
      * As it is not a valid contract statement, its removal doesn't need to trigger an out-of-block modification. Nonetheless, as such a
      * situation should not occur frequently, false positives are acceptable and this simplifies the analysis, making it less error-prone.
      */
-    private fun ModificationType.isContractRemoval(): Boolean =
-        this is ModificationType.ElementRemoved && (removedElement as? KtExpression)?.isContractDescriptionCallPsiCheck() == true
+    private fun KaElementModificationType.isContractRemoval(): Boolean =
+        this is KaElementModificationType.ElementRemoved && (removedElement as? KtExpression)?.isContractDescriptionCallPsiCheck() == true
 
     private fun inBlockModification(declaration: KtAnnotated, ktModule: KaModule) {
         val resolveSession = ktModule.getFirResolveSession(project)
@@ -274,11 +246,9 @@ class LLFirDeclarationModificationService(val project: Project) : Disposable {
     }
 
     /**
-     * @return the psi element (ancestor of the changedElement) which should be re-highlighted in case of in-block changes or null if unsure
+     * @see org.jetbrains.kotlin.analysis.api.platform.modification.KaSourceModificationService.ancestorAffectedByInBlockModification
      */
-    fun elementToRehighlight(changedElement: PsiElement): PsiElement? {
-        return nonLocalDeclarationForLocalChange(changedElement)
-    }
+    fun ancestorAffectedByInBlockModification(changedElement: PsiElement): PsiElement? = nonLocalDeclarationForLocalChange(changedElement)
 
     override fun dispose() {}
 
