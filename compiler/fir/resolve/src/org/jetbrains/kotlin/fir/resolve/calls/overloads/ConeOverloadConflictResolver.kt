@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.fir.scopes.*
 import org.jetbrains.kotlin.fir.scopes.impl.overrides
 import org.jetbrains.kotlin.fir.symbols.ConeTypeParameterLookupTag
 import org.jetbrains.kotlin.fir.symbols.impl.FirCallableSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.types.*
@@ -329,12 +330,12 @@ class ConeOverloadConflictResolver(
     private fun List<CandidateSignature>.exactMaxWith(): CandidateSignature? {
         var result: CandidateSignature? = null
         for (candidate in this) {
-            if (result == null || checkExpectAndNotLessSpecificShape(candidate, result)) {
+            if (result == null || isOfNotLessSpecificShape(candidate, result)) {
                 result = candidate
             }
         }
         if (result == null) return null
-        if (any { it != result && checkExpectAndNotLessSpecificShape(it, result) }) {
+        if (any { it != result && isOfNotLessSpecificShape(it, result) }) {
             return null
         }
         return result
@@ -343,13 +344,12 @@ class ConeOverloadConflictResolver(
     /**
      * call1.expect
      */
-    private fun checkExpectAndNotLessSpecificShape(
+    private fun isOfNotLessSpecificShape(
         call1: FlatSignature<Candidate>,
         call2: FlatSignature<Candidate>
     ): Boolean {
-        // !false && false
-        if (!call1.isExpect && call2.isExpect) return true
-        if (call1.isExpect && !call2.isExpect) return false
+        checkNonSourceExpectCallables(call1, call2)?.let { return it }
+
         val hasVarargs1 = call1.hasVarargs
         val hasVarargs2 = call2.hasVarargs
         if (hasVarargs1 && !hasVarargs2) return false
@@ -360,6 +360,35 @@ class ConeOverloadConflictResolver(
         }
 
         return true
+    }
+
+    /**
+     * Filter out a non-source `expect` top-level callable if another callable is not `expect`.
+     * Typically, there is no need to run this check, because `FirActualizingMemberScope` filters out `expect` candidates
+     * if corresponding actuals are found, except the case when those callables are retrieved from binaries, for instance, klib.
+     * Unfortunately, in this case, there is no way to match expect-actual pairs:
+     * the `actual` flag and info about a corresponding `expect` complement are not stored in klib for `actual` declarations.
+     * That's why such a filtering is needed during overload resolution.
+     * Typically, the current check is encountered on metadata compilation (`commonMain` and `nativeMain` klib), but not only.
+     *
+     * The `expect` deprioritization handling can't be extracted to a separated conflict resolver,
+     * because the current resolver (`ConeOverloadConflictResolver`)
+     * contains a special logic around candidate shapes (`exactMaxWith`), that should also consider `expect` flag.
+     * Otherwise, multiple non-expect candidates remain alive after the current disambiguation and
+     * the newly introduced resolver won't be able to disambiguate them,
+     * despite the fact it will be able to filter out non-source `expect` candidates.
+     */
+    private fun checkNonSourceExpectCallables(call1: FlatSignature<Candidate>, call2: FlatSignature<Candidate>): Boolean? {
+        val symbol1 = call1.origin.symbol as? FirFunctionSymbol<*> ?: return null
+        val symbol2 = call2.origin.symbol as? FirFunctionSymbol<*> ?: return null
+
+        if (symbol1.origin.fromSource || symbol2.origin.fromSource) return null
+        if (symbol1.callableId.classId != null || symbol2.callableId.classId != null) return null
+
+        if (!call1.isExpect && call2.isExpect) return true
+        if (call1.isExpect && !call2.isExpect) return false
+
+        return null
     }
 
     /**
