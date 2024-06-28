@@ -4217,6 +4217,18 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
       }
 
       @Test
+      @TestMetadata("kt69040.kt")
+      public void testKt69040() {
+        runTest("compiler/testData/diagnostics/tests/builderInference/kt69040.kt");
+      }
+
+      @Test
+      @TestMetadata("lambdaBelongsToOuterCall.kt")
+      public void testLambdaBelongsToOuterCall() {
+        runTest("compiler/testData/diagnostics/tests/builderInference/lambdaBelongsToOuterCall.kt");
+      }
+
+      @Test
       @TestMetadata("overloadResolutionByLambdaReturnType.kt")
       public void testOverloadResolutionByLambdaReturnType() {
         runTest("compiler/testData/diagnostics/tests/builderInference/overloadResolutionByLambdaReturnType.kt");
