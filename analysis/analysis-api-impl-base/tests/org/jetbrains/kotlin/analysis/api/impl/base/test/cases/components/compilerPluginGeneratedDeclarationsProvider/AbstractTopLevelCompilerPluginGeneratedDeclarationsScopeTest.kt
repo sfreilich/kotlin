@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.test.services.assertions
 abstract class AbstractTopLevelCompilerPluginGeneratedDeclarationsScopeTest : AbstractAnalysisApiBasedTest() {
     override fun doTestByMainFile(mainFile: KtFile, mainModule: KtTestModule, testServices: TestServices) {
         analyseForTest(mainFile) {
-            val resolveExtensionScope = mainModule.ktModule.topLevelCompilerPluginGeneratedDeclarationsScope
+            val resolveExtensionScope = mainModule.ktModule.compilerPluginGeneratedDeclarations.topLevelDeclarationsScope
 
             val actual = prettyPrint { renderForTests(resolveExtensionScope, this, printPretty = false) }
             val actualPretty = prettyPrint { renderForTests(resolveExtensionScope, this, printPretty = true) }
