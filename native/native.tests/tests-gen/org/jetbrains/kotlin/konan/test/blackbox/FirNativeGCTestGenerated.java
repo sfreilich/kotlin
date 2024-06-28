@@ -43,18 +43,6 @@ public class FirNativeGCTestGenerated extends AbstractNativeBlackBoxTest {
   }
 
   @Test
-  @TestMetadata("cleaner_in_tls_worker.kt")
-  public void testCleaner_in_tls_worker() {
-    runTest("native/native.tests/testData/gc/cleaner_in_tls_worker.kt");
-  }
-
-  @Test
-  @TestMetadata("cleaner_workers.kt")
-  public void testCleaner_workers() {
-    runTest("native/native.tests/testData/gc/cleaner_workers.kt");
-  }
-
-  @Test
   @TestMetadata("collect.kt")
   public void testCollect() {
     runTest("native/native.tests/testData/gc/collect.kt");
