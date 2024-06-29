@@ -1963,6 +1963,12 @@ public class FirOldFrontendMPPDiagnosticsWithLightTreeTestGenerated extends Abst
     }
 
     @Test
+    @TestMetadata("regularAndDeprecatedActualOverloads.kt")
+    public void testRegularAndDeprecatedActualOverloads() {
+      runTest("compiler/testData/diagnostics/tests/multiplatform/hmpp/regularAndDeprecatedActualOverloads.kt");
+    }
+
+    @Test
     @TestMetadata("simple.kt")
     public void testSimple() {
       runTest("compiler/testData/diagnostics/tests/multiplatform/hmpp/simple.kt");
