@@ -15,8 +15,8 @@ import kotlin.internal.InlineOnly
  * Note that only the [HexFormat.upperCase] and [HexFormat.bytes] properties of the [format] instance affect
  * the formatting result of this byte array.
  *
- * Each byte in the array is converted into two hexadecimal digits. The first digit represents the high 4 bits,
- * and the second digit represents the low 4 bits of the byte. The [HexFormat.upperCase] property determines whether
+ * Each byte in the array is converted into two hexadecimal digits. The first digit represents the most significant 4 bits,
+ * and the second digit represents the least significant 4 bits of the byte. The [HexFormat.upperCase] property determines whether
  * upper-case (`0-9`, `A-F`) or lower-case (`0-9`, `a-f`) hexadecimal digits are used for this conversion.
  * The [HexFormat.bytes] property specifies the strings that prefix and suffix each byte representation, and defines
  * how these representations are arranged.
@@ -42,8 +42,8 @@ public inline fun UByteArray.toHexString(format: HexFormat = HexFormat.Default):
  * Note that only the [HexFormat.upperCase] and [HexFormat.bytes] properties of the [format] instance affect
  * the formatting result of this byte array.
  *
- * Each byte in the array is converted into two hexadecimal digits. The first digit represents the high 4 bits,
- * and the second digit represents the low 4 bits of the byte. The [HexFormat.upperCase] property determines whether
+ * Each byte in the array is converted into two hexadecimal digits. The first digit represents the most significant 4 bits,
+ * and the second digit represents the least significant 4 bits of the byte. The [HexFormat.upperCase] property determines whether
  * upper-case (`0-9`, `A-F`) or lower-case (`0-9`, `a-f`) hexadecimal digits are used for this conversion.
  * The [HexFormat.bytes] property specifies the strings that prefix and suffix each byte representation, and defines
  * how these representations are arranged.
