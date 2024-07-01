@@ -179,17 +179,10 @@ object NativeTestSupport {
 
     private fun computeReleasedCompiler() = ReleasedCompiler(
         lazy {
-            val parentDirectory = File(ProcessLevelProperty.LATEST_RELEASED_COMPILER_PATH.readValue())
-            val nativePrebuilt = findNativePrebuilt(parentDirectory)
+            val nativePrebuilt = File(ProcessLevelProperty.LATEST_RELEASED_COMPILER_PATH.readValue())
             KotlinNativeHome(nativePrebuilt)
         }
     )
-
-    private fun findNativePrebuilt(parentDir: File): File {
-        val filesInParentDir = parentDir.listFiles()
-        require(filesInParentDir != null) { "Parent directory for released compiler not found: $parentDir" }
-        return filesInParentDir.single { it.name.contains("kotlin-native-prebuilt") }
-    }
 
     private fun ExtensionContext.setUpMemoryTracking() {
         if (ProcessLevelProperty.TEAMCITY.readValue().toBoolean())

@@ -2,8 +2,6 @@ import TestProperty.*
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.tasks.Sync
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.environment
 import org.gradle.kotlin.dsl.project
@@ -107,7 +105,7 @@ fun Project.nativeTest(
     customTestDependencies: List<Configuration> = emptyList(),
     compilerPluginDependencies: List<Configuration> = emptyList(),
     allowParallelExecution: Boolean = true,
-    releasedCompilerDist: TaskProvider<Sync>? = null,
+    releasedCompilerDist: Configuration? = null,
     maxMetaspaceSizeMb: Int = 512,
     defineJDKEnvVariables: List<JdkMajorVersion> = emptyList(),
     body: Test.() -> Unit = {},
@@ -242,7 +240,7 @@ fun Project.nativeTest(
             computeLazy(LATEST_RELEASED_COMPILER_PATH) {
                 if (releasedCompilerDist != null) dependsOn(releasedCompilerDist)
                 lazy {
-                    releasedCompilerDist?.get()?.destinationDir?.absolutePath
+                    releasedCompilerDist?.files?.single()?.absolutePath
                 }
             }
 
