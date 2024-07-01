@@ -139,7 +139,7 @@ class PostponedArgumentsAnalyzer(
         val rawReturnType = lambda.returnType
 
         val expectedTypeForReturnArguments = when {
-            c.canBeProper(rawReturnType) -> substitute(rawReturnType)
+            c.canBeProper(rawReturnType) || withPCLASession -> substitute(rawReturnType)
 
             // For Unit-coercion
             !rawReturnType.isMarkedNullable && c.hasUpperOrEqualUnitConstraint(rawReturnType) -> unitType
