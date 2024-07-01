@@ -9,6 +9,7 @@ import llvm.LLVMModuleCreateWithNameInContext
 import llvm.LLVMModuleRef
 import org.jetbrains.kotlin.backend.konan.llvm.*
 import org.jetbrains.kotlin.backend.konan.llvm.llvmLinkModules2
+import org.jetbrains.kotlin.backend.konan.optimizations.handlePerformanceInlineAnnotation
 
 /**
  * To avoid combinatorial explosion, we split runtime into several LLVM modules.
@@ -59,6 +60,8 @@ internal sealed class RuntimeLinkageStrategy {
             ModuleOptimizationPipeline(config, generationState).use {
                 it.execute(runtimeModule)
             }
+
+            handlePerformanceInlineAnnotation(generationState.config, BasicLlvmHelpers(generationState, runtimeModule))
 
             return listOf(runtimeModule)
         }
