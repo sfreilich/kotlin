@@ -644,6 +644,7 @@ cacheableTargetNames.forEach { targetName ->
         cacheRoot = project.layout.buildDirectory.dir("cache/$targetName").get().asFile.absolutePath
 
         dependsOn(":kotlin-native:${targetName}CrossDistRuntime")
+        dependsOn(":kotlin-native:distCompiler")
         // stdlib cache links in runtime modules from the K/N distribution.
         inputs.dir("$kotlinNativeDist/konan/targets/$targetName/native")
     }
