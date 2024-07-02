@@ -198,6 +198,35 @@ func depsObjectsTravelBridgeAsAny2() throws {
     try assertTrue(isSavedDepsObject_2(obj: obj))
 }
 
+func objectsHashProperly() throws {
+    let one: KotlinBase = getHashableObject(value: 1)
+    let ein: KotlinBase = getHashableObject(value: 1)
+    let two: KotlinBase = getHashableObject(value: 2)
+
+    try assertFalse(one === ein)
+    try assertTrue(one == ein)
+    try assertFalse(one == two)
+    try assertFalse(ein == two)
+
+    func testEquality(_ lhs: KotlinBase, _ rhs: KotlinBase) throws {
+        try assertEquals(actual: lhs.hashValue, expected: numericCast(getHash(obj: lhs)))
+        try assertEquals(actual: lhs == lhs, expected: isEqual(lhs: lhs, rhs: lhs))
+        try assertEquals(actual: rhs.hashValue, expected: numericCast(getHash(obj: rhs)))
+        try assertEquals(actual: rhs == rhs, expected: isEqual(lhs: rhs, rhs: rhs))
+
+        try assertEquals(actual: lhs == rhs, expected: isEqual(lhs: lhs, rhs: rhs))
+        try assertEquals(actual: lhs.hashValue == rhs.hashValue, expected: getHash(obj: lhs) == getHash(obj: rhs))
+    }
+
+    try testEquality(one, one)
+    try testEquality(two, two)
+    try testEquality(ein, ein)
+
+    try testEquality(one, ein)
+    try testEquality(one, two)
+    try testEquality(ein, two)
+}
+
 class ReferenceTypesTests : TestProvider {
     var tests: [TestCase] = []
 
@@ -231,6 +260,7 @@ class ReferenceTypesTests : TestProvider {
             TestCase(name: "anyPersistsAsProperty", method: withAutorelease(anyPersistsAsProperty)),
             TestCase(name: "depsObjectsTravelBridgeAsAny", method: withAutorelease(depsObjectsTravelBridgeAsAny)),
             TestCase(name: "depsObjectsTravelBridgeAsAny2", method: withAutorelease(depsObjectsTravelBridgeAsAny2)),
+            TestCase(name: "objectsHashProperly", method: withAutorelease(objectsHashProperly)),
         ]
     }
 }

@@ -29,6 +29,10 @@
 
 static void injectToRuntime();
 
+extern "C" KInt Kotlin_hashCode(KRef str);
+extern "C" KBoolean Kotlin_equals(KRef lhs, KRef rhs);
+extern "C" OBJ_GETTER(Kotlin_toString, KRef obj);
+
 // Note: `KotlinBase`'s `toKotlin` and `_tryRetain` methods will terminate if
 // called with non-frozen object on a wrong worker. `retain` will also terminate
 // in these conditions if backref's refCount is zero.
@@ -229,7 +233,34 @@ static void injectToRuntime();
 }
 
 - (uintptr_t)externalRCRef {
-  return reinterpret_cast<uintptr_t>(refHolder.externalRCRef(permanent));
+    return reinterpret_cast<uintptr_t>(refHolder.externalRCRef(permanent));
+}
+
+- (NSString *)description {
+    kotlin::ThreadStateGuard guard(kotlin::ThreadState::kRunnable);
+    ObjHolder h1, h2;
+    return Kotlin_Interop_CreateNSStringFromKString(Kotlin_toString([self toKotlin:h1.slot()], h2.slot()));
+}
+
+- (NSUInteger)hash {
+    kotlin::ThreadStateGuard guard(kotlin::ThreadState::kRunnable);
+    ObjHolder holder;
+    return (NSUInteger)Kotlin_hashCode([self toKotlin:holder.slot()]);
+}
+
+- (BOOL)isEqual:(id)other {
+    if (self == other) {
+        return YES;
+    }
+
+    if (![other respondsToSelector:Kotlin_ObjCExport_toKotlinSelector]) {
+        return NO;
+    }
+
+    kotlin::ThreadStateGuard guard(kotlin::ThreadState::kRunnable);
+    ObjHolder lhsHolder, rhsHolder;
+    KRef lhs = [self toKotlin:lhsHolder.slot()], rhs = [other toKotlin:rhsHolder.slot()];
+    return !!Kotlin_equals(lhs, rhs);
 }
 
 @end
