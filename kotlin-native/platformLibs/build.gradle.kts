@@ -90,6 +90,7 @@ enabledTargets(platformManager).forEach { target ->
                 cacheRoot = kotlinNativeDist.resolve("klib/cache").absolutePath
 
                 dependsOn(":kotlin-native:${targetName}StdlibCache")
+                dependsOn(":kotlin-native:distCompiler")
 
                 // Make it depend on platform libraries defined in def files and their caches
                 df.config.depends.map {
