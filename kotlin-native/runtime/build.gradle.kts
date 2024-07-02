@@ -556,12 +556,14 @@ tasks.named("clean", Delete::class) {
 
 // region: Stdlib
 
+val nativeBootstrapCompiler by nativePublishedDistribution(bootstrapKotlinVersion)
+
 val stdlibBuildTask by tasks.registering(KonanCompileTask::class) {
     group = BasePlugin.BUILD_GROUP
     description = "Build the Kotlin/Native standard library '$name'"
 
-    this.compilerDistributionPath.set(kotlinNativeDist.absolutePath)
-    dependsOn(":kotlin-native:distCompiler")
+    this.compilerDistributionPath.set(provider { nativeBootstrapCompiler.singleFile.absolutePath })
+    dependsOn(nativeBootstrapCompiler)
 
     this.konanTarget.set(HostManager.host)
     this.outputDirectory.set(
@@ -612,7 +614,9 @@ val stdlibTask = tasks.register<Copy>("nativeStdlib") {
     into(project.layout.buildDirectory.dir("nativeStdlib"))
 
     val allPossibleTargets = project.extensions.getByType<PlatformManager>().targetValues.map { it.name }
+    inputs.property("allPossibleTargets", allPossibleTargets)
     val kotlinVersion = kotlinVersion
+    inputs.property("kotlinVersion", kotlinVersion)
     eachFile {
         if (name == "manifest") {
             // Stdlib is a common library that doesn't depend on anything target-specific.
@@ -621,12 +625,7 @@ val stdlibTask = tasks.register<Copy>("nativeStdlib") {
             KFile(file.absolutePath).run {
                 val props = loadProperties()
                 props[KLIB_PROPERTY_NATIVE_TARGETS] = allPossibleTargets.joinToString(separator = " ")
-
-                // Check that we didn't get other than the requested version from cache, previous build or due to some other build issue
-                val versionFromManifest = props[KLIB_PROPERTY_COMPILER_VERSION]
-                check(versionFromManifest == kotlinVersion) {
-                    "Manifest file ($this) processing: $versionFromManifest was found while $kotlinVersion was expected"
-                }
+                props[KLIB_PROPERTY_COMPILER_VERSION] = kotlinVersion
 
                 saveProperties(props)
             }
