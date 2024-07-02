@@ -76,6 +76,7 @@ internal abstract class Fir2IrJsWasmResultsConverter(testServices: TestServices)
     }
 }
 
+@InternalFir2IrConverterAPI
 internal class Fir2IrJsResultsConverter(testServices: TestServices) : Fir2IrJsWasmResultsConverter(testServices) {
     override val artifactFactory: (IrModuleFragment, IrPluginContext, List<KotlinFileSerializedData>, BaseDiagnosticsCollector, Boolean, KotlinMangler.DescriptorMangler?, KotlinMangler.IrMangler, KlibSingleFileMetadataSerializer<*>) -> IrBackendInput
         get() = IrBackendInput::JsIrAfterFrontendBackendInput
@@ -85,7 +86,7 @@ internal class Fir2IrJsResultsConverter(testServices: TestServices) : Fir2IrJsWa
     }
 }
 
-
+@InternalFir2IrConverterAPI
 internal class Fir2IrWasmResultsConverter(testServices: TestServices) : Fir2IrJsWasmResultsConverter(testServices) {
     override val artifactFactory: (IrModuleFragment, IrPluginContext, List<KotlinFileSerializedData>, BaseDiagnosticsCollector, Boolean, KotlinMangler.DescriptorMangler?, KotlinMangler.IrMangler, KlibSingleFileMetadataSerializer<*>) -> IrBackendInput.WasmAfterFrontendBackendInput
         get() = IrBackendInput::WasmAfterFrontendBackendInput

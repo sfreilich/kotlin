@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.test.model.TestModule
 import org.jetbrains.kotlin.test.services.TestServices
 import org.jetbrains.kotlin.test.services.compilerConfigurationProvider
 
+@InternalFir2IrConverterAPI
 internal class Fir2IrJvmResultsConverter(testServices: TestServices) : AbstractFir2IrResultsConverter(testServices) {
     override fun createIrMangler(): KotlinMangler.IrMangler = JvmIrMangler
 
