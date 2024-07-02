@@ -9,12 +9,10 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.Usage
 import org.gradle.api.file.FileCollection
 import org.jetbrains.kotlin.gradle.dsl.awaitMetadataTarget
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
 import org.jetbrains.kotlin.gradle.plugin.mpp.resolvableMetadataConfiguration
 import org.jetbrains.kotlin.gradle.plugin.sources.InternalKotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.sources.disambiguateName
@@ -25,6 +23,8 @@ internal val psmAttribute = Attribute.of("org.jetbrains.kotlin.psmFile", Boolean
 
 internal val projectStructureMetadataOutgoingArtifactsSetupAction = KotlinProjectSetupAction {
     project.setupProjectStructureMetadataOutgoingArtifacts()
+    project.dependencies.attributesSchema.attribute(psmAttribute)
+    setupTransformActionFromJarToPsm(project)
 }
 
 /**
@@ -80,9 +80,19 @@ private fun maybeCreatePsmConsumableConfiguration(project: Project): Configurati
 
 private fun Configuration.configurePsmDependenciesAttributes(project: Project) {
     attributes.setAttribute(psmAttribute, true)
-    attributes.setAttribute(Usage.USAGE_ATTRIBUTE, project.usageByName(KotlinUsages.KOTLIN_PSM))
     attributes.setAttribute(Category.CATEGORY_ATTRIBUTE, project.categoryByName(Category.LIBRARY))
 }
 
 private val InternalKotlinSourceSet.projectStructureMetadataConfigurationName: String
     get() = disambiguateName(lowerCamelCaseName(PSM_RESOLVABLE_CONFIGURATION_NAME))
+
+
+private fun setupTransformActionFromJarToPsm(project: Project) {
+    project.dependencies.artifactTypes.getByName("jar").also { artifactType ->
+        artifactType.attributes.setAttribute(psmAttribute, false)
+    }
+    project.dependencies.registerTransform(ProjectStructureMetadataTransformationAction::class.java) { transform ->
+        transform.from.setAttribute(psmAttribute, false)
+        transform.to.setAttribute(psmAttribute, true)
+    }
+}
