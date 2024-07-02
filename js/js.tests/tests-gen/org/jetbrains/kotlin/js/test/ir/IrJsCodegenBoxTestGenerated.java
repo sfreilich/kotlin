@@ -13741,12 +13741,6 @@ public class IrJsCodegenBoxTestGenerated extends AbstractIrJsCodegenBoxTest {
       }
 
       @Test
-      @TestMetadata("kt50019_noOptimizedCallableReferences.kt")
-      public void testKt50019_noOptimizedCallableReferences() {
-        runTest("compiler/testData/codegen/box/delegatedProperty/delegateToAnother/kt50019_noOptimizedCallableReferences.kt");
-      }
-
-      @Test
       @TestMetadata("mutable.kt")
       public void testMutable() {
         runTest("compiler/testData/codegen/box/delegatedProperty/delegateToAnother/mutable.kt");
@@ -16947,12 +16941,6 @@ public class IrJsCodegenBoxTestGenerated extends AbstractIrJsCodegenBoxTest {
     @TestMetadata("multimodule.kt")
     public void testMultimodule() {
       runTest("compiler/testData/codegen/box/funInterface/multimodule.kt");
-    }
-
-    @Test
-    @TestMetadata("noOptimizedCallableReferences.kt")
-    public void testNoOptimizedCallableReferences() {
-      runTest("compiler/testData/codegen/box/funInterface/noOptimizedCallableReferences.kt");
     }
 
     @Test
