@@ -171,7 +171,7 @@ internal class PropertiesProvider private constructor(private val project: Proje
      * Enable exposing secondary 'classes' variant for JVM compilations.
      */
     val addSecondaryClassesVariant: Boolean
-        get() = booleanProperty(KOTLIN_JVM_ADD_CLASSES_VARIANT) ?: false
+        get() = booleanProperty(KOTLIN_JVM_ADD_CLASSES_VARIANT) ?: true
 
     val useKotlinAbiSnapshot: Boolean
         get() {
