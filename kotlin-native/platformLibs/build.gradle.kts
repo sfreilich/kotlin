@@ -35,6 +35,7 @@ if (HostManager.host == KonanTarget.MACOS_ARM64) {
 }
 
 val cacheableTargetNames = platformManager.hostPlatform.cacheableTargets
+val nativeBootstrapCompiler by nativePublishedDistribution(bootstrapKotlinVersion)
 
 enabledTargets(platformManager).forEach { target ->
     val targetName = target.visibleName
@@ -50,8 +51,8 @@ enabledTargets(platformManager).forEach { target ->
             group = BasePlugin.BUILD_GROUP
             description = "Build the Kotlin/Native platform library '$libName' for '$target'"
 
-            this.compilerDistributionPath.set(kotlinNativeDist.absolutePath)
-            dependsOn(":kotlin-native:${targetName}CrossDist")
+            this.compilerDistributionPath.set(provider { nativeBootstrapCompiler.singleFile.absolutePath })
+            dependsOn(nativeBootstrapCompiler)
 
             this.konanTarget.set(target)
             this.outputDirectory.set(
