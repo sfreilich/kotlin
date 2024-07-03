@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.objcexport.analysisApiUtils
 
 import org.jetbrains.kotlin.analysis.api.KaSession
 import org.jetbrains.kotlin.analysis.api.symbols.KaClassSymbol
-import org.jetbrains.kotlin.analysis.api.symbols.KaDeclarationSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.KaNamedFunctionSymbol
 import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.name.CallableId
@@ -15,17 +14,7 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.StandardClassIds
 
-internal fun KaSession.getImplementsCloneable(symbol: KaDeclarationSymbol?): Boolean {
-
-    val classSymbol = symbol as? KaClassSymbol
-    return if (classSymbol != null) {
-        getImplementsCloneable(classSymbol)
-    } else {
-        false
-    }
-}
-
-internal fun KaSession.getImplementsCloneable(symbol: KaClassSymbol): Boolean {
+internal fun KaSession.isImplementsCloneable(symbol: KaClassSymbol): Boolean {
     return symbol.superTypes.any {
         it.expandedSymbol?.isCloneable ?: false
     }

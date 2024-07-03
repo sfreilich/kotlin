@@ -1,7 +1,7 @@
 package org.jetbrains.kotlin.objcexport.tests
 
 import org.jetbrains.kotlin.analysis.api.analyze
-import org.jetbrains.kotlin.objcexport.analysisApiUtils.getImplementsCloneable
+import org.jetbrains.kotlin.objcexport.analysisApiUtils.isImplementsCloneable
 import org.jetbrains.kotlin.objcexport.analysisApiUtils.isClone
 import org.jetbrains.kotlin.objcexport.analysisApiUtils.isCloneable
 import org.jetbrains.kotlin.objcexport.testUtils.InlineSourceCodeAnalysis
@@ -72,7 +72,7 @@ class IsCloneableTest(
         )
         analyze(file) {
             val foo = getClassOrFail(file, "Foo")
-            assertTrue(getImplementsCloneable(foo))
+            assertTrue(isImplementsCloneable(foo))
             assertTrue(isClone(getFunctionOrFail(foo, "clone")))
         }
     }
