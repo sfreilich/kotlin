@@ -37,4 +37,30 @@ class NpmVersions : Serializable {
     val typescript = NpmPackageVersion("typescript", "5.4.3")
 
     val kotlinJsTestRunner = KotlinGradleNpmPackage("test-js-runner")
+
+    val allDeps = listOf(
+        webpack,
+        webpackCli,
+        webpackDevServer,
+        sourceMapLoader,
+        sourceMapSupport,
+        cssLoader,
+        styleLoader,
+        sassLoader,
+        sass,
+        toStringLoader,
+        miniCssExtractPlugin,
+        mocha,
+        karma,
+        karmaChromeLauncher,
+        karmaPhantomjsLauncher,
+        karmaFirefoxLauncher,
+        karmaOperaLauncher,
+        karmaIeLauncher,
+        karmaSafariLauncher,
+        karmaMocha,
+        karmaWebpack,
+        karmaSourcemapLoader,
+        typescript,
+    )
 }
