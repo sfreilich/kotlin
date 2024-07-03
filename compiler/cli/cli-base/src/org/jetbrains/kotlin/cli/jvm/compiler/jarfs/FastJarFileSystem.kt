@@ -17,7 +17,7 @@ import java.nio.ByteBuffer
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-private typealias RandomAccessFileAndBuffer = Pair<RandomAccessFile, MappedByteBuffer>
+private typealias RandomAccessFileAndBuffer = Pair<RandomAccessFile, LargeDynamicMappedBuffer>
 
 class FastJarFileSystem private constructor(internal val unmapBuffer: MappedByteBuffer.() -> Unit) : DeprecatedVirtualFileSystem() {
     private val myHandlers: MutableMap<String, FastJarHandler> =
@@ -28,13 +28,19 @@ class FastJarFileSystem private constructor(internal val unmapBuffer: MappedByte
             @Throws(IOException::class)
             override fun createAccessor(file: File): RandomAccessFileAndBuffer {
                 val randomAccessFile = RandomAccessFile(file, "r")
-                return Pair(randomAccessFile, randomAccessFile.channel.map(FileChannel.MapMode.READ_ONLY, 0, randomAccessFile.length()))
+                val buffer = LargeDynamicMappedBuffer(
+                    randomAccessFile.channel,
+                    this@FastJarFileSystem,
+                    FileChannel.MapMode.READ_ONLY,
+                    randomAccessFile.length()
+                )
+                return Pair(randomAccessFile, buffer)
             }
 
             @Throws(IOException::class)
             override fun disposeAccessor(fileAccessor: RandomAccessFileAndBuffer) {
                 fileAccessor.first.close()
-                fileAccessor.second.unmapBuffer()
+                fileAccessor.second.unmap()
             }
 
             override fun isEqual(val1: File, val2: File): Boolean {

@@ -22,10 +22,11 @@ class FastJarHandler(val fileSystem: FastJarFileSystem, path: String) {
     init {
         val entries: List<ZipEntryDescription>
         RandomAccessFile(file, "r").use { randomAccessFile ->
-            val mappedByteBuffer = randomAccessFile.channel.map(FileChannel.MapMode.READ_ONLY, 0, randomAccessFile.length())
+            val largeBuffer =
+                LargeDynamicMappedBuffer(randomAccessFile.channel, fileSystem, FileChannel.MapMode.READ_ONLY, randomAccessFile.length())
             try {
                 entries = try {
-                    mappedByteBuffer.parseCentralDirectory()
+                    largeBuffer.parseCentralDirectory()
                 } catch (e: Exception) {
                     // copying the behavior of ArchiveHandler (and therefore ZipHandler)
                     // TODO: consider propagating to compiler error or warning, but take into account that both javac and K1 simply ignore invalid jars in such cases
@@ -34,11 +35,9 @@ class FastJarHandler(val fileSystem: FastJarFileSystem, path: String) {
                 }
                 cachedManifest =
                     entries.singleOrNull { StringUtil.equals(MANIFEST_PATH, it.relativePath) }
-                        ?.let(mappedByteBuffer::contentsToByteArray)
+                        ?.let(largeBuffer::contentsToByteArray)
             } finally {
-                with(fileSystem) {
-                    mappedByteBuffer.unmapBuffer()
-                }
+                largeBuffer.unmap()
             }
         }
 
