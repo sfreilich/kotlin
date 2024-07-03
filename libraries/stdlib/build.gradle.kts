@@ -142,7 +142,6 @@ kotlin {
                 }
             }
             val mainJdk7 by creating {
-                associateWith(main)
                 compileTaskProvider.configure {
                     this as UsesKotlinJavaToolchain
                     kotlinJavaToolchain.toolchain.use(getToolchainLauncherFor(JdkMajorVersion.JDK_11_0))
@@ -165,8 +164,6 @@ kotlin {
                 }
             }
             val mainJdk8 by creating {
-                associateWith(main)
-                associateWith(mainJdk7)
                 compileTaskProvider.configure {
                     compilerOptions {
                         moduleName = "kotlin-stdlib-jdk8"
