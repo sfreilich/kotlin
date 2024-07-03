@@ -47,12 +47,12 @@ internal val ObjCInterface.isExtensionsFacade: Boolean
  */
 fun ObjCExportContext.translateToObjCExtensionFacades(file: KtResolvedObjCExportFile): List<ObjCInterface> {
     val extensions = file.callableSymbols
-        .filter { kaSession.getClassIfCategory(it) != null && it.isExtension }
+        .filter { analysisSession.getClassIfCategory(it) != null && it.isExtension }
         .sortedWith(StableCallableOrder)
         .ifEmpty { return emptyList() }
         .groupBy {
             val type = it.receiverParameter?.type
-            if (kaSession.isMappedObjCType(type)) return@groupBy null
+            if (analysisSession.isMappedObjCType(type)) return@groupBy null
             else {
                 /**
                  * Mapped types extensions should be handled as top level facades
@@ -60,7 +60,7 @@ fun ObjCExportContext.translateToObjCExtensionFacades(file: KtResolvedObjCExport
                  * @see [org.jetbrains.kotlin.backend.konan.objcexport.ObjCExportMapper.getClassIfCategory] which K1 uses
                  * to differentiate extensions and top level callables
                  */
-                val expandedSymbol = with(kaSession) { type?.expandedSymbol }
+                val expandedSymbol = with(analysisSession) { type?.expandedSymbol }
                 if (expandedSymbol == null) return@groupBy null
                 else getObjCClassOrProtocolName(expandedSymbol).objCName
             }

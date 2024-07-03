@@ -56,7 +56,7 @@ object AnalysisApiHeaderGenerator : HeaderGenerator {
                     module == useSiteModule || module is KaLibraryModule && module in exportedLibraries
                 }
             ) {
-                with(ObjCExportContext(kaSession = kaSession, exportSession = this)) {
+                with(ObjCExportContext(analysisSession = kaSession, exportSession = this)) {
                     translateToObjCHeader(
                         files.map { it as KtFile }.map(::KtObjCExportFile) + exportedLibraryFiles,
                         withObjCBaseDeclarations = configuration.withObjCBaseDeclarationStubs

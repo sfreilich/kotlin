@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.objcexport.analysisApiUtils.isVisibleInObjC
 import org.jetbrains.kotlin.utils.addIfNotNull
 
 fun ObjCExportContext.translateToObjCProperty(symbol: KaPropertySymbol): ObjCProperty? {
-    if (!kaSession.isVisibleInObjC(symbol)) return null
+    if (!analysisSession.isVisibleInObjC(symbol)) return null
     return buildProperty(symbol)
 }
 
@@ -32,7 +32,7 @@ fun ObjCExportContext.buildProperty(symbol: KaPropertySymbol): ObjCProperty {
     val attributes = mutableListOf<String>()
     val setterName: String?
 
-    if (!kaSession.getBridgeReceiverType(symbol).isInstance) attributes += "class"
+    if (!analysisSession.getBridgeReceiverType(symbol).isInstance) attributes += "class"
 
     val propertySetter = symbol.setter
     // Note: the condition below is similar to "toObjCMethods" logic in [ObjCExportedInterface.createCodeSpec].
@@ -50,12 +50,12 @@ fun ObjCExportContext.buildProperty(symbol: KaPropertySymbol): ObjCProperty {
     val getterName: String? = if (getterSelector != name && getterSelector.isNotBlank() == true) getterSelector else null
     val declarationAttributes = mutableListOf(symbol.getSwiftPrivateAttribute() ?: swiftNameAttribute(propertyName.swiftName))
 
-    declarationAttributes.addIfNotNull(kaSession.getObjCDeprecationStatus(symbol))
+    declarationAttributes.addIfNotNull(analysisSession.getObjCDeprecationStatus(symbol))
 
     return ObjCProperty(
         name = name,
-        comment = kaSession.translateToObjCComment(symbol.annotations),
-        origin = kaSession.getObjCExportStubOrigin(symbol),
+        comment = analysisSession.translateToObjCComment(symbol.annotations),
+        origin = analysisSession.getObjCExportStubOrigin(symbol),
         type = type ?: ObjCIdType, //[ObjCIdType] temp fix, should be translated properly, see KT-65709
         propertyAttributes = attributes,
         setterName = if (setterName.isNullOrBlank()) null else setterName,

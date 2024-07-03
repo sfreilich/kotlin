@@ -18,22 +18,22 @@ import org.jetbrains.kotlin.objcexport.analysisApiUtils.isVisibleInObjC
 fun ObjCExportContext.translateToObjCProtocol(symbol: KaClassSymbol): ObjCProtocol? {
     // TODO: check if this symbol shall be exposed in the first place
     require(symbol.classKind == KaClassKind.INTERFACE)
-    if (!kaSession.isVisibleInObjC(symbol)) return null
+    if (!analysisSession.isVisibleInObjC(symbol)) return null
 
     // TODO: Check error type!
     val name = getObjCClassOrProtocolName(symbol)
 
-    val members = kaSession.getCallableSymbolsForObjCMemberTranslation(symbol)
-        .filter { kaSession.isObjCBaseCallable(it) }
+    val members = analysisSession.getCallableSymbolsForObjCMemberTranslation(symbol)
+        .filter { analysisSession.isObjCBaseCallable(it) }
         .sortedWith(StableCallableOrder)
         .flatMap { translateToObjCExportStub(it) }
 
-    val comment: ObjCComment? = kaSession.translateToObjCComment(symbol.annotations)
+    val comment: ObjCComment? = analysisSession.translateToObjCComment(symbol.annotations)
 
     return ObjCProtocolImpl(
         name = name.objCName,
         comment = comment,
-        origin = kaSession.getObjCExportStubOrigin(symbol),
+        origin = analysisSession.getObjCExportStubOrigin(symbol),
         attributes = name.toNameAttributes(),
         superProtocols = superProtocols(symbol),
         members = members
@@ -41,8 +41,8 @@ fun ObjCExportContext.translateToObjCProtocol(symbol: KaClassSymbol): ObjCProtoc
 }
 
 internal fun ObjCExportContext.superProtocols(symbol: KaClassSymbol): List<String> {
-    return kaSession.getDeclaredSuperInterfaceSymbols(symbol)
-        .filter { kaSession.isVisibleInObjC(it) }
+    return analysisSession.getDeclaredSuperInterfaceSymbols(symbol)
+        .filter { analysisSession.isVisibleInObjC(it) }
         .map { superInterface -> getObjCClassOrProtocolName(superInterface).objCName }
         .toList()
 }

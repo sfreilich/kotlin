@@ -18,7 +18,7 @@ internal data class KtObjCSuperClassTranslation(
 )
 
 internal fun ObjCExportContext.translateSuperClass(symbol: KaClassSymbol): KtObjCSuperClassTranslation {
-    val superClassType = kaSession.getSuperClassTypeNotAny(symbol)
+    val superClassType = analysisSession.getSuperClassTypeNotAny(symbol)
     val defaultName = exportSession.getDefaultSuperClassOrProtocolName()
     val superClassName = if (superClassType == null) {
         defaultName

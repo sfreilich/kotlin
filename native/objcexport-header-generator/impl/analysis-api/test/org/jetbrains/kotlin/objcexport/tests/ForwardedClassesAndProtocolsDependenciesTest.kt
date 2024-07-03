@@ -81,7 +81,7 @@ class ForwardedClassesAndProtocolsDependenciesTest(
         return analyze(file) {
             val kaSession = this
             withKtObjCExportSession(KtObjCExportConfiguration()) {
-                with(ObjCExportContext(kaSession = kaSession, exportSession = this)) {
+                with(ObjCExportContext(analysisSession = kaSession, exportSession = this)) {
                     translateToObjCHeader(listOf(KtObjCExportFile(file)))
                 }
             }

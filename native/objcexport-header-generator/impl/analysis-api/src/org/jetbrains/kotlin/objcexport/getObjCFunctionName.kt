@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.objcexport.analysisApiUtils.getPropertySymbol
 
 fun ObjCExportContext.getObjCFunctionName(symbol: KaFunctionSymbol): ObjCExportFunctionName {
     val annotationName =
-        if (symbol is KaPropertyAccessorSymbol) with(kaSession) { symbol.containingDeclaration }?.resolveObjCNameAnnotation()
+        if (symbol is KaPropertyAccessorSymbol) with(analysisSession) { symbol.containingDeclaration }?.resolveObjCNameAnnotation()
         else symbol.resolveObjCNameAnnotation()
     return ObjCExportFunctionName(
         swiftName = getObjCFunctionName(symbol, annotationName?.swiftName),
@@ -36,7 +36,7 @@ private fun ObjCExportContext.getTranslationName(symbol: KaFunctionSymbol): Stri
 }
 
 private fun ObjCExportContext.formatPropertyName(symbol: KaPropertyAccessorSymbol, annotationName: String? = null): String {
-    val propertySymbol = kaSession.getPropertySymbol(symbol)
+    val propertySymbol = analysisSession.getPropertySymbol(symbol)
     val name = annotationName ?: exportSession.exportSessionSymbolName(propertySymbol)
     return when (symbol) {
         is KaPropertyGetterSymbol -> name

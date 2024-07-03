@@ -28,7 +28,7 @@ fun ObjCExportContext.valueParametersAssociated(
     val functionParameters = function.valueParameters
     val bridgeParameters = bridge.valueParameters
 
-    kaSession.addReceiver(result, bridgeParameters, function)
+    analysisSession.addReceiver(result, bridgeParameters, function)
 
     if (function is KaPropertySetterSymbol) {
         /**

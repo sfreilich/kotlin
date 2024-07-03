@@ -54,7 +54,7 @@ internal fun ObjCExportContext.translateToObjCParameters(symbol: KaFunctionSymbo
                 val returnType = parameter!!.type
                 if (parameter.isVararg) {
                     //vararg is a special case, [parameter.returnType] is T, we need Array<T>
-                    val classType = kaSession.buildClassType(StandardClassIds.Array) { argument(parameter.type) }
+                    val classType = analysisSession.buildClassType(StandardClassIds.Array) { argument(parameter.type) }
                     translateToObjCType(classType, bridge.bridge)
                 } else {
                     translateToObjCType(returnType, bridge.bridge)

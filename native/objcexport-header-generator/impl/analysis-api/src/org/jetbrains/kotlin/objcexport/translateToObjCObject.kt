@@ -16,14 +16,14 @@ import org.jetbrains.kotlin.objcexport.extras.requiresForwardDeclaration
 
 fun ObjCExportContext.translateToObjCObject(symbol: KaClassSymbol): ObjCClass? {
     require(symbol.classKind == KaClassKind.OBJECT || symbol.classKind == KaClassKind.COMPANION_OBJECT)
-    if (!kaSession.isVisibleInObjC(symbol)) return null
+    if (!analysisSession.isVisibleInObjC(symbol)) return null
 
     val enumKind = symbol.classKind == KaClassKind.ENUM_CLASS
     val final = symbol.modality == KaSymbolModality.FINAL
     val name = getObjCClassOrProtocolName(symbol)
     val attributes = (if (enumKind || final) listOf(OBJC_SUBCLASSING_RESTRICTED) else emptyList()) + name.toNameAttributes()
-    val comment: ObjCComment? = kaSession.translateToObjCComment(symbol.annotations)
-    val origin = kaSession.getObjCExportStubOrigin(symbol)
+    val comment: ObjCComment? = analysisSession.translateToObjCComment(symbol.annotations)
+    val origin = analysisSession.getObjCExportStubOrigin(symbol)
     val superProtocols: List<String> = superProtocols(symbol)
     val categoryName: String? = null
     val generics: List<ObjCGenericTypeDeclaration> = emptyList()
@@ -32,7 +32,7 @@ fun ObjCExportContext.translateToObjCObject(symbol: KaClassSymbol): ObjCClass? {
     val objectMembers = mutableListOf<ObjCExportStub>()
     objectMembers += translateToObjCConstructors(symbol)
     objectMembers += getDefaultMembers(symbol)
-    objectMembers += with(kaSession) {
+    objectMembers += with(analysisSession) {
         symbol.declaredMemberScope.callables
             .sortedWith(StableCallableOrder)
             .flatMap { translateToObjCExportStub(it) }

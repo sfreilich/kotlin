@@ -97,19 +97,19 @@ private class KtObjCExportHeaderGenerator(
 
 
     private fun ObjCExportContext.translateClass(classId: ClassId) {
-        val classOrObjectSymbol = kaSession.findClass(classId) ?: return
+        val classOrObjectSymbol = analysisSession.findClass(classId) ?: return
         translateClassOrObjectSymbol(classOrObjectSymbol)
     }
 
     private fun ObjCExportContext.translateFileClassifiers(file: KtObjCExportFile) {
-        val resolvedFile = with(file) { kaSession.resolve() }
+        val resolvedFile = with(file) { analysisSession.resolve() }
         resolvedFile.classifierSymbols.sortedWith(StableClassifierOrder).forEach { classOrObjectSymbol ->
             translateClassOrObjectSymbol(classOrObjectSymbol)
         }
     }
 
     private fun ObjCExportContext.translateFileFacades(file: KtObjCExportFile) {
-        val resolvedFile = with(file) { kaSession.resolve() }
+        val resolvedFile = with(file) { analysisSession.resolve() }
 
         translateToObjCExtensionFacades(resolvedFile).forEach { facade ->
             objCStubs += facade
@@ -145,13 +145,13 @@ private class KtObjCExportHeaderGenerator(
         2) Super interface / superclass symbol export stubs (result of translation) have to be present in the stubs list before the
         original stub
          */
-        kaSession.getDeclaredSuperInterfaceSymbols(symbol).filter { kaSession.isVisibleInObjC(it) }.forEach { superInterfaceSymbol ->
+        analysisSession.getDeclaredSuperInterfaceSymbols(symbol).filter { analysisSession.isVisibleInObjC(it) }.forEach { superInterfaceSymbol ->
             translateClassOrObjectSymbol(superInterfaceSymbol)?.let {
                 objCProtocolForwardDeclarations += it.name
             }
         }
 
-        kaSession.getSuperClassSymbolNotAny(symbol)?.takeIf { kaSession.isVisibleInObjC(it) }?.let { superClassSymbol ->
+        analysisSession.getSuperClassSymbolNotAny(symbol)?.takeIf { analysisSession.isVisibleInObjC(it) }?.let { superClassSymbol ->
             translateClassOrObjectSymbol(superClassSymbol)?.let {
                 objCClassForwardDeclarations += it.name
             }

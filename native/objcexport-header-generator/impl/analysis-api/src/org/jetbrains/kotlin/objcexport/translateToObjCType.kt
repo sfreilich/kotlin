@@ -42,7 +42,7 @@ internal fun ObjCExportContext.translateToObjCType(type: KaType, typeBridge: Typ
             ObjCValueType.FLOAT -> ObjCPrimitiveType.float
             ObjCValueType.DOUBLE -> ObjCPrimitiveType.double
             ObjCValueType.VECTOR_FLOAT_128 -> ObjCPrimitiveType.vectorFloat128
-            ObjCValueType.POINTER -> ObjCPointerType(ObjCVoidType, kaSession.isBinaryRepresentationNullable(type))
+            ObjCValueType.POINTER -> ObjCPointerType(ObjCVoidType, analysisSession.isBinaryRepresentationNullable(type))
         }
     }
 }
@@ -52,14 +52,14 @@ internal fun ObjCExportContext.translateToObjCType(type: KaType, typeBridge: Typ
  */
 internal fun ObjCExportContext.translateToObjCReferenceType(type: KaType): ObjCReferenceType {
     val referenceType = mapToReferenceTypeIgnoringNullability(type)
-    return kaSession.withNullabilityOf(referenceType, type)
+    return analysisSession.withNullabilityOf(referenceType, type)
 }
 
 /**
  * [org.jetbrains.kotlin.backend.konan.objcexport.ObjCExportTranslatorImpl.mapReferenceTypeIgnoringNullability]
  */
 internal fun ObjCExportContext.mapToReferenceTypeIgnoringNullability(type: KaType): ObjCNonNullReferenceType {
-    with(kaSession) {
+    with(analysisSession) {
         val fullyExpandedType = type.fullyExpandedType
         val classId = (fullyExpandedType as? KaClassType)?.classId
 
@@ -151,7 +151,7 @@ internal fun ObjCExportContext.mapToReferenceTypeIgnoringNullability(type: KaTyp
 }
 
 private fun ObjCExportContext.getObjCTypeName(type: KaClassType): String {
-    val clazz = kaSession.findClass(type.classId)
+    val clazz = analysisSession.findClass(type.classId)
     return if (clazz != null) {
         getObjCClassOrProtocolName(clazz).objCName
     } else {
@@ -169,7 +169,7 @@ internal fun ObjCExportContext.translateTypeArgumentsToObjC(type: KaType): List<
         when (typeArgument) {
             is KaStarTypeProjection -> ObjCIdType
             is KaTypeArgumentWithVariance -> {
-                val isMarkedNullable = with(kaSession) { typeArgument.type.isMarkedNullable }
+                val isMarkedNullable = with(analysisSession) { typeArgument.type.isMarkedNullable }
                 /*
                 Kotlin `null` keys and values are represented as `NSNull` singleton in collections
                 */

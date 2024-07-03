@@ -46,7 +46,7 @@ import org.jetbrains.kotlin.objcexport.analysisApiUtils.getDefaultSuperClassOrPr
  */
 fun ObjCExportContext.translateToObjCTopLevelFacade(file: KtResolvedObjCExportFile): ObjCInterface? {
     val extensions = file.callableSymbols
-        .filter { kaSession.getClassIfCategory(it) == null }
+        .filter { analysisSession.getClassIfCategory(it) == null }
         .toList()
         .sortedWith(StableCallableOrder)
         .ifEmpty { return null }
@@ -69,5 +69,5 @@ fun ObjCExportContext.translateToObjCTopLevelFacade(file: KtResolvedObjCExportFi
 
 internal fun ObjCExportContext.isExtensionOfMappedObjCType(symbol: KaCallableSymbol): Boolean {
     val receiverType = symbol.receiverParameter?.type
-    return symbol.isExtension && receiverType != null && kaSession.isMappedObjCType(receiverType)
+    return symbol.isExtension && receiverType != null && analysisSession.isMappedObjCType(receiverType)
 }

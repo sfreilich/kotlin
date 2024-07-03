@@ -13,5 +13,5 @@ internal fun ObjCExportContext.translateToObjCFunctionType(type: KaType, typeBri
             translateToObjCReferenceType(parameterType)
         }
     )
-    return kaSession.withNullabilityOf(objCBlockPointerType, type)
+    return analysisSession.withNullabilityOf(objCBlockPointerType, type)
 }

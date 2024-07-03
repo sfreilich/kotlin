@@ -30,7 +30,7 @@ interface KtObjCExportModuleNaming {
 internal fun ObjCExportContext.getObjCKotlinModuleName(module: KaModule): String? {
     return exportSession.cached(GetObjCKotlinModuleNameCacheKey(module)) {
         with(exportSession.internal.moduleNaming) {
-            kaSession.getModuleName(module)
+            analysisSession.getModuleName(module)
         }
     }
 }

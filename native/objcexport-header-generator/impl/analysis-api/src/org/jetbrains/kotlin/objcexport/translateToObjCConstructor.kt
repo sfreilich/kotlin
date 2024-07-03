@@ -21,14 +21,14 @@ import org.jetbrains.kotlin.objcexport.analysisApiUtils.isVisibleInObjC
 fun ObjCExportContext.translateToObjCConstructors(symbol: KaClassSymbol): List<ObjCMethod> {
 
     /* Translate declared constructors */
-    val result = with(kaSession) { symbol.declaredMemberScope }
+    val result = with(analysisSession) { symbol.declaredMemberScope }
         .constructors
         .filter { !it.hasExportForCompilerAnnotation }
-        .filter { kaSession.isVisibleInObjC(it) }
+        .filter { analysisSession.isVisibleInObjC(it) }
         .sortedWith(StableCallableOrder)
         .flatMap { constructor ->
             val objCConstructor = buildObjCMethod(constructor)
-            listOf(objCConstructor) + if (objCConstructor.name == "init") listOf(kaSession.buildNewInitConstructor(constructor)) else emptyList()
+            listOf(objCConstructor) + if (objCConstructor.name == "init") listOf(analysisSession.buildNewInitConstructor(constructor)) else emptyList()
         }
         .toMutableList()
 
@@ -51,7 +51,7 @@ fun ObjCExportContext.translateToObjCConstructors(symbol: KaClassSymbol): List<O
         result.add(
             ObjCMethod(
                 comment = null,
-                origin = kaSession.getObjCExportStubOrigin(symbol),
+                origin = analysisSession.getObjCExportStubOrigin(symbol),
                 isInstanceMethod = false,
                 returnType = ObjCInstanceType,
                 selectors = listOf("allocWithZone:"),
@@ -62,8 +62,8 @@ fun ObjCExportContext.translateToObjCConstructors(symbol: KaClassSymbol): List<O
     }
 
     // Hide "unimplemented" super constructors:
-    with(kaSession) { kaSession.getSuperClassSymbolNotAny(symbol)?.memberScope }?.constructors.orEmpty()
-        .filter { kaSession.isVisibleInObjC(it) }
+    with(analysisSession) { this@translateToObjCConstructors.analysisSession.getSuperClassSymbolNotAny(symbol)?.memberScope }?.constructors.orEmpty()
+        .filter { analysisSession.isVisibleInObjC(it) }
         .forEach { superClassConstructor ->
             val translatedSuperClassConstructor = buildObjCMethod(superClassConstructor, unavailable = true)
             if (result.none { it.name == translatedSuperClassConstructor.name }) {

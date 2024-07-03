@@ -142,7 +142,7 @@ private fun <T, S : KaSymbol> ObjCExportContext.runWithOverride(
         it.copy(overrides = it.overrides + (symbol to override))
     }
     return ObjCExportContext(
-        kaSession = kaSession,
+        analysisSession = analysisSession,
         exportSession = session
     ).block(symbol)
     //return session.block(symbol)

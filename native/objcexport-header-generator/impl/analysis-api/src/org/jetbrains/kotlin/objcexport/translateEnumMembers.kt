@@ -23,7 +23,7 @@ internal fun ObjCExportContext.translateEnumMembers(symbol: KaClassSymbol): List
 
 private fun ObjCExportContext.getEnumEntries(symbol: KaClassSymbol): List<ObjCProperty> {
 
-    val staticMembers = with(kaSession) { symbol.staticDeclaredMemberScope }.callables.toList()
+    val staticMembers = with(analysisSession) { symbol.staticDeclaredMemberScope }.callables.toList()
     return staticMembers.filterIsInstance<KaEnumEntrySymbol>().map { entry ->
 
         val entryName = getEnumEntryName(entry, false)
@@ -43,7 +43,7 @@ private fun ObjCExportContext.getEnumEntries(symbol: KaClassSymbol): List<ObjCPr
  * [org.jetbrains.kotlin.backend.konan.objcexport.ObjCExportTranslatorImpl.buildEnumValuesMethod]
  */
 private fun ObjCExportContext.getEnumValuesMethod(symbol: KaClassSymbol): ObjCMethod {
-    val valuesFunctionSymbol = with(kaSession) { symbol.staticMemberScope }.callables(Name.identifier("values")).firstOrNull()
+    val valuesFunctionSymbol = with(analysisSession) { symbol.staticMemberScope }.callables(Name.identifier("values")).firstOrNull()
     val returnType = valuesFunctionSymbol?.returnType
     return ObjCMethod(
         comment = null,
@@ -60,7 +60,7 @@ private fun ObjCExportContext.getEnumValuesMethod(symbol: KaClassSymbol): ObjCMe
  * [org.jetbrains.kotlin.backend.konan.objcexport.ObjCExportTranslatorImpl.buildEnumEntriesProperty]
  */
 private fun ObjCExportContext.getEnumEntriesProperty(symbol: KaClassSymbol): ObjCProperty {
-    val entriesSymbol = with(kaSession) { symbol.staticMemberScope }.callables(Name.identifier("entries")).firstOrNull()
+    val entriesSymbol = with(analysisSession) { symbol.staticMemberScope }.callables(Name.identifier("entries")).firstOrNull()
 
     val returnType = entriesSymbol?.returnType
     return ObjCProperty(

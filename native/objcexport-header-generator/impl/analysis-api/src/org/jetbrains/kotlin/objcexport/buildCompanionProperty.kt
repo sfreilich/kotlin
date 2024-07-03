@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.objcexport.extras.requiresForwardDeclaration
  * To check whether class has companion object see [needsCompanionProperty]
  */
 internal fun ObjCExportContext.buildCompanionProperty(classSymbol: KaClassSymbol): ObjCProperty {
-    val companion = with(kaSession) {
+    val companion = with(analysisSession) {
         classSymbol.staticMemberScope
     }.classifiers.toList().firstOrNull { (it as? KaClassSymbol)?.isCompanion == true }
 

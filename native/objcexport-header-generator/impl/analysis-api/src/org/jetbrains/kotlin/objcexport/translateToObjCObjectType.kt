@@ -46,12 +46,12 @@ internal fun ObjCExportContext.translateToObjCObjectType(type: KaType): ObjCNonN
 }
 
 private fun ObjCExportContext.translateToObjCObjectType(symbol: KaClassSymbol): ObjCNonNullReferenceType {
-    if (kaSession.isObjCMetaClass(symbol)) return ObjCMetaClassType
-    if (kaSession.isObjCProtocolClass(symbol)) return ObjCClassType("Protocol", extras = objCTypeExtras {
+    if (analysisSession.isObjCMetaClass(symbol)) return ObjCMetaClassType
+    if (analysisSession.isObjCProtocolClass(symbol)) return ObjCClassType("Protocol", extras = objCTypeExtras {
         requiresForwardDeclaration = true
     })
 
-    if (kaSession.isExternalObjCClass(symbol) || kaSession.isObjCForwardDeclaration(symbol)) {
+    if (analysisSession.isExternalObjCClass(symbol) || analysisSession.isObjCForwardDeclaration(symbol)) {
         return if (symbol.classKind == KaClassKind.INTERFACE) {
             ObjCProtocolType(symbol.nameOrAnonymous.asString().removeSuffix("Protocol"), extras = objCTypeExtras {
                 requiresForwardDeclaration = true
@@ -63,7 +63,7 @@ private fun ObjCExportContext.translateToObjCObjectType(symbol: KaClassSymbol): 
         }
     }
 
-    val superClassSymbol = kaSession.getSuperClassSymbolNotAny(symbol)
+    val superClassSymbol = analysisSession.getSuperClassSymbolNotAny(symbol)
 
     return if (superClassSymbol == null) {
         ObjCIdType

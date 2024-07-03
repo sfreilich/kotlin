@@ -68,7 +68,7 @@ private fun ObjCExportContext.getObjCName(
             .handleSpecialNames("get")
     }
 
-    with(kaSession) {
+    with(analysisSession) {
         symbol.containingDeclaration?.let { it as? KaClassLikeSymbol }?.let { containingClass ->
             return getObjCName(containingClass) + objCName.capitalizeAsciiOnly()
         }
@@ -94,7 +94,7 @@ private fun ObjCExportContext.getSwiftName(
         return swiftName
     }
 
-    with(kaSession) {
+    with(analysisSession) {
         classSymbol.containingDeclaration?.let { it as? KaClassLikeSymbol }?.let { containingClass ->
             val containingClassSwiftName = getSwiftName(containingClass)
             return buildString {
@@ -161,7 +161,7 @@ private fun mangleSwiftNestedClassName(name: String): String = when (name) {
 }
 
 private fun ObjCExportContext.getObjCModuleNamePrefix(symbol: KaSymbol): String? {
-    val module = with(kaSession) { symbol.containingModule }
+    val module = with(analysisSession) { symbol.containingModule }
     val moduleName = getObjCKotlinModuleName(module) ?: return null
     val isExported = with(exportSession) { isExported(module) }
     if (moduleName == "stdlib" || moduleName == "kotlin-stdlib-common") return "Kotlin"

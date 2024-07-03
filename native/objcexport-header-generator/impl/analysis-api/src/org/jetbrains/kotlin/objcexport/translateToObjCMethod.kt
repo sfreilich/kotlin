@@ -25,9 +25,9 @@ internal val KaSymbol.isConstructor: Boolean
     get() = this is KaConstructorSymbol
 
 fun ObjCExportContext.translateToObjCMethod(symbol: KaFunctionSymbol): ObjCMethod? {
-    if (!kaSession.isVisibleInObjC(symbol)) return null
+    if (!analysisSession.isVisibleInObjC(symbol)) return null
     if (symbol.isFakeOverride) return null
-    if (symbol is KaNamedFunctionSymbol && kaSession.isClone(symbol)) return null
+    if (symbol is KaNamedFunctionSymbol && analysisSession.isClone(symbol)) return null
     return buildObjCMethod(symbol)
 }
 
@@ -38,7 +38,7 @@ fun ObjCExportContext.getBaseFunctionMethodBridge(symbol: KaFunctionSymbol): Met
          * So in case of function we need to call [getFunctionMethodBridge] on [baseMethod]
          */
         is KaNamedFunctionSymbol -> {
-            getFunctionMethodBridge(kaSession.getBaseMethod(symbol))
+            getFunctionMethodBridge(analysisSession.getBaseMethod(symbol))
         }
         else -> getFunctionMethodBridge(symbol)
     }
@@ -59,8 +59,8 @@ internal fun ObjCExportContext.buildObjCMethod(
     val swiftName = getSwiftName(symbol, bridge)
     val attributes = mutableListOf<String>()
     val returnBridge = bridge.returnBridge
-    val comment = kaSession.translateToObjCComment(symbol, bridge, parameters)
-    val throws = kaSession.getDefinedThrows(symbol).map { it }.toList()
+    val comment = analysisSession.translateToObjCComment(symbol, bridge, parameters)
+    val throws = analysisSession.getDefinedThrows(symbol).map { it }.toList()
 
     attributes += symbol.getSwiftPrivateAttribute() ?: swiftNameAttribute(swiftName)
 
@@ -71,21 +71,21 @@ internal fun ObjCExportContext.buildObjCMethod(
         attributes += "swift_error(nonnull_error)" // Means "failure <=> (error != nil)".
     }
 
-    if (symbol.isConstructor && !kaSession.isArrayConstructor(symbol)) { // TODO: check methodBridge instead.
+    if (symbol.isConstructor && !analysisSession.isArrayConstructor(symbol)) { // TODO: check methodBridge instead.
         attributes += "objc_designated_initializer"
     }
 
     if (unavailable) {
         attributes += "unavailable"
     } else {
-        attributes.addIfNotNull(kaSession.getObjCDeprecationStatus(symbol))
+        attributes.addIfNotNull(analysisSession.getObjCDeprecationStatus(symbol))
     }
 
     val isMethodInstance = if (isExtensionOfMappedObjCType(symbol)) false else bridge.isInstance
 
     return ObjCMethod(
         comment = comment,
-        origin = kaSession.getObjCExportStubOrigin(symbol),
+        origin = analysisSession.getObjCExportStubOrigin(symbol),
         isInstanceMethod = isMethodInstance,
         returnType = returnType,
         selectors = selectors,
@@ -270,7 +270,7 @@ fun ObjCExportContext.getSelector(symbol: KaFunctionSymbol, methodBridge: Method
  */
 fun ObjCExportContext.getMangledName(symbol: KaFunctionSymbol, forSwift: Boolean): String {
     return if (symbol.isConstructor) {
-        if (kaSession.isArrayConstructor(symbol) && !forSwift) "array" else "init"
+        if (analysisSession.isArrayConstructor(symbol) && !forSwift) "array" else "init"
     } else {
         getObjCFunctionName(symbol).name(forSwift).handleSpecialNames("do")
     }

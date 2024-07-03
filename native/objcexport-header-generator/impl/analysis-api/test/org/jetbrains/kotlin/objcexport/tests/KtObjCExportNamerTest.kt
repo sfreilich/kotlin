@@ -87,9 +87,9 @@ class KtObjCExportNamerTest(
         getSymbol<KaFunctionSymbol>("fun foo(param1: Boolean, param2: String) {}", "foo", KaScope::callables) { symbol ->
             val ktPsiFactory = KtPsiFactory(symbol.psi!!.project)
 
-            val type1 = with(kaSession) { ktPsiFactory.createTypeCodeFragment("Int", symbol.psi).getContentElement()!!.type }
-            val type2 = with(kaSession) { ktPsiFactory.createTypeCodeFragment("Double", symbol.psi).getContentElement()!!.type }
-            val returnType = with(kaSession) { ktPsiFactory.createTypeCodeFragment("Float", symbol.psi).getContentElement()!!.type }
+            val type1 = with(analysisSession) { ktPsiFactory.createTypeCodeFragment("Int", symbol.psi).getContentElement()!!.type }
+            val type2 = with(analysisSession) { ktPsiFactory.createTypeCodeFragment("Double", symbol.psi).getContentElement()!!.type }
+            val returnType = with(analysisSession) { ktPsiFactory.createTypeCodeFragment("Float", symbol.psi).getContentElement()!!.type }
 
             val valueParams = listOf(
                 bridgeParameter(type1) to KtObjCParameterData(Name.identifier("intParam"), false, type1, false),
@@ -121,7 +121,7 @@ class KtObjCExportNamerTest(
     ) {
         val file = inlineSourceCodeAnalysis.createKtFile(sourceCode)
         analyzeWithObjCExport(file) {
-            val symbol = with(kaSession) { file.symbol.fileScope.symbolsGetter(Name.identifier(name)).single() as T }
+            val symbol = with(analysisSession) { file.symbol.fileScope.symbolsGetter(Name.identifier(name)).single() as T }
             action(this, symbol)
         }
     }

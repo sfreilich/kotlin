@@ -14,7 +14,7 @@ internal fun ObjCExportContext.translateToObjCExportStub(symbol: KaCallableSymbo
     val result = mutableListOf<ObjCExportStub>()
     when (symbol) {
         is KaPropertySymbol -> {
-            if (kaSession.isObjCProperty(symbol)) {
+            if (analysisSession.isObjCProperty(symbol)) {
                 result.addIfNotNull(translateToObjCProperty(symbol))
             } else {
                 symbol.getter?.let { getter ->
