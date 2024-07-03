@@ -93,7 +93,7 @@ fun isMainPermanentObject(obj: Any): Boolean = obj == Object
 
 fun getMainPermanentObject(): Any = Object
 
-// FILE: FakeOverrides.kt
+// FILE: KotlinAnyMethodsx.kt
 class HashableObject(val value: Int) {
     override fun hashCode(): Int = value
     override fun equals(other: Any?): Boolean = (other as? HashableObject)?.value == value

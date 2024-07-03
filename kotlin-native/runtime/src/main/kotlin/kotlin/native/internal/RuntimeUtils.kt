@@ -269,15 +269,3 @@ internal fun KonanObjectToUtf8Array(value: Any?): ByteArray {
 @PublishedApi
 @TypedIntrinsic(IntrinsicType.IMMUTABLE_BLOB)
 internal external fun immutableBlobOfImpl(data: String): ImmutableBlob
-
-@PublishedApi
-@ExportForCppRuntime("Kotlin_hashCode")
-internal fun hashCode(obj: Any): Int = obj.hashCode()
-
-@PublishedApi
-@ExportForCppRuntime("Kotlin_equals")
-internal fun equals(lhs: Any, rhs: Any): Boolean = lhs == rhs
-
-@PublishedApi
-@ExportForCppRuntime("Kotlin_toString")
-internal fun toString(obj: Any): String = obj.toString()

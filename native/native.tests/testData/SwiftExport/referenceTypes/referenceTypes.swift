@@ -208,11 +208,13 @@ func objectsHashProperly() throws {
     try assertFalse(one == two)
     try assertFalse(ein == two)
 
+    try assertFalse(ein == NSNumber(1))
+
     func testEquality(_ lhs: KotlinBase, _ rhs: KotlinBase) throws {
         try assertEquals(actual: lhs.hashValue, expected: numericCast(getHash(obj: lhs)))
-        try assertEquals(actual: lhs == lhs, expected: isEqual(lhs: lhs, rhs: lhs))
+        try assertEquals(actual: lhs == lhs, expected: true)
         try assertEquals(actual: rhs.hashValue, expected: numericCast(getHash(obj: rhs)))
-        try assertEquals(actual: rhs == rhs, expected: isEqual(lhs: rhs, rhs: rhs))
+        try assertEquals(actual: rhs == rhs, expected: true)
 
         try assertEquals(actual: lhs == rhs, expected: isEqual(lhs: lhs, rhs: rhs))
         try assertEquals(actual: lhs.hashValue == rhs.hashValue, expected: getHash(obj: lhs) == getHash(obj: rhs))
