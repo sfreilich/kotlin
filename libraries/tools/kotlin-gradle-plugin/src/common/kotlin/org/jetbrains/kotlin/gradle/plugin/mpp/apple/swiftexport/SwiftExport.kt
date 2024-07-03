@@ -8,6 +8,8 @@ package org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.dsl.KotlinNativeBinaryContainer
@@ -15,12 +17,14 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.AppleTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.appleTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.configuration
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.internal.SwiftExportedModule
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.internal.maybeCreateSwiftExportClasspathResolvableConfiguration
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.tasks.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.tasks.BuildSPMSwiftExportPackage
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.tasks.GenerateSPMPackageFromSwiftExport
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.tasks.MergeStaticLibrariesTask
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.tasks.SwiftExportTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 import org.jetbrains.kotlin.gradle.tasks.locateOrRegisterTask
 import org.jetbrains.kotlin.gradle.utils.*
 import org.jetbrains.kotlin.gradle.utils.getOrCreate
@@ -30,11 +34,15 @@ import org.jetbrains.kotlin.konan.target.Distribution
 
 internal fun Project.registerSwiftExportTask(
     name: Provider<String>,
+    flattenPkg: Provider<String>,
+    exportedModules: Set<SwiftExportExtension.ModuleExport>,
     taskGroup: String?,
     binary: NativeBinary,
 ): TaskProvider<*> {
     return registerSwiftExportTask(
         swiftApiModuleName = name,
+        flattenPkg = flattenPkg,
+        exportedModules = exportedModules,
         taskGroup = taskGroup,
         target = binary.target,
         buildType = binary.buildType,
@@ -43,6 +51,8 @@ internal fun Project.registerSwiftExportTask(
 
 private fun Project.registerSwiftExportTask(
     swiftApiModuleName: Provider<String>,
+    flattenPkg: Provider<String>,
+    exportedModules: Set<SwiftExportExtension.ModuleExport>,
     taskGroup: String?,
     target: KotlinNativeTarget,
     buildType: NativeBuildType,
@@ -60,6 +70,8 @@ private fun Project.registerSwiftExportTask(
         target = target,
         configuration = buildConfiguration,
         swiftApiModuleName = swiftApiModuleName,
+        flattenPkg = flattenPkg,
+        exportedModules = exportedModules,
         mainCompilation = mainCompilation
     )
     val staticLibrary = registerSwiftExportCompilationAndGetBinary(
@@ -115,6 +127,8 @@ private fun Project.registerSwiftExportRun(
     target: KotlinNativeTarget,
     configuration: String,
     swiftApiModuleName: Provider<String>,
+    flattenPkg: Provider<String>,
+    exportedModules: Set<SwiftExportExtension.ModuleExport>,
     mainCompilation: KotlinNativeCompilation,
 ): TaskProvider<SwiftExportTask> {
     val swiftExportTaskName = lowerCamelCaseName(
@@ -124,22 +138,38 @@ private fun Project.registerSwiftExportRun(
 
     val outputs = layout.buildDirectory.dir("SwiftExport/${target.name}/$configuration")
     val compileTask = mainCompilation.compileTaskProvider
+    val files = outputs.map { it.dir("files") }
+    val serializedModules = outputs.map { it.dir("modules") }
+    val libraries = compileTask.map { it.libraries }
+
+    val compileDependencies = compileTask.map {
+        it.taskDependencies.getDependencies(null).filterIsInstance<KotlinNativeCompile>()
+    }
+
+    val rootModule = objects.newInstance<SwiftExportedModule>().apply {
+        projectName.set(project.name)
+        moduleName.set(swiftApiModuleName)
+        flattenPackage.set(flattenPkg)
+        library.set(layout.file(compileTask.map { it.outputFile.get() }))
+    }
+
+    val exportedModulesProvider = compileDependencies.map { compileTasks ->
+        compileTasks.mapNotNull { compileTask ->
+            exportedSwiftModule(objects, layout, compileTask, exportedModules)
+        }
+    }
 
     return locateOrRegisterTask<SwiftExportTask>(swiftExportTaskName) { task ->
         task.description = "Run $taskNamePrefix Swift Export process"
         task.group = taskGroup
 
-        val files = outputs.map { it.dir("files") }
-        val serializedModules = outputs.map { it.dir("modules") }
-
         // Input
+        task.libraries.from(libraries)
         task.swiftExportClasspath.from(maybeCreateSwiftExportClasspathResolvableConfiguration())
-        task.parameters.swiftApiModuleName.convention(swiftApiModuleName)
-        task.parameters.bridgeModuleName.convention("SharedBridge")
-        task.parameters.konanDistribution.convention(Distribution(konanDistribution.root.absolutePath))
-        task.parameters.kotlinLibraryFile.set(
-            layout.file(compileTask.map { it.outputFile.get() })
-        )
+        task.parameters.bridgeModuleName.set("SharedBridge")
+        task.parameters.konanDistribution.set(Distribution(konanDistribution.root.absolutePath))
+        task.parameters.swiftModule.set(rootModule)
+        task.parameters.exportedModules.set(exportedModulesProvider.get())
 
         // Output
         task.parameters.outputPath.set(files)
@@ -334,3 +364,16 @@ private fun Project.registerCopyTask(
     return copyTask
 }
 
+private fun exportedSwiftModule(
+    objects: ObjectFactory,
+    layout: ProjectLayout,
+    compileTask: KotlinNativeCompile,
+    exportedModules: Set<SwiftExportExtension.ModuleExport>,
+): SwiftExportedModule? = exportedModules.find { it.projectName == compileTask.project.name }?.let { moduleDef ->
+    objects.newInstance<SwiftExportedModule>().apply {
+        projectName.set(moduleDef.projectName)
+        moduleName.set(moduleDef.name)
+        flattenPackage.set(moduleDef.flattenPackage)
+        library.set(layout.file(compileTask.outputFile))
+    }
+}

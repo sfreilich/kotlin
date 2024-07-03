@@ -31,10 +31,20 @@ internal abstract class SwiftExportAction : WorkAction<SwiftExportParameters> {
     }
 
     override fun execute() {
+        //TODO: Pass exported modules
+        val exportedModules = parameters.exportedModules.get()
+        println(
+            "exportedModules: ${
+                exportedModules.map {
+                    "name: ${it.moduleName.get()}, collapse: ${it.flattenPackage.get()}, klib: ${it.library.getFile()}"
+                }
+            }"
+        )
+
         runSwiftExport(
             input = InputModule.Binary(
-                name = parameters.swiftApiModuleName.get(),
-                path = parameters.kotlinLibraryFile.getFile().toPath()
+                name = parameters.swiftModule.flatMap { it.moduleName }.get(),
+                path = parameters.swiftModule.map { it.library.getFile() }.get().toPath()
             ),
             config = SwiftExportConfig(
                 settings = mapOf(

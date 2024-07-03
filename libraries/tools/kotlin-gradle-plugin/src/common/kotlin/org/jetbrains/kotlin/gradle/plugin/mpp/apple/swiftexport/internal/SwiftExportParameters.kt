@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.internal
 
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.workers.WorkParameters
@@ -17,8 +18,12 @@ internal interface SwiftExportParameters : WorkParameters {
     @get:Input
     val bridgeModuleName: Property<String>
 
-    @get:Input
-    val swiftApiModuleName: Property<String>
+    @get:Nested
+    val swiftModule: Property<SwiftExportedModule>
+
+    @get:Nested
+    @get:Optional
+    val exportedModules: ListProperty<SwiftExportedModule>
 
     @get:Input
     @get:Optional
@@ -30,10 +35,6 @@ internal interface SwiftExportParameters : WorkParameters {
 
     @get:Input
     val konanDistribution: Property<Distribution>
-
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    val kotlinLibraryFile: RegularFileProperty
 
     @get:OutputDirectory
     val outputPath: DirectoryProperty

@@ -194,12 +194,14 @@ internal fun Project.registerEmbedSwiftExportTask(
 ) {
     val envTargets = environment.targets
     val envBuildType = environment.buildType
-    val isRequestedFramework = envTargets.contains(binary.konanTarget) && binary.buildType == envBuildType
+    val isMatchingBinary = envTargets.contains(binary.konanTarget) && binary.buildType == envBuildType
     val frameworkTaskName = binary.embedSwiftExportTaskName()
 
-    if (isRequestedFramework) {
+    if (isMatchingBinary) {
         val swiftExportTask = registerSwiftExportTask(
             swiftExportExtension.nameProvider,
+            swiftExportExtension.flattenPackageProvider,
+            swiftExportExtension.exportedModules,
             SwiftExportDSLConstants.TASK_GROUP,
             binary
         ).apply {
