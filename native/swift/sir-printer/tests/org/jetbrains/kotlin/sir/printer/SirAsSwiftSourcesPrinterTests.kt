@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.sir.printer
 import org.jetbrains.kotlin.sir.*
 import org.jetbrains.kotlin.sir.builder.*
 import org.jetbrains.kotlin.sir.providers.utils.updateImports
+import org.jetbrains.kotlin.sir.util.SirFoundationModule
 import org.jetbrains.kotlin.sir.util.SirSwiftModule
 import org.jetbrains.kotlin.test.services.JUnit5Assertions
 import org.jetbrains.kotlin.test.util.KtTestUtil
@@ -169,6 +170,10 @@ class SirAsSwiftSourcesPrinterTests {
                             SirParameter(
                                 argumentName = "arg7",
                                 type = SirNominalType(SirSwiftModule.float)
+                            ),
+                            SirParameter(
+                                argumentName = "arg8",
+                                type = SirNominalType(SirFoundationModule.unichar)
                             ),
                         )
                     )
@@ -503,6 +508,10 @@ class SirAsSwiftSourcesPrinterTests {
                                         argumentName = "arg7",
                                         type = SirNominalType(SirSwiftModule.float)
                                     ),
+                                    SirParameter(
+                                        argumentName = "arg8",
+                                        type = SirNominalType(SirFoundationModule.unichar)
+                                    ),
                                 )
                             )
                             returnType = SirNominalType(SirSwiftModule.bool)
@@ -595,6 +604,10 @@ class SirAsSwiftSourcesPrinterTests {
                                     SirParameter(
                                         argumentName = "arg7",
                                         type = SirNominalType(SirSwiftModule.float)
+                                    ),
+                                    SirParameter(
+                                        argumentName = "arg8",
+                                        type = SirNominalType(SirFoundationModule.unichar)
                                     ),
                                 )
                             )
