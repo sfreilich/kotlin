@@ -92,43 +92,67 @@ private fun Any?.toByte(): Byte? =
         else -> null
     }
 
-private fun Any?.toShort(): Short? =
+private fun Any?.toShort(initialType: IrType): Short? =
     when (this) {
-        is Number -> toShort()
+        is Number -> when {
+            initialType.isUByte() -> toByte().toUByte().toShort()
+            else -> toShort()
+        }
         is Char -> code.toShort()
         else -> null
     }
 
-private fun Any?.toInt(): Int? =
+private fun Any?.toInt(initialType: IrType): Int? =
     when (this) {
-        is Number -> toInt()
+        is Number -> when {
+            initialType.isUByte() -> toByte().toUByte().toInt()
+            initialType.isUShort() -> toShort().toUShort().toInt()
+            else -> toInt()
+        }
         is Char -> code
         else -> null
     }
 
-private fun Any?.toLong(): Long? =
+private fun Any?.toLong(initialType: IrType): Long? =
     when (this) {
-        is Number -> toLong()
+        is Number -> when {
+            initialType.isUByte() -> toByte().toUByte().toLong()
+            initialType.isUShort() -> toShort().toUShort().toLong()
+            initialType.isUInt() -> toInt().toUInt().toLong()
+            else -> toLong()
+        }
         is Char -> code.toLong()
         else -> null
     }
 
-private fun Any?.toFloat(): Float? =
+private fun Any?.toFloat(initialType: IrType): Float? =
     when (this) {
-        is Number -> toFloat()
+        is Number -> when {
+            initialType.isUByte() -> toByte().toUByte().toFloat()
+            initialType.isUShort() -> toShort().toUShort().toFloat()
+            initialType.isUInt() -> toInt().toUInt().toFloat()
+            initialType.isULong() -> toLong().toULong().toFloat()
+            else -> toFloat()
+        }
         is Char -> code.toFloat()
         else -> null
     }
 
-private fun Any?.toDouble(): Double? =
+private fun Any?.toDouble(initialType: IrType): Double? =
     when (this) {
-        is Number -> toDouble()
+        is Number -> when {
+            initialType.isUByte() -> toByte().toUByte().toDouble()
+            initialType.isUShort() -> toShort().toUShort().toDouble()
+            initialType.isUInt() -> toInt().toUInt().toDouble()
+            initialType.isULong() -> toLong().toULong().toDouble()
+            else -> toDouble()
+        }
         is Char -> code.toDouble()
         else -> null
     }
 
 internal val IrExpression.constLongValue: Long?
-    get() = if (this is IrConst<*>) value.toLong() else null
+    get() = if (this is IrConst<*>) value.toLong(type) else null
 
 /**
  * If [expression] can have side effects ([IrExpression.canHaveSideEffects]), this function creates a temporary local variable for that
@@ -178,11 +202,11 @@ internal fun IrExpression.castIfNecessary(targetClass: IrClass) =
             val targetType = targetClass.defaultType
             when (targetType.getPrimitiveType()) {
                 PrimitiveType.BYTE -> IrConstImpl.byte(startOffset, endOffset, targetType, value.toByte()!!)
-                PrimitiveType.SHORT -> IrConstImpl.short(startOffset, endOffset, targetType, value.toShort()!!)
-                PrimitiveType.INT -> IrConstImpl.int(startOffset, endOffset, targetType, value.toInt()!!)
-                PrimitiveType.LONG -> IrConstImpl.long(startOffset, endOffset, targetType, value.toLong()!!)
-                PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, targetType, value.toFloat()!!)
-                PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, targetType, value.toDouble()!!)
+                PrimitiveType.SHORT -> IrConstImpl.short(startOffset, endOffset, targetType, value.toShort(type)!!)
+                PrimitiveType.INT -> IrConstImpl.int(startOffset, endOffset, targetType, value.toInt(type)!!)
+                PrimitiveType.LONG -> IrConstImpl.long(startOffset, endOffset, targetType, value.toLong(type)!!)
+                PrimitiveType.FLOAT -> IrConstImpl.float(startOffset, endOffset, targetType, value.toFloat(type)!!)
+                PrimitiveType.DOUBLE -> IrConstImpl.double(startOffset, endOffset, targetType, value.toDouble(type)!!)
                 else -> error("Cannot cast expression of type ${type.render()} to ${targetType.render()}")
             }
         }
