@@ -76,8 +76,13 @@ class WasmFileCodegenContext(
         wasmFileFragment.functionTypes.define(irFunction.getReferenceKey(), wasmFunctionType)
     }
 
-    fun referenceFunction(irFunction: IrFunctionSymbol): WasmSymbol<WasmFunction> =
-        wasmFileFragment.functions.reference(irFunction.getReferenceKey())
+    fun referenceFunction(irFunction: IrFunctionSymbol): WasmSymbol<WasmFunction> {
+        if (irFunction.getReferenceKey().toString().contains("/prop.<get-prop>|<get-prop>(){}[0] ]")) {
+            println()
+        }
+
+        return wasmFileFragment.functions.reference(irFunction.getReferenceKey())
+    }
 
     fun referenceGlobalField(irField: IrFieldSymbol): WasmSymbol<WasmGlobal> =
         wasmFileFragment.globalFields.reference(irField.getReferenceKey())
