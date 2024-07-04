@@ -21,6 +21,11 @@ public inline fun AutoCloseable(crossinline closeAction: () -> kotlin.Unit): kot
 @kotlin.internal.InlineOnly
 public inline fun Char(code: kotlin.Int): kotlin.Char
 
+@kotlin.SinceKotlin(version = "1.5")
+@kotlin.Deprecated(level = DeprecationLevel.HIDDEN, message = "Provided for expect-actual matching")
+@kotlin.internal.InlineOnly
+public inline fun Char(code: kotlin.UShort): kotlin.Char
+
 @kotlin.internal.InlineOnly
 public inline fun TODO(): kotlin.Nothing
 
