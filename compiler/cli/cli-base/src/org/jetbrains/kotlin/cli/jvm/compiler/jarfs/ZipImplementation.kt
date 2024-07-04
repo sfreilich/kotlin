@@ -40,12 +40,10 @@ internal fun LargeDynamicMappedBuffer.contentsToByteArray(
             "Reading files bigger than Int.MAX_VALUE - $startPos is not supported yet"
         }
 
-        val compressed = getBytes(startPos, zipEntryDescription.compressedSize.toInt())
-
         when (zipEntryDescription.compressionKind) {
             ZipEntryDescription.CompressionKind.DEFLATE -> {
                 val inflater = Inflater(true)
-                inflater.setInput(compressed, 0, zipEntryDescription.compressedSize.toInt())
+                inflater.setInput(startPos, zipEntryDescription.compressedSize.toInt())
 
                 val result = ByteArray(zipEntryDescription.uncompressedSize.toInt())
 
@@ -55,7 +53,7 @@ internal fun LargeDynamicMappedBuffer.contentsToByteArray(
                 result
             }
 
-            ZipEntryDescription.CompressionKind.PLAIN -> compressed.copyOf(zipEntryDescription.compressedSize.toInt())
+            ZipEntryDescription.CompressionKind.PLAIN -> getBytes(startPos, zipEntryDescription.compressedSize.toInt())
         }
     }
 
