@@ -253,14 +253,20 @@ extern "C" OBJ_GETTER(Kotlin_toString, KRef obj);
         return YES;
     }
 
+    if (other == nil) {
+        return NO;
+    }
+
     if (![other respondsToSelector:Kotlin_ObjCExport_toKotlinSelector]) {
         return NO;
     }
 
     kotlin::ThreadStateGuard guard(kotlin::ThreadState::kRunnable);
-    ObjHolder lhsHolder, rhsHolder;
-    KRef lhs = [self toKotlin:lhsHolder.slot()], rhs = [other toKotlin:rhsHolder.slot()];
-    return !!Kotlin_equals(lhs, rhs);
+    ObjHolder lhsHolder;
+    ObjHolder rhsHolder;
+    KRef lhs = [self toKotlin:lhsHolder.slot()];
+    KRef rhs = [other toKotlin:rhsHolder.slot()];
+    return Kotlin_equals(lhs, rhs);
 }
 
 @end

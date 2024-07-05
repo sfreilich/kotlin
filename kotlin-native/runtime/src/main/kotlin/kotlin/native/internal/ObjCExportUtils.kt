@@ -297,12 +297,12 @@ internal class OpaqueFunction : Function<Any?>
 
 @PublishedApi
 @ExportForCppRuntime("Kotlin_hashCode")
-internal fun hashCode(obj: Any): Int = obj.hashCode()
+internal fun Kotlin_hashCode(obj: Any): Int = obj.hashCode()
 
 @PublishedApi
 @ExportForCppRuntime("Kotlin_equals")
-internal fun equals(lhs: Any, rhs: Any): Boolean = lhs == rhs
+internal fun Kotlin_equals(lhs: Any, rhs: Any): Boolean = lhs == rhs
 
 @PublishedApi
 @ExportForCppRuntime("Kotlin_toString")
-internal fun toString(obj: Any): String = obj.toString()
+internal fun Kotlin_toString(obj: Any): String = obj.toString()
