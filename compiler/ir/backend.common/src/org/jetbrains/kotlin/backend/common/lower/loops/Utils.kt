@@ -198,7 +198,7 @@ internal fun IrExpression.castIfNecessary(targetClass: IrClass) =
     when {
         // This expression's type could be Nothing from an exception throw.
         type == targetClass.defaultType || type.isNothing() -> this
-        this is IrConst<*> && targetClass.defaultType.isPrimitiveType() -> { // TODO: convert unsigned too?
+        this is IrConst<*> && targetClass.defaultType.isPrimitiveType() -> {
             val targetType = targetClass.defaultType
             when (targetType.getPrimitiveType()) {
                 PrimitiveType.BYTE -> IrConstImpl.byte(startOffset, endOffset, targetType, value.toByte()!!)
