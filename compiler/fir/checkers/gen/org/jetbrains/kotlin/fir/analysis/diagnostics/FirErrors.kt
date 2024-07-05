@@ -236,7 +236,7 @@ object FirErrors {
     val QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE: KtDiagnosticFactory1<FirBasedSymbol<*>> = KtDiagnosticFactory1("QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE", ERROR, SourceElementPositioningStrategies.DEFAULT, KtTypeReference::class)
     val SUPERTYPE_INITIALIZED_IN_INTERFACE: KtDiagnosticFactory0 = KtDiagnosticFactory0("SUPERTYPE_INITIALIZED_IN_INTERFACE", ERROR, SourceElementPositioningStrategies.DEFAULT, KtTypeReference::class)
     val INTERFACE_WITH_SUPERCLASS: KtDiagnosticFactory0 = KtDiagnosticFactory0("INTERFACE_WITH_SUPERCLASS", ERROR, SourceElementPositioningStrategies.DEFAULT, KtTypeReference::class)
-    val FINAL_SUPERTYPE: KtDiagnosticFactory0 = KtDiagnosticFactory0("FINAL_SUPERTYPE", ERROR, SourceElementPositioningStrategies.DEFAULT, KtTypeReference::class)
+    val FINAL_SUPERTYPE: KtDiagnosticFactory0 = KtDiagnosticFactory0("FINAL_SUPERTYPE", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
     val CLASS_CANNOT_BE_EXTENDED_DIRECTLY: KtDiagnosticFactory1<FirRegularClassSymbol> = KtDiagnosticFactory1("CLASS_CANNOT_BE_EXTENDED_DIRECTLY", ERROR, SourceElementPositioningStrategies.DEFAULT, KtTypeReference::class)
     val SUPERTYPE_IS_EXTENSION_FUNCTION_TYPE: KtDiagnosticFactory0 = KtDiagnosticFactory0("SUPERTYPE_IS_EXTENSION_FUNCTION_TYPE", ERROR, SourceElementPositioningStrategies.DEFAULT, KtTypeReference::class)
     val SINGLETON_IN_SUPERTYPE: KtDiagnosticFactory0 = KtDiagnosticFactory0("SINGLETON_IN_SUPERTYPE", ERROR, SourceElementPositioningStrategies.DEFAULT, KtTypeReference::class)

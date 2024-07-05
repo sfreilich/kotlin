@@ -270,7 +270,7 @@ object DIAGNOSTICS_LIST : DiagnosticList("FirErrors") {
         }
         val SUPERTYPE_INITIALIZED_IN_INTERFACE by error<KtTypeReference>()
         val INTERFACE_WITH_SUPERCLASS by error<KtTypeReference>()
-        val FINAL_SUPERTYPE by error<KtTypeReference>()
+        val FINAL_SUPERTYPE by error<PsiElement>()
         val CLASS_CANNOT_BE_EXTENDED_DIRECTLY by error<KtTypeReference> {
             parameter<FirRegularClassSymbol>("classSymbol")
         }

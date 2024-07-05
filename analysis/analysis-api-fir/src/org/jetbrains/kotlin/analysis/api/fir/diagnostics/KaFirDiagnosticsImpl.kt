@@ -610,7 +610,7 @@ internal class InterfaceWithSuperclassImpl(
 internal class FinalSupertypeImpl(
     firDiagnostic: KtPsiDiagnostic,
     token: KaLifetimeToken,
-) : KaAbstractFirDiagnostic<KtTypeReference>(firDiagnostic, token), KaFirDiagnostic.FinalSupertype
+) : KaAbstractFirDiagnostic<PsiElement>(firDiagnostic, token), KaFirDiagnostic.FinalSupertype
 
 internal class ClassCannotBeExtendedDirectlyImpl(
     override val classSymbol: KaClassLikeSymbol,
