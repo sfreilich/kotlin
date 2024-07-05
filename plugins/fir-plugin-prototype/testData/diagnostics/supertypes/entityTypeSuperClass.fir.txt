@@ -1,7 +1,7 @@
 FILE: entityTypeSuperClass.kt
     package foo
 
-    public final class EntityType<Self> : R|kotlin/Any| {
+    public open class EntityType<Self> : R|kotlin/Any| {
         public constructor<Self>(): R|foo/EntityType<Self>| {
             super<R|kotlin/Any|>()
         }
