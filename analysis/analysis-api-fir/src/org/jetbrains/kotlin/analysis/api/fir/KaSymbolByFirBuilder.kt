@@ -174,6 +174,20 @@ internal class KaSymbolByFirBuilder(
         }
 
         fun buildTypeParameterSymbol(firSymbol: FirTypeParameterSymbol): KaFirTypeParameterSymbol {
+            val callableSymbol = firSymbol.containingDeclarationSymbol as? FirCallableSymbol<*>
+            callableSymbol?.fir?.unwrapSubstitutionOverrideIfNeeded()?.let { unwrappedCallable ->
+                val originalIndex = callableSymbol.typeParameterSymbols.indexOf(firSymbol)
+                if (originalIndex == -1) {
+                    errorWithAttachment("Containing callable doesn't have the corresponding parameter") {
+                        withFirSymbolEntry("typeParameter", firSymbol)
+                        withFirSymbolEntry("containingCallable", callableSymbol)
+                    }
+                }
+
+                val unwrappedParameter = unwrappedCallable.symbol.typeParameterSymbols[originalIndex]
+                return buildTypeParameterSymbol(unwrappedParameter)
+            }
+
             return symbolsCache.cache(firSymbol) {
                 KaFirTypeParameterSymbol(firSymbol, analysisSession)
             }
@@ -245,7 +259,7 @@ internal class KaSymbolByFirBuilder(
 
         fun buildConstructorSymbol(firSymbol: FirConstructorSymbol): KaFirConstructorSymbol {
             val originalFirSymbol = firSymbol.fir.originalConstructorIfTypeAlias?.symbol ?: firSymbol
-            val unwrapped = originalFirSymbol.originalIfFakeOverride() ?: originalFirSymbol
+            val unwrapped = originalFirSymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.symbol ?: originalFirSymbol
             return symbolsCache.cache(unwrapped) {
                 KaFirConstructorSymbol(unwrapped, analysisSession)
             }
@@ -259,13 +273,7 @@ internal class KaSymbolByFirBuilder(
         }
 
         fun buildPropertyAccessorSymbol(firSymbol: FirPropertyAccessorSymbol): KaFunctionSymbol {
-            return symbolsCache.cache(firSymbol) {
-                if (firSymbol.isGetter) {
-                    KaFirPropertyGetterSymbol(firSymbol, analysisSession)
-                } else {
-                    KaFirPropertySetterSymbol(firSymbol, analysisSession)
-                }
-            }
+            return callableBuilder.buildPropertyAccessorSymbol(firSymbol)
         }
     }
 
@@ -354,6 +362,7 @@ internal class KaSymbolByFirBuilder(
 
         fun buildFieldSymbol(firSymbol: FirFieldSymbol): KaFirJavaFieldSymbol {
             firSymbol.unwrapImportedFromObjectOrStatic(::buildFieldSymbol)?.let { return it }
+            firSymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let { return buildFieldSymbol(it.symbol) }
 
             checkRequirementForBuildingSymbol<KaFirJavaFieldSymbol>(firSymbol, firSymbol.fir.isJavaFieldOrSubstitutionOverrideOfJavaField())
             return symbolsCache.cache(firSymbol) { KaFirJavaFieldSymbol(firSymbol, analysisSession) }
@@ -403,6 +412,11 @@ internal class KaSymbolByFirBuilder(
 
         fun buildGetterSymbol(firSymbol: FirPropertyAccessorSymbol): KaFirPropertyGetterSymbol {
             checkRequirementForBuildingSymbol<KaFirPropertyGetterSymbol>(firSymbol, firSymbol.isGetter)
+
+            firSymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let {
+                return buildGetterSymbol(it.symbol)
+            }
+
             return symbolsCache.cache(firSymbol) {
                 KaFirPropertyGetterSymbol(firSymbol, analysisSession)
             }
@@ -410,6 +424,11 @@ internal class KaSymbolByFirBuilder(
 
         fun buildSetterSymbol(firSymbol: FirPropertyAccessorSymbol): KaFirPropertySetterSymbol {
             checkRequirementForBuildingSymbol<KaFirPropertySetterSymbol>(firSymbol, firSymbol.isSetter)
+
+            firSymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let {
+                return buildSetterSymbol(it.symbol)
+            }
+
             return symbolsCache.cache(firSymbol) {
                 KaFirPropertySetterSymbol(firSymbol, analysisSession)
             }
@@ -421,9 +440,14 @@ internal class KaSymbolByFirBuilder(
             }
         }
 
-        fun buildExtensionReceiverSymbol(firCallableSymbol: FirCallableSymbol<*>): KaReceiverParameterSymbol? {
-            if (firCallableSymbol.fir.receiverParameter == null) return null
-            return KaFirReceiverParameterSymbol(firCallableSymbol, analysisSession)
+        fun buildExtensionReceiverSymbol(firSymbol: FirCallableSymbol<*>): KaReceiverParameterSymbol? {
+            if (firSymbol.fir.receiverParameter == null) return null
+
+            firSymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let { unwrappedCallable ->
+                return buildExtensionReceiverSymbol(unwrappedCallable.symbol)
+            }
+
+            return KaFirReceiverParameterSymbol(firSymbol, analysisSession)
         }
     }
 
