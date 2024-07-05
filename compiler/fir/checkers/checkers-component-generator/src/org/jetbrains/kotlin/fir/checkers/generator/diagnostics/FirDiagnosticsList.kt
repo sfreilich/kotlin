@@ -277,7 +277,7 @@ object DIAGNOSTICS_LIST : DiagnosticList("FirErrors") {
         val SUPERTYPE_IS_EXTENSION_FUNCTION_TYPE by error<KtTypeReference>()
         val SINGLETON_IN_SUPERTYPE by error<KtTypeReference>()
         val NULLABLE_SUPERTYPE by error<KtTypeReference>(PositioningStrategy.QUESTION_MARK_BY_TYPE)
-        val MANY_CLASSES_IN_SUPERTYPE_LIST by error<KtTypeReference>()
+        val MANY_CLASSES_IN_SUPERTYPE_LIST by error<PsiElement>()
         val SUPERTYPE_APPEARS_TWICE by error<KtTypeReference>()
         val CLASS_IN_SUPERTYPE_FOR_ENUM by error<KtTypeReference>()
         val SEALED_SUPERTYPE by error<KtTypeReference>()

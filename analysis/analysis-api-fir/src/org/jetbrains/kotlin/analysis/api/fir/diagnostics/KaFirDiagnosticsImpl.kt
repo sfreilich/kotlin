@@ -636,7 +636,7 @@ internal class NullableSupertypeImpl(
 internal class ManyClassesInSupertypeListImpl(
     firDiagnostic: KtPsiDiagnostic,
     token: KaLifetimeToken,
-) : KaAbstractFirDiagnostic<KtTypeReference>(firDiagnostic, token), KaFirDiagnostic.ManyClassesInSupertypeList
+) : KaAbstractFirDiagnostic<PsiElement>(firDiagnostic, token), KaFirDiagnostic.ManyClassesInSupertypeList
 
 internal class SupertypeAppearsTwiceImpl(
     firDiagnostic: KtPsiDiagnostic,

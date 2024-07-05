@@ -4,15 +4,15 @@ import org.jetbrains.kotlin.fir.plugin.GeneratedEntityType
 
 class EntityType<Self>
 
-@GeneratedEntityType
-class WithImplicitAny
+<!FINAL_SUPERTYPE!>@GeneratedEntityType
+class WithImplicitAny<!>
 
 interface Inter
 
-@GeneratedEntityType
-class WithExplicitInterface : Inter
+<!FINAL_SUPERTYPE!>@GeneratedEntityType
+class WithExplicitInterface : Inter<!>
 
 open class SomeClass
 
-@GeneratedEntityType
-class WithExplicitClass : SomeClass()
+<!FINAL_SUPERTYPE, MANY_CLASSES_IN_SUPERTYPE_LIST!>@GeneratedEntityType
+class WithExplicitClass : SomeClass()<!>
