@@ -23,7 +23,7 @@ object UnsafeCoerce : IntrinsicMethod() {
         val to = expression.getTypeArgument(1)!!
         val fromType = codegen.typeMapper.mapType(from)
         val toType = codegen.typeMapper.mapType(to)
-        require(fromType == toType) {
+        require(fromType == toType || fromType.sort == Type.ARRAY && toType.sort == Type.ARRAY) {
             "Inline class types should have the same representation: $fromType != $toType"
         }
         val arg = expression.getValueArgument(0)!!
