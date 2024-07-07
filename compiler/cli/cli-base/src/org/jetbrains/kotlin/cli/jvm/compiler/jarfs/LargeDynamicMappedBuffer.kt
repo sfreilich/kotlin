@@ -13,7 +13,7 @@ import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.util.zip.Inflater
 
-private const val AVOID_COPYING_DATA_LENGTH_THRESHOLD = 1024
+private const val AVOID_COPYING_DATA_LENGTH_THRESHOLD = 1024 * 1024
 
 internal class LargeDynamicMappedBuffer(
     private val channel: FileChannel,
