@@ -73,4 +73,4 @@ fun KtResolvedObjCExportFile.translateToObjCTopLevelFacade(): ObjCInterface? {
 context(KaSession, KtObjCExportSession)
 @Suppress("CONTEXT_RECEIVERS_DEPRECATED")
 internal val KaCallableSymbol.isExtensionOfMappedObjCType: Boolean
-    get() = isExtension && receiverParameter?.type?.isMappedObjCType == true
+    get() = isExtension && receiverParameter?.returnType?.isMappedObjCType == true

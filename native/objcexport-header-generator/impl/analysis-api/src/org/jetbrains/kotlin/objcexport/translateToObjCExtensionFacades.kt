@@ -54,7 +54,7 @@ fun KtResolvedObjCExportFile.translateToObjCExtensionFacades(): List<ObjCInterfa
         .sortedWith(StableCallableOrder)
         .ifEmpty { return emptyList() }
         .groupBy {
-            val type = it.receiverParameter?.type
+            val type = it.receiverParameter?.returnType
             if (type?.isMappedObjCType == true) return@groupBy null
             else {
                 /**

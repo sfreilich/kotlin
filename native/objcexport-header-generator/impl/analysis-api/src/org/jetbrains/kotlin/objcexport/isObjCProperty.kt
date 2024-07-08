@@ -15,5 +15,5 @@ context(KaSession)
 @Suppress("CONTEXT_RECEIVERS_DEPRECATED")
 internal val KaPropertySymbol.isObjCProperty: Boolean
     get() {
-        return this.receiverParameter?.type == null || getClassIfCategory() != null
+        return this.receiverParameter?.returnType == null || getClassIfCategory() != null
     }

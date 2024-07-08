@@ -136,14 +136,27 @@ KaKotlinPropertySymbol:
     origin: SOURCE
     receiverParameter: KaReceiverParameterSymbol:
       annotations: []
+      callableId: null
+      compilerVisibility: Public
+      contextReceivers: []
+      isActual: false
+      isExpect: false
+      isExtension: false
+      isVal: true
       location: LOCAL
+      modality: FINAL
+      name: <receiver>
       origin: SOURCE
       owningCallableSymbol: KaKotlinPropertySymbol(/y)
-      type: KaUsualClassType:
+      receiverParameter: null
+      returnType: KaUsualClassType:
         annotations: []
         typeArguments: []
         type: kotlin/Int
+      visibility: PUBLIC
       getContainingFileSymbol: KaFileSymbol(topLevelProperties.kt)
+      getContainingJvmClassName: Could not render due to java.lang.ClassCastException: org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirReceiverParameterSymbol cannot be cast to org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirSymbol
+
       getContainingModule: KaSourceModule "Sources of main"
       deprecationStatus: null
     returnType: KaUsualClassType:
@@ -176,14 +189,27 @@ KaKotlinPropertySymbol:
   origin: SOURCE
   receiverParameter: KaReceiverParameterSymbol:
     annotations: []
+    callableId: null
+    compilerVisibility: Public
+    contextReceivers: []
+    isActual: false
+    isExpect: false
+    isExtension: false
+    isVal: true
     location: LOCAL
+    modality: FINAL
+    name: <receiver>
     origin: SOURCE
     owningCallableSymbol: KaKotlinPropertySymbol(/y)
-    type: KaUsualClassType:
+    receiverParameter: null
+    returnType: KaUsualClassType:
       annotations: []
       typeArguments: []
       type: kotlin/Int
+    visibility: PUBLIC
     getContainingFileSymbol: KaFileSymbol(topLevelProperties.kt)
+    getContainingJvmClassName: Could not render due to java.lang.ClassCastException: org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirReceiverParameterSymbol cannot be cast to org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirSymbol
+
     getContainingModule: KaSourceModule "Sources of main"
     deprecationStatus: null
   returnType: KaUsualClassType:
@@ -249,14 +275,27 @@ KaKotlinPropertySymbol:
     origin: SOURCE
     receiverParameter: KaReceiverParameterSymbol:
       annotations: []
+      callableId: null
+      compilerVisibility: Public
+      contextReceivers: []
+      isActual: false
+      isExpect: false
+      isExtension: false
+      isVal: true
       location: LOCAL
+      modality: FINAL
+      name: <receiver>
       origin: SOURCE
       owningCallableSymbol: KaKotlinPropertySymbol(/get)
-      type: KaUsualClassType:
+      receiverParameter: null
+      returnType: KaUsualClassType:
         annotations: []
         typeArguments: []
         type: kotlin/Short
+      visibility: PUBLIC
       getContainingFileSymbol: KaFileSymbol(topLevelProperties.kt)
+      getContainingJvmClassName: Could not render due to java.lang.ClassCastException: org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirReceiverParameterSymbol cannot be cast to org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirSymbol
+
       getContainingModule: KaSourceModule "Sources of main"
       deprecationStatus: null
     returnType: KaUsualClassType:
@@ -289,14 +328,27 @@ KaKotlinPropertySymbol:
   origin: SOURCE
   receiverParameter: KaReceiverParameterSymbol:
     annotations: []
+    callableId: null
+    compilerVisibility: Public
+    contextReceivers: []
+    isActual: false
+    isExpect: false
+    isExtension: false
+    isVal: true
     location: LOCAL
+    modality: FINAL
+    name: <receiver>
     origin: SOURCE
     owningCallableSymbol: KaKotlinPropertySymbol(/get)
-    type: KaUsualClassType:
+    receiverParameter: null
+    returnType: KaUsualClassType:
       annotations: []
       typeArguments: []
       type: kotlin/Short
+    visibility: PUBLIC
     getContainingFileSymbol: KaFileSymbol(topLevelProperties.kt)
+    getContainingJvmClassName: Could not render due to java.lang.ClassCastException: org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirReceiverParameterSymbol cannot be cast to org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirSymbol
+
     getContainingModule: KaSourceModule "Sources of main"
     deprecationStatus: null
   returnType: KaUsualClassType:
@@ -350,14 +402,27 @@ KaKotlinPropertySymbol:
       deprecationStatus: null
     receiverParameter: KaReceiverParameterSymbol:
       annotations: []
+      callableId: null
+      compilerVisibility: Public
+      contextReceivers: []
+      isActual: false
+      isExpect: false
+      isExtension: false
+      isVal: true
       location: LOCAL
+      modality: FINAL
+      name: <receiver>
       origin: SOURCE
       owningCallableSymbol: KaKotlinPropertySymbol(/get)
-      type: KaUsualClassType:
+      receiverParameter: null
+      returnType: KaUsualClassType:
         annotations: []
         typeArguments: []
         type: kotlin/Short
+      visibility: PUBLIC
       getContainingFileSymbol: KaFileSymbol(topLevelProperties.kt)
+      getContainingJvmClassName: Could not render due to java.lang.ClassCastException: org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirReceiverParameterSymbol cannot be cast to org.jetbrains.kotlin.analysis.api.fir.symbols.KaFirSymbol
+
       getContainingModule: KaSourceModule "Sources of main"
       deprecationStatus: null
     returnType: KaUsualClassType:

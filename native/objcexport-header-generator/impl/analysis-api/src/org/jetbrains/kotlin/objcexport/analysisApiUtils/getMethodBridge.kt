@@ -29,7 +29,7 @@ internal fun KaFunctionSymbol.getFunctionMethodBridge(): MethodBridge {
     val isInner = (containingDeclaration as? KaNamedClassSymbol)?.isInner ?: false
 
     this.receiverParameter?.apply {
-        valueParameters += this.type.bridgeParameter()
+        valueParameters += this.returnType.bridgeParameter()
     }
 
     this.valueParameters.forEach {
