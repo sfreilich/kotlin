@@ -84,8 +84,7 @@ data class ClassActualizationInfo(
         return actualTypeAliases[classId] ?: actualClasses[classId]
     }
 
-    @JvmInline
-    value class ActualClassMapping(private val actualClasses: Map<ClassId, IrClassSymbol>) {
+    class ActualClassMapping(private val actualClasses: Map<ClassId, IrClassSymbol>) {
         /*
          * expect class may be actualized to another expect class via actual typealias, so
          *   we need to actualize them recursively until there will be a non-expect class

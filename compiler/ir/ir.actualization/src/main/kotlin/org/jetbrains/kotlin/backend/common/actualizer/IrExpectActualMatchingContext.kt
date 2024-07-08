@@ -418,17 +418,9 @@ internal abstract class IrExpectActualMatchingContext(
             return substituteOrNull(type) ?: type
         }
 
-        fun actualizeClass(irClass: IrClass): IrClassSymbol? {
-            val actualized = expectToActualClassMap[irClass.classIdOrFail] ?: return null
-            if (actualized.owner.isExpect) {
-                return actualizeClass(actualized.owner)
-            }
-            return actualized
-        }
-
         private fun substituteOrNull(type: IrType): IrType? {
             if (type !is IrSimpleTypeImpl) return null
-            val newClassifier = (type.classifier.owner as? IrClass)?.let { actualizeClass(it) }
+            val newClassifier = (type.classifier.owner as? IrClass)?.let { expectToActualClassMap[it.classIdOrFail] }
             val newArguments = ArrayList<IrTypeArgument>(type.arguments.size)
             var argumentsChanged = false
             for (argument in type.arguments) {
