@@ -17,8 +17,8 @@ namespace kotlin {
 // Can be used to ignore specific call sites that are known to be safe.
 class CallsCheckerIgnoreGuard : private Pinned {
 public:
-    CallsCheckerIgnoreGuard() noexcept;
-    ~CallsCheckerIgnoreGuard();
+    ALWAYS_INLINE CallsCheckerIgnoreGuard() noexcept;
+    ALWAYS_INLINE ~CallsCheckerIgnoreGuard();
 };
 
 } // namespace kotlin
