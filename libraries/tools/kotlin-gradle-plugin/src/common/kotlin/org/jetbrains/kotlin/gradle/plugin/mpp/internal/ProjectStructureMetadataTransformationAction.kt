@@ -38,9 +38,11 @@ abstract class ProjectStructureMetadataTransformationAction : TransformAction<Tr
         val psm = archiveOperations.zipTree(input).matching { it.include("META-INF/$MULTIPLATFORM_PROJECT_METADATA_JSON_FILE_NAME") }
             .singleOrNull()
         if (psm != null) {
+            val outputFile = outputs.file(MULTIPLATFORM_PROJECT_METADATA_JSON_FILE_NAME)
             fileSystemOperations.copy {
                 it.from(psm)
-                it.into(outputs.dir("psm"))
+                it.into(outputFile.parentFile)
+                it.rename { MULTIPLATFORM_PROJECT_METADATA_JSON_FILE_NAME }
             }
         } else {
             outputs.file(EMPTY_PROJECT_STRUCTURE_METADATA_FILE_NAME).createNewFile()
