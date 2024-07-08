@@ -38,7 +38,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.shouldNotBeCalled
 
 internal abstract class IrExpectActualMatchingContext(
     val typeContext: IrTypeSystemContext,
-    val expectToActualClassMap: Map<ClassId, IrClassSymbol>
+    val expectToActualClassMap: ClassActualizationInfo.ActualClassMapping
 ) : ExpectActualMatchingContext<IrSymbol>, TypeSystemContext by typeContext {
     // This incompatibility is often suppressed in the source code (e.g. in kotlin-stdlib).
     // The backend must be able to do expect-actual matching to emit bytecode
@@ -418,9 +418,17 @@ internal abstract class IrExpectActualMatchingContext(
             return substituteOrNull(type) ?: type
         }
 
+        fun actualizeClass(irClass: IrClass): IrClassSymbol? {
+            val actualized = expectToActualClassMap[irClass.classIdOrFail] ?: return null
+            if (actualized.owner.isExpect) {
+                return actualizeClass(actualized.owner)
+            }
+            return actualized
+        }
+
         private fun substituteOrNull(type: IrType): IrType? {
             if (type !is IrSimpleTypeImpl) return null
-            val newClassifier = (type.classifier.owner as? IrClass)?.let { expectToActualClassMap[it.classIdOrFail] }
+            val newClassifier = (type.classifier.owner as? IrClass)?.let { actualizeClass(it) }
             val newArguments = ArrayList<IrTypeArgument>(type.arguments.size)
             var argumentsChanged = false
             for (argument in type.arguments) {
