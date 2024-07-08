@@ -257,11 +257,12 @@ class CacheBuilder(
 
         val lockFileName = "${libraryCache.absolutePath}.lock"
         val lockFile = File(lockFileName)
-        var channel: FileChannel? = null
+        // For now, per-file caches are only used for the incremental compilation which can't be run in parallel.
+        val shouldUseLockFile = !makePerFileCache
         try {
             libraryCacheDirectory.mkdirs()
-            if (!makePerFileCache) { // For now, per-file caches are only used for the incremental compilation which can't be run in parallel.
-                channel = FileChannel.open(Paths.get(lockFileName), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)
+            if (shouldUseLockFile) {
+                Files.createFile(Paths.get(lockFileName))
             }
             try {
                 // TODO: Run monolithic cache builds in parallel.
@@ -306,12 +307,8 @@ class CacheBuilder(
 
                 libraryCache.deleteRecursively()
             }
-            try {
-                channel?.close()
-            } catch (_: Throwable) {
-            } finally {
+            if (shouldUseLockFile)
                 lockFile.delete()
-            }
         } catch (t: Throwable) {
             var ok = false
             for (i in 0..<120) {
@@ -327,6 +324,7 @@ class CacheBuilder(
                 configuration.report(CompilerMessageSeverity.WARNING,
                         "Failed to wait for cache to be built\n" +
                                 "Falling back to not use cache for ${library.libraryName}")
+                lockFile.delete()
             }
         }
     }
