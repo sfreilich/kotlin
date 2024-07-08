@@ -366,7 +366,7 @@ private object WhenOnSealedClassExhaustivenessChecker : WhenExhaustivenessChecke
                 else -> return
             }
 
-            val symbol = when (val argument = equalityOperatorCall.arguments[1]) {
+            val symbol = when (val argument = equalityOperatorCall.arguments[1].unwrapSmartcastExpression()) {
                 is FirResolvedQualifier -> {
                     val firClass = (argument.symbol as? FirRegularClassSymbol)?.fir
                     if (firClass?.classKind == ClassKind.OBJECT) {
