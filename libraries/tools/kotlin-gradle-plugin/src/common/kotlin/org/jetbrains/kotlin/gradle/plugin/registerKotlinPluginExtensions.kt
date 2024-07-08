@@ -63,6 +63,9 @@ internal fun Project.registerKotlinPluginExtensions() {
 
         if (isJvm || isMultiplatform) {
             register(project, ScriptingGradleSubpluginSetupAction)
+        }
+
+        if (isJvm) {
             if (isKmpProjectIsolationEnabled) {
                 register(project, ProjectStructureMetadataForJVMSetupAction)
             }
