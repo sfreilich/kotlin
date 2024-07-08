@@ -101,13 +101,6 @@ internal val ThreadSanitizerPhase = optimizationPipelinePass(
         pipeline = ::ThreadSanitizerPipeline
 )
 
-internal val PerformanceInlinePhase = createSimpleNamedCompilerPhase<BitcodePostProcessingContext, Unit>(
-        name = "PerformanceInline",
-        description = "Inline calls to functions annotated with performance_inline",
-        postactions = getDefaultLlvmModuleActions(),
-        op = { context, _ -> handleInlinePerfAnnot(context) }
-)
-
 internal val RemoveRedundantSafepointsPhase = createSimpleNamedCompilerPhase<BitcodePostProcessingContext, Unit>(
         name = "RemoveRedundantSafepoints",
         description = "Remove function prologue safepoints inlined to another function",
@@ -162,7 +155,6 @@ internal fun <T : BitcodePostProcessingContext> PhaseEngine<T>.runBitcodePostPro
     )
     useContext(OptimizationState(context.config, optimizationConfig)) {
         val module = this@runBitcodePostProcessing.context.llvmModule
-        runPhase(PerformanceInlinePhase)
         it.runPhase(MandatoryBitcodeLLVMPostprocessingPhase, module)
         it.runPhase(ModuleBitcodeOptimizationPhase, module)
         it.runPhase(LTOBitcodeOptimizationPhase, module)
