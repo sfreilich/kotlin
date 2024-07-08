@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.backend.jvm.lower
 
+import org.jetbrains.kotlin.backend.common.lower.LoweredDeclarationOrigins
 import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
 import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
 import org.jetbrains.kotlin.backend.jvm.ir.isInlineFunctionCall
@@ -34,5 +35,7 @@ class JvmIrInliner(context: JvmBackendContext) : FunctionInlining(
 }
 
 class JvmInlineFunctionResolver(private val context: JvmBackendContext) : InlineFunctionResolver() {
-    override fun needsInlining(function: IrFunction): Boolean = function.isInlineFunctionCall(context)
+    override fun needsInlining(function: IrFunction): Boolean {
+        return function.isInlineFunctionCall(context) || function.origin == LoweredDeclarationOrigins.INLINE_LAMBDA
+    }
 }

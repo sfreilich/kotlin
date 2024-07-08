@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.backend.common.ir.Symbols
 import org.jetbrains.kotlin.backend.common.ir.isInlineLambdaBlock
 import org.jetbrains.kotlin.backend.common.ir.isPure
 import org.jetbrains.kotlin.backend.common.lower.InnerClassesSupport
+import org.jetbrains.kotlin.backend.common.lower.LoweredDeclarationOrigins
 import org.jetbrains.kotlin.backend.common.lower.LoweredStatementOrigins.INLINED_FUNCTION_ARGUMENTS
 import org.jetbrains.kotlin.backend.common.lower.LoweredStatementOrigins.INLINED_FUNCTION_DEFAULT_ARGUMENTS
 import org.jetbrains.kotlin.backend.common.lower.LoweredStatementOrigins.INLINED_FUNCTION_REFERENCE
@@ -40,7 +41,9 @@ abstract class InlineFunctionResolver {
     open val allowExternalInlining: Boolean
         get() = false
 
-    open fun needsInlining(function: IrFunction) = function.isInline && (allowExternalInlining || !function.isExternal)
+    open fun needsInlining(function: IrFunction): Boolean {
+        return function.isInline && (allowExternalInlining || !function.isExternal) || function.origin == LoweredDeclarationOrigins.INLINE_LAMBDA
+    }
 
     open fun getFunctionDeclaration(symbol: IrFunctionSymbol): IrFunction? {
         if (shouldExcludeFunctionFromInlining(symbol)) return null
@@ -308,11 +311,10 @@ open class FunctionInlining(
                 val irFunction = irBlock.statements[0].let {
                     it.transformChildrenVoid(this)
                     copyIrElement.copy(it) as IrFunction
-                }.apply {
-                    origin = IrDeclarationOrigin.ADAPTER_FOR_CALLABLE_REFERENCE
                 }
                 val irFunctionReference = irBlock.statements[1] as IrFunctionReference
                 val inlinedFunctionReference = inlineFunctionReference(irCall, irFunctionReference, irFunction)
+                irFunction.origin = IrDeclarationOrigin.ADAPTER_FOR_CALLABLE_REFERENCE
                 return IrBlockImpl(
                     irCall.startOffset, irCall.endOffset,
                     inlinedFunctionReference.type, origin = null,
