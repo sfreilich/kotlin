@@ -69,9 +69,11 @@ TEST(CustomAllocTest, NextFitPageThreshold) {
     const int MAX_BLOCK_SIZE = NextFitPage::maxBlockSize();
     const int FROM = MAX_BLOCK_SIZE - 10;
     const int TO = MAX_BLOCK_SIZE + 10;
+    std::vector<TypeInfo> types;
     for (int blocks = FROM; blocks <= TO; ++blocks) {
-        TypeInfo fakeType = {.typeInfo_ = &fakeType, .instanceSize_ = 8 * blocks, .flags_ = 0};
-        ca.CreateObject(&fakeType);
+        auto& type = types.emplace_back();
+        type = {.typeInfo_ = &type, .instanceSize_ = 8 * blocks, .flags_ = 0};
+        ca.CreateObject(&type);
     }
 }
 
