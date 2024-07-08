@@ -22,7 +22,6 @@ import org.jetbrains.kotlin.backend.konan.driver.utilities.getDefaultLlvmModuleA
 import org.jetbrains.kotlin.backend.konan.insertAliasToEntryPoint
 import org.jetbrains.kotlin.backend.konan.llvm.verifyModule
 import org.jetbrains.kotlin.backend.konan.optimizations.RemoveRedundantSafepointsPass
-import org.jetbrains.kotlin.backend.konan.optimizations.handleInlinePerfAnnot
 import org.jetbrains.kotlin.backend.konan.optimizations.removeMultipleThreadDataLoads
 import org.jetbrains.kotlin.konan.target.SanitizerKind
 import java.io.File
