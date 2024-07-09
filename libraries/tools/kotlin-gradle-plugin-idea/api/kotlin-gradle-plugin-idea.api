@@ -106,7 +106,6 @@ public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryCapabili
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryCoordinates : org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinDependencyCoordinates {
-	public static final field serialVersionUID J
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryAttributes;)V
@@ -193,7 +192,6 @@ public abstract interface annotation class org/jetbrains/kotlin/gradle/idea/tcs/
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectArtifactDependency : org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinDependency {
-	public static final field serialVersionUID J
 	public fun <init> (Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;)V
 	public synthetic fun <init> (Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;
@@ -213,7 +211,6 @@ public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectArtifac
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectCoordinates : java/io/Serializable, org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinDependencyCoordinates {
-	public static final field serialVersionUID J
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -234,7 +231,6 @@ public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectCoordin
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinResolvedBinaryDependency : org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryDependency {
-	public static final field serialVersionUID J
 	public fun <init> (Ljava/lang/String;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinClasspath;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;)V
 	public synthetic fun <init> (Ljava/lang/String;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinClasspath;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -258,7 +254,6 @@ public abstract interface annotation class org/jetbrains/kotlin/gradle/idea/tcs/
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceCoordinates : org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinDependencyCoordinates {
-	public static final field serialVersionUID J
 	public fun <init> (Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectCoordinates;Ljava/lang/String;)V
 	public final fun component1 ()Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinProjectCoordinates;
 	public final fun component2 ()Ljava/lang/String;
@@ -277,7 +272,6 @@ public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceCoordina
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency : org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinDependency {
-	public static final field serialVersionUID J
 	public fun <init> (Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;)V
 	public synthetic fun <init> (Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;
@@ -296,16 +290,11 @@ public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependen
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type : java/lang/Enum, java/io/Serializable {
-	public static final field DependsOn Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;
-	public static final field Friend Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;
-	public static final field Regular Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;
-	public static final field serialVersionUID J
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;
 	public static fun values ()[Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinSourceDependency$Type;
 }
 
 public final class org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinUnresolvedBinaryDependency : org/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryDependency {
-	public static final field serialVersionUID J
 	public fun <init> (Ljava/lang/String;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;)V
 	public synthetic fun <init> (Ljava/lang/String;Lorg/jetbrains/kotlin/gradle/idea/tcs/IdeaKotlinBinaryCoordinates;Lorg/jetbrains/kotlin/tooling/core/MutableExtras;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
