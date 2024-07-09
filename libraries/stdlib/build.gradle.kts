@@ -44,11 +44,7 @@ fun outgoingConfiguration(name: String, configure: Action<Configuration> = Actio
     }
 
 fun KotlinCommonCompilerOptions.mainCompilationWithK1() {
-    if (!kotlinBuildProperties.useFir) {
-        languageVersion = KotlinVersion.KOTLIN_1_9
-    } else {
-        languageVersion = KotlinVersion.KOTLIN_2_0
-    }
+    languageVersion = KotlinVersion.KOTLIN_1_9
     apiVersion = KotlinVersion.KOTLIN_2_0
     freeCompilerArgs.add("-Xsuppress-api-version-greater-than-language-version-error")
 }
@@ -206,6 +202,9 @@ kotlin {
                                 "-Xexpect-actual-classes",
                             )
                         )
+                        if (kotlinBuildProperties.useFir) {
+                            languageVersion = KotlinVersion.KOTLIN_2_0
+                        }
                         // This is needed for JavaTypeTest; typeOf for non-reified type parameters doesn't work otherwise, for implementation reasons.
                         val currentFreeArgs = freeCompilerArgs.get()
                         freeCompilerArgs
