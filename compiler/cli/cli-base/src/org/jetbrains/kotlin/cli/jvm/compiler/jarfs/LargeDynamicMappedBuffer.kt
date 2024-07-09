@@ -6,14 +6,9 @@
 package org.jetbrains.kotlin.cli.jvm.compiler.jarfs
 
 import com.google.common.primitives.Longs.min
-import org.jetbrains.kotlin.cli.common.CompilerSystemProperties
-import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
-import java.util.zip.Inflater
-
-private const val AVOID_COPYING_DATA_LENGTH_THRESHOLD = 1024
 
 internal class LargeDynamicMappedBuffer(
     private val channel: FileChannel,
@@ -86,35 +81,5 @@ internal class LargeDynamicMappedBuffer(
         }
 
         fun endOffset() = buffer.capacity() - baseOffset
-
-        fun Inflater.setInput(offset: Int, length: Int) {
-            if (length < AVOID_COPYING_DATA_LENGTH_THRESHOLD) {
-                setInput(getBytes(offset, length))
-            } else {
-                inflaterInputSetter.invoke(this, this@Mapping, offset, length)
-            }
-        }
-
-        companion object {
-
-            val inflaterInputSetter: (Inflater, Mapping, Int, Int) -> Unit
-
-            init {
-                val javaVersion = CompilerSystemProperties.JAVA_VERSION.value?.toIntOrNull()
-                if (javaVersion != null && javaVersion >= 16) {
-                    val slice = Class.forName("java.nio.MappedByteBuffer").getMethod("slice", Int::class.java, Int::class.java)
-                    val setInput = Class.forName("java.util.zip.Inflater").getMethod("setInput", ByteBuffer::class.java)
-
-                    inflaterInputSetter = { inflater: Inflater, mapping: Mapping, offset: Int, length: Int ->
-                        val b1 = slice.invoke(mapping.buffer, mapping.baseOffset + offset, length)
-                        setInput.invoke(inflater, b1)
-                    }
-                } else {
-                    inflaterInputSetter = { inflater: Inflater, mapping: Mapping, offset: Int, length: Int ->
-                        inflater.setInput(mapping.getBytes(offset, length))
-                    }
-                }
-            }
-        }
     }
 }
