@@ -232,7 +232,7 @@ class Candidate(
 
     override var chosenExtensionReceiver: ConeCallAtom? = givenExtensionReceiverOptions.singleOrNull()
 
-    var contextReceiverArguments: List<ConeCallAtom>? = null
+    override var contextReceiverArguments: List<ConeCallAtom>? = null
 
     // FirExpressionStub can be located here in case of callable reference resolution
     fun dispatchReceiverExpression(): FirExpression? {

@@ -22,6 +22,7 @@ abstract class AbstractCallCandidate<P : AbstractConeCallAtom> : AbstractCandida
     abstract val dispatchReceiver: AbstractConeCallAtom?
     abstract val chosenExtensionReceiver: AbstractConeCallAtom?
     abstract val explicitReceiverKind: ExplicitReceiverKind
+    abstract val contextReceiverArguments: List<AbstractConeCallAtom>?
     abstract val callInfo: AbstractCallInfo
     abstract val diagnostics: List<ResolutionDiagnostic>
     abstract val errors: List<ConstraintSystemError>
