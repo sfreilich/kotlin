@@ -64,6 +64,7 @@ import org.jetbrains.kotlin.fir.psi
 import org.jetbrains.kotlin.fir.realPsi
 import org.jetbrains.kotlin.fir.references.*
 import org.jetbrains.kotlin.fir.resolve.ResolutionMode
+import org.jetbrains.kotlin.fir.resolve.calls.AbstractCallCandidate
 import org.jetbrains.kotlin.fir.resolve.calls.AbstractCandidate
 import org.jetbrains.kotlin.fir.resolve.calls.candidate.Candidate
 import org.jetbrains.kotlin.fir.resolve.createConeDiagnosticForCandidateWithError
@@ -538,7 +539,7 @@ internal class KaFirResolver(
             )
         }
 
-        val partiallyAppliedSymbol = if (candidate != null) {
+        val partiallyAppliedSymbol = if (candidate is AbstractCallCandidate<*>) {
             if (fir is FirImplicitInvokeCall ||
                 (calleeReference.calleeOrCandidateName != OperatorNameConventions.INVOKE && targetSymbol.isInvokeFunction())
             ) {

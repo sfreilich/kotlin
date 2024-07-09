@@ -495,25 +495,6 @@ class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
         val diagnostic: ConeDiagnostic?,
         override val applicability: CandidateApplicability
     ) : AbstractCandidate() {
-
-        override val dispatchReceiver: ConeCallAtom?
-            get() = null
-
-        override val chosenExtensionReceiver: ConeCallAtom?
-            get() = null
-
-        override val explicitReceiverKind: ExplicitReceiverKind
-            get() = ExplicitReceiverKind.NO_EXPLICIT_RECEIVER
-
-        override val diagnostics: List<ResolutionDiagnostic>
-            get() = emptyList()
-
-        override val errors: List<ConstraintSystemError>
-            get() = emptyList()
-
-        override val callInfo: AbstractCallInfo
-            get() = shouldNotBeCalled()
-
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is TypeCandidate) return false
