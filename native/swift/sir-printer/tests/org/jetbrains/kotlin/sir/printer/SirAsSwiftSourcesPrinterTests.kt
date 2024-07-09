@@ -8,7 +8,6 @@ package org.jetbrains.kotlin.sir.printer
 import org.jetbrains.kotlin.sir.*
 import org.jetbrains.kotlin.sir.builder.*
 import org.jetbrains.kotlin.sir.providers.utils.updateImports
-import org.jetbrains.kotlin.sir.util.SirFoundationModule
 import org.jetbrains.kotlin.sir.util.SirSwiftModule
 import org.jetbrains.kotlin.test.services.JUnit5Assertions
 import org.jetbrains.kotlin.test.util.KtTestUtil
@@ -173,7 +172,7 @@ class SirAsSwiftSourcesPrinterTests {
                             ),
                             SirParameter(
                                 argumentName = "arg8",
-                                type = SirNominalType(SirFoundationModule.unichar)
+                                type = SirNominalType(SirSwiftModule.utf16CodeUnit)
                             ),
                         )
                     )
@@ -510,7 +509,7 @@ class SirAsSwiftSourcesPrinterTests {
                                     ),
                                     SirParameter(
                                         argumentName = "arg8",
-                                        type = SirNominalType(SirFoundationModule.unichar)
+                                        type = SirNominalType(SirSwiftModule.utf16CodeUnit)
                                     ),
                                 )
                             )
@@ -607,7 +606,7 @@ class SirAsSwiftSourcesPrinterTests {
                                     ),
                                     SirParameter(
                                         argumentName = "arg8",
-                                        type = SirNominalType(SirFoundationModule.unichar)
+                                        type = SirNominalType(SirSwiftModule.utf16CodeUnit)
                                     ),
                                 )
                             )

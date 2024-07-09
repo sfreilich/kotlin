@@ -6,7 +6,7 @@ public func foo(
     arg5: Swift.Int64,
     arg6: Swift.Double,
     arg7: Swift.Float,
-    arg8: Foundation.unichar
+    arg8: Swift.Unicode.UTF16.CodeUnit
 ) -> Swift.Bool {
     stub()
 }
