@@ -208,7 +208,20 @@ func objectsHashProperly() throws {
     try assertFalse(one == two)
     try assertFalse(ein == two)
 
-    try assertFalse(ein == NSNumber(1))
+    // NSNumber isn't a `KotlinObject`, but conforms to our `toKotlin:` informal protocol on `NSObject`
+    try assertTrue(ein == NSNumber(value: CInt(1)))
+    try assertFalse(ein == NSNumber(value: CInt(2)))
+
+    // `CInt` is bridged as `NSNumber`
+    // We are using `isEqual(_:)` here to trigger objc bridging
+    try assertTrue(ein.isEqual(CInt(1)))
+    try assertFalse(ein.isEqual(CInt(2)))
+
+    // On apple platforms, swift classes with no objc inheritance implicitly inherit
+    // `Swift._SwiftObject` – a separate from `NSObject` root class that we expect to
+    // also conform to our informal `toKotlin:` protocol
+    class MyRoot {}
+    try assertFalse(ein.isEqual(MyRoot()))
 
     func testEquality(_ lhs: KotlinBase, _ rhs: KotlinBase) throws {
         try assertEquals(actual: lhs.hashValue, expected: numericCast(getHash(obj: lhs)))

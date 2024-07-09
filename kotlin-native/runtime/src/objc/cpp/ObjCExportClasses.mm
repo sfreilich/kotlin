@@ -257,6 +257,9 @@ extern "C" OBJ_GETTER(Kotlin_toString, KRef obj);
         return NO;
     }
 
+    // All `NSObject`'s, `__SwiftObject`'s and `NSProxy`-ies wrapping them should respond well to `toKotlin:`.
+    // However, other system- or user- defined root classes may not.
+    // But, at the very least, we expect them to conform to NSObject protocol. There's no test for that.
     if (![other respondsToSelector:Kotlin_ObjCExport_toKotlinSelector]) {
         return NO;
     }

@@ -96,7 +96,7 @@ fun getMainPermanentObject(): Any = Object
 // FILE: KotlinAnyMethodsx.kt
 class HashableObject(val value: Int) {
     override fun hashCode(): Int = value
-    override fun equals(other: Any?): Boolean = (other as? HashableObject)?.value == value
+    override fun equals(other: Any?): Boolean = (other as? HashableObject)?.value == value || other as? Int? == value
     override fun toString(): String = "$value"
 }
 
