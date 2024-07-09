@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.fir.analysis.checkers.expression.FirQualifiedAccessE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.native.FirNativeErrors
 import org.jetbrains.kotlin.fir.expressions.FirQualifiedAccessExpression
 import org.jetbrains.kotlin.fir.references.toResolvedCallableSymbol
-import org.jetbrains.kotlin.fir.types.toConeTypeProjection
+import org.jetbrains.kotlin.fir.types.toConeTypeProjectionSafe
 import org.jetbrains.kotlin.fir.resolve.toRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.type
 
@@ -28,7 +28,7 @@ object FirNativeForwardDeclarationReifiedChecker : FirQualifiedAccessExpressionC
             val typeArgumentProjection = typeArguments.elementAt(index)
             val source = typeArgumentProjection.source ?: calleeReference.source ?: continue
 
-            val typeArgument = typeArgumentProjection.toConeTypeProjection().type ?: continue
+            val typeArgument = typeArgumentProjection.toConeTypeProjectionSafe()?.type ?: continue
             val typeParameter = typeParameters[index]
 
             if (typeParameter.isReified && typeArgument.toRegularClassSymbol(context.session)?.forwardDeclarationKindOrNull() != null) {

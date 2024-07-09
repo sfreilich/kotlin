@@ -150,13 +150,16 @@ fun ConeClassLikeType.toConstKind(): ConstantValueKind? = when (lookupTag.classI
     else -> null
 }
 
-fun FirTypeProjection.toConeTypeProjection(): ConeTypeProjection = when (this) {
+fun FirTypeProjection.toConeTypeProjection(): ConeTypeProjection = toConeTypeProjectionSafe()
+    ?: errorWithAttachment("Unexpected ${this::class.simpleName}") { withFirEntry("projection", this@toConeTypeProjection) }
+
+fun FirTypeProjection.toConeTypeProjectionSafe(): ConeTypeProjection? = when (this) {
     is FirStarProjection -> ConeStarProjection
     is FirTypeProjectionWithVariance -> {
         val type = typeRef.coneType
         type.toTypeProjection(this.variance)
     }
-    else -> errorWithAttachment("Unexpected ${this::class.simpleName}") { withFirEntry("projection", this@toConeTypeProjection) }
+    else -> null
 }
 
 fun ConeKotlinType.arrayElementType(checkUnsignedArrays: Boolean = true): ConeKotlinType? {

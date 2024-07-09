@@ -152,8 +152,8 @@ private class OriginalProjectionTypeAttribute(val data: ConeTypeProjection) : Co
 private val ConeAttributes.originalProjection: OriginalProjectionTypeAttribute? by ConeAttributes.attributeAccessor()
 
 fun List<FirTypeProjection>.toTypeArgumentsWithSourceInfo(): List<ConeTypeProjection> {
-    return map { firTypeProjection ->
-        firTypeProjection.toConeTypeProjection().withSource(
+    return mapNotNull { firTypeProjection ->
+        (firTypeProjection.toConeTypeProjectionSafe() ?: ConeStarProjection).withSource(
             FirTypeRefSource((firTypeProjection as? FirTypeProjectionWithVariance)?.typeRef, firTypeProjection.source)
         )
     }
