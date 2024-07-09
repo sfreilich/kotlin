@@ -62,7 +62,6 @@ import org.jetbrains.kotlin.fir.utils.exceptions.withFirSymbolEntry
 import org.jetbrains.kotlin.fir.visitors.FirVisitorVoid
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -413,8 +412,12 @@ internal class KaSymbolByFirBuilder(
         fun buildGetterSymbol(firSymbol: FirPropertyAccessorSymbol): KaFirPropertyGetterSymbol {
             checkRequirementForBuildingSymbol<KaFirPropertyGetterSymbol>(firSymbol, firSymbol.isGetter)
 
-            firSymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let {
-                return buildGetterSymbol(it.symbol)
+            firSymbol.propertySymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let { unwrapped ->
+                val getterSymbol = unwrapped.symbol.getterSymbol ?: errorWithFirSpecificEntries("No getter found", fir = unwrapped) {
+                    withFirEntry("original", firSymbol.fir)
+                }
+
+                return buildGetterSymbol(getterSymbol)
             }
 
             return symbolsCache.cache(firSymbol) {
@@ -425,8 +428,12 @@ internal class KaSymbolByFirBuilder(
         fun buildSetterSymbol(firSymbol: FirPropertyAccessorSymbol): KaFirPropertySetterSymbol {
             checkRequirementForBuildingSymbol<KaFirPropertySetterSymbol>(firSymbol, firSymbol.isSetter)
 
-            firSymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let {
-                return buildSetterSymbol(it.symbol)
+            firSymbol.propertySymbol.fir.unwrapSubstitutionOverrideIfNeeded()?.let { unwrapped ->
+                val setterSymbol = unwrapped.symbol.setterSymbol ?: errorWithFirSpecificEntries("No setter found", fir = unwrapped) {
+                    withFirEntry("original", firSymbol.fir)
+                }
+
+                return buildSetterSymbol(setterSymbol)
             }
 
             return symbolsCache.cache(firSymbol) {
