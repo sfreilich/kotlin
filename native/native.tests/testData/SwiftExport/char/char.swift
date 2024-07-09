@@ -1,27 +1,26 @@
-import Foundation
 import Char
 
-let string = "AB0-Ыß☺🙂系" as NSString
-func unichar(_ literal: Unicode.Scalar) -> unichar {
-    return unichar(literal.value)
+let string = "AB0-Ыß☺🙂系"
+func utf16CodeUnit(_ literal: Unicode.Scalar) -> UTF16.CodeUnit {
+    return UTF16.CodeUnit(literal.value)
 }
 
-func testKotlinCharToFoundationUnichar() throws {
-    try assertTrue(getCharAt(index: 4) == unichar("Ы"))
-    try assertFalse(getCharAt(index: 5) == unichar("Ы"))
+func testKotlinCharToUtf16CodeUnit() throws {
+    try assertTrue(getCharAt(index: 4) == utf16CodeUnit("Ы"))
+    try assertFalse(getCharAt(index: 5) == utf16CodeUnit("Ы"))
 
-    for i in 0..<string.length {
-        try assertEquals(actual: getCharAt(index: Int32(i)), expected: string.character(at: i))
+    try string.utf16.enumerated().forEach { i, c in
+        try assertEquals(actual: getCharAt(index: numericCast(i)), expected: c)
     }
 }
 
-func testFoundationUnicharToKotlinChar() throws {
-    try assertTrue(isEqualToCharAt(c: unichar("ß"), index: 5))
-    try assertFalse(isEqualToCharAt(c: unichar("ß"), index: 4))
+func testUtf16CodeUnitToKotlinChar() throws {
+    try assertTrue(isEqualToCharAt(c: utf16CodeUnit("ß"), index: 5))
+    try assertFalse(isEqualToCharAt(c: utf16CodeUnit("ß"), index: 4))
     try assertTrue(isEqualToCharAt(c: 0xD83D, index: 7))
 
-    for i in 0..<string.length {
-        try assertTrue(isEqualToCharAt(c: string.character(at: i), index: Int32(i)))
+    try string.utf16.enumerated().forEach { i, c in
+        try assertTrue(isEqualToCharAt(c: c, index: numericCast(i)))
     }
 }
 
@@ -31,8 +30,8 @@ class CharTests : TestProvider {
     init() {
         providers.append(self)
         tests = [
-            TestCase(name: "testKotlinCharToFoundationUnichar", method: withAutorelease(testKotlinCharToFoundationUnichar)),
-            TestCase(name: "testFoundationUnicharToKotlinChar", method: withAutorelease(testFoundationUnicharToKotlinChar)),
+            TestCase(name: "testKotlinCharToUtf16CodeUnit", method: withAutorelease(testKotlinCharToUtf16CodeUnit)),
+            TestCase(name: "testUtf16CodeUnitToKotlinChar", method: withAutorelease(testUtf16CodeUnitToKotlinChar)),
         ]
     }
 }

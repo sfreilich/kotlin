@@ -203,7 +203,7 @@ private fun bridgeType(type: SirType): Bridge {
         SirSwiftModule.uint -> Bridge.AsOpaqueObject(type, KotlinType.Object, CType.Object)
         SirSwiftModule.never -> Bridge.AsOpaqueObject(type, KotlinType.Object, CType.Object)
 
-        SirFoundationModule.unichar -> Bridge.AsIs(type, KotlinType.Char, CType.UInt16)
+        SirSwiftModule.utf16CodeUnit -> Bridge.AsIs(type, KotlinType.Char, CType.UInt16)
 
         is SirTypealias -> bridgeType(subtype.type)
 

@@ -15,7 +15,6 @@ import org.jetbrains.kotlin.sir.providers.SirTypeProvider.ErrorTypeStrategy
 import org.jetbrains.kotlin.sir.providers.source.KotlinRuntimeElement
 import org.jetbrains.kotlin.sir.providers.source.KotlinSource
 import org.jetbrains.kotlin.sir.providers.utils.KotlinRuntimeModule
-import org.jetbrains.kotlin.sir.util.SirFoundationModule
 import org.jetbrains.kotlin.sir.util.SirSwiftModule
 
 public class SirTypeProviderImpl(
@@ -38,7 +37,7 @@ public class SirTypeProviderImpl(
     private fun buildSirNominalType(ktType: KaType, ktAnalysisSession: KaSession): SirType {
         fun buildPrimitiveType(ktType: KaType): SirType? = with(ktAnalysisSession) {
             when {
-                ktType.isCharType -> SirNominalType(SirFoundationModule.unichar)
+                ktType.isCharType -> SirNominalType(SirSwiftModule.utf16CodeUnit)
                 ktType.isUnitType -> SirNominalType(SirSwiftModule.void)
 
                 ktType.isByteType -> SirNominalType(SirSwiftModule.int8)
@@ -117,11 +116,6 @@ public class SirTypeProviderImpl(
                 }
                 is KotlinRuntimeElement -> {
                     processTypeImports(listOf(SirImport(KotlinRuntimeModule.name)))
-                }
-                is SirOrigin.ExternallyDefined -> {
-                    if (type.parent == SirFoundationModule) {
-                        processTypeImports(listOf(SirImport(SirFoundationModule.name)))
-                    }
                 }
                 else -> {}
             }

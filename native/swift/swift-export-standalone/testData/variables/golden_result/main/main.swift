@@ -1,5 +1,4 @@
 @_exported import ExportedKotlinPackages
-import Foundation
 import KotlinRuntime
 @_implementationOnly import KotlinBridges_main
 
@@ -13,7 +12,7 @@ public var BYTE_CONST: Swift.Int8 {
         return __root___BYTE_CONST_get()
     }
 }
-public var CHAR_CONST: Foundation.unichar {
+public var CHAR_CONST: Swift.Unicode.UTF16.CodeUnit {
     get {
         return __root___CHAR_CONST_get()
     }

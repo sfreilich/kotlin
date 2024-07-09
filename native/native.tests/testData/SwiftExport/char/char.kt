@@ -2,7 +2,7 @@
 // MODULE: Char
 // FILE: char.kt
 
-private val string = "AB0-Ыß☺\uD83D\uDE42系"
+private val string = "AB0-Ыß☺🙂系"
 
 fun getCharAt(index: Int): Char = string.get(index)
 
