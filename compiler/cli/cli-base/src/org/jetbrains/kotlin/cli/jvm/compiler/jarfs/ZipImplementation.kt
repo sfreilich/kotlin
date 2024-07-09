@@ -88,11 +88,12 @@ internal fun LargeDynamicMappedBuffer.parseCentralDirectory(): List<ZipEntryDesc
 
             // NOTE: order of Zip64 fields is fixed, see "4.5.3 -Zip64 Extended Information Extra Field" in zip file format specs
             var extraFieldNo = 0
+            val extraFieldsSize = getShort(extraFieldOffset + 2)
 
             fun Int.toLongOrNextZip64ExtrField(): Long =
                 if (this != -1) toUInt().toLong()
                 else {
-                    require(getShort(extraFieldOffset + 2) >= (extraFieldNo + 1) * 8)
+                    require(extraFieldsSize >= (extraFieldNo + 1) * 8)
                     getLong(extraFieldOffset + 4 + extraFieldNo * 8).also { extraFieldNo++ }
                 }
 
