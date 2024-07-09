@@ -9,8 +9,15 @@ import com.google.common.primitives.Longs.min
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 
+/**
+ * A 'sliding window mapped buffer' allowing efficient mapping of large files beyond the 2GB ByteBuffer limit.
+ *
+ * @property dataSize The max size of the data to be mapped, usually the file size.
+ * @property mapBuffer A callback to create a [MappedByteBuffer] given an offset and size.
+ * @property unmapBuffer A callback to unmap given [MappedByteBuffer].
+ */
 internal class LargeDynamicMappedBuffer(
-    private val maxSize: Long,
+    private val dataSize: Long,
     private val mapBuffer: (Long, Long) -> MappedByteBuffer, // (offset, size) -> MappedByteBuffer
     private val unmapBuffer: MappedByteBuffer.() -> Unit
 ) {
@@ -21,16 +28,16 @@ internal class LargeDynamicMappedBuffer(
 
     @Synchronized
     fun <R> withMappedRange(start: Long, end: Long, body: Mapping.() -> R): R {
-        require(end in (start + 1)..maxSize && end - start <= Int.MAX_VALUE)
+        require(end in (start + 1)..dataSize && end - start <= Int.MAX_VALUE)
         var currentSize = Int.MAX_VALUE.toLong()
         if (currentMappedBuffer == null || currentStart > start || currentEnd < end) {
-            if (maxSize <= Int.MAX_VALUE) {
+            if (dataSize <= Int.MAX_VALUE) {
                 currentStart = 0L
-                currentEnd = maxSize
-                currentSize = maxSize
-            } else if (start + Int.MAX_VALUE > maxSize) {
-                currentStart = maxSize - Int.MAX_VALUE
-                currentEnd = maxSize
+                currentEnd = dataSize
+                currentSize = dataSize
+            } else if (start + Int.MAX_VALUE > dataSize) {
+                currentStart = dataSize - Int.MAX_VALUE
+                currentEnd = dataSize
             } else {
                 currentStart = start
                 currentEnd = start + Int.MAX_VALUE
@@ -47,13 +54,13 @@ internal class LargeDynamicMappedBuffer(
     }
 
     fun <R> withMappedTail(body: Mapping.() -> R): R {
-        val size = min(maxSize, Int.MAX_VALUE.toLong())
-        return withMappedRange(maxSize - size, maxSize, body)
+        val size = min(dataSize, Int.MAX_VALUE.toLong())
+        return withMappedRange(dataSize - size, dataSize, body)
     }
 
     fun <R> withMappedRangeFrom(start: Long, body: Mapping.() -> R): R {
-        require(start < maxSize)
-        val size = min(maxSize - start, Int.MAX_VALUE.toLong())
+        require(start < dataSize)
+        val size = min(dataSize - start, Int.MAX_VALUE.toLong())
         return withMappedRange(start, start + size, body)
     }
 
