@@ -76,7 +76,12 @@ class FirCallCompleter(
         val initialType = typeRef.initialTypeOfCandidate(candidate)
 
         if (call is FirExpression) {
-            call.resultType = initialType
+            // Annotation types are resolved during type resolution, and generic arguments aren't inferred.
+            // Updating the type of an annotation call is a no-op, it only checks if it's the same as the type of the annotation type ref.
+            // In the case of a generic annotation, we would set it to a type containing type variable types which would cause an exception.
+            if (call !is FirAnnotation) {
+                call.resultType = initialType
+            }
             session.lookupTracker?.recordTypeResolveAsLookup(initialType, call.source, components.context.file.source)
         }
 
