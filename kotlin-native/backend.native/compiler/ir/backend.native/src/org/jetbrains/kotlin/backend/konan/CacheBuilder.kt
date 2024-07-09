@@ -255,6 +255,11 @@ class CacheBuilder(
         )
 
 
+        /*
+         * Use lock file to not allow caches building in parallel. Actually, this is OK (there are some synchronization
+         * mechanisms in the compiler) but may take up a lot of memory (especially when building stdlib cache). In particular,
+         * this happens during some tests which specify certain binary options which won't allow to use the precompiled caches.
+         */
         val lockFileName = "${libraryCache.absolutePath}.lock"
         val lockFile = File(lockFileName)
         // For now, per-file caches are only used for the incremental compilation which can't be run in parallel.
