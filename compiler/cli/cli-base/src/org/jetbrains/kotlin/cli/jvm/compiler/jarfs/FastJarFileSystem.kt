@@ -29,9 +29,8 @@ class FastJarFileSystem private constructor(internal val unmapBuffer: MappedByte
             override fun createAccessor(file: File): RandomAccessFileAndBuffer {
                 val randomAccessFile = RandomAccessFile(file, "r")
                 val buffer = LargeDynamicMappedBuffer(
-                    randomAccessFile.channel,
-                    FileChannel.MapMode.READ_ONLY,
                     randomAccessFile.length(),
+                    { offset, size -> randomAccessFile.channel.map(FileChannel.MapMode.READ_ONLY, offset, size) },
                     unmapBuffer
                 )
                 return Pair(randomAccessFile, buffer)

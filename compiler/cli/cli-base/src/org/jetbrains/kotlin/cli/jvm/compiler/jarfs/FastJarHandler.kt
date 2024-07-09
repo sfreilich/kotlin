@@ -23,9 +23,8 @@ class FastJarHandler(val fileSystem: FastJarFileSystem, path: String) {
         RandomAccessFile(file, "r").use { randomAccessFile ->
             val largeBuffer =
                 LargeDynamicMappedBuffer(
-                    randomAccessFile.channel,
-                    FileChannel.MapMode.READ_ONLY,
                     randomAccessFile.length(),
+                    { offset, size -> randomAccessFile.channel.map(FileChannel.MapMode.READ_ONLY, offset, size) },
                     fileSystem.unmapBuffer
                 )
             try {

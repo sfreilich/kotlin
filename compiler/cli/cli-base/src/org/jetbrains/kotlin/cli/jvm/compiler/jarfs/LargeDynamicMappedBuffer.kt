@@ -8,12 +8,10 @@ package org.jetbrains.kotlin.cli.jvm.compiler.jarfs
 import com.google.common.primitives.Longs.min
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 
 internal class LargeDynamicMappedBuffer(
-    private val channel: FileChannel,
-    private val mapMode: FileChannel.MapMode,
     private val maxSize: Long,
+    private val mapBuffer: (Long, Long) -> MappedByteBuffer, // (offset, size) -> MappedByteBuffer
     private val unmapBuffer: MappedByteBuffer.() -> Unit
 ) {
 
@@ -38,7 +36,7 @@ internal class LargeDynamicMappedBuffer(
                 currentEnd = start + Int.MAX_VALUE
             }
             unmap()
-            currentMappedBuffer = channel.map(mapMode, currentStart, currentSize).also {
+            currentMappedBuffer = mapBuffer(currentStart, currentSize).also {
                 it.order(ByteOrder.LITTLE_ENDIAN)
             }
         }
