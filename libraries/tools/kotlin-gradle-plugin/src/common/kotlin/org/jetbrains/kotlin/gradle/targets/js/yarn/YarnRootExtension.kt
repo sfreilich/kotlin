@@ -122,7 +122,7 @@ open class YarnRootExtension(
         }
         return YarnEnv(
             download = download,
-            downloadBaseUrl = downloadBaseUrlProperty.get(),
+            downloadBaseUrl = downloadBaseUrlProperty.orNull,
             cleanableStore = cleanableStore,
             dir = home,
             executable = getExecutable("yarn", commandProperty.get(), "cmd"),

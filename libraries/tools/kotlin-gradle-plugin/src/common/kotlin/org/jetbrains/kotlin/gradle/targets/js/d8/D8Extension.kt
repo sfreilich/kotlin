@@ -84,7 +84,7 @@ open class D8Extension(@Transient val project: Project) : AbstractSettings<D8Env
 
         return D8Env(
             download = download,
-            downloadBaseUrl = downloadBaseUrlProperty.get(),
+            downloadBaseUrl = downloadBaseUrlProperty.orNull,
             ivyDependency = "google.d8:v8:$requiredVersion@zip",
             executable = getExecutable("d8", commandProperty.get(), "exe"),
             dir = targetPath,

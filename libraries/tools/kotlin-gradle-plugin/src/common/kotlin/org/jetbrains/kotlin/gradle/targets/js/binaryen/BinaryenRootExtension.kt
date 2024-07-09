@@ -66,7 +66,7 @@ open class BinaryenRootExtension(
 
         return BinaryenEnv(
             download = download,
-            downloadBaseUrl = downloadBaseUrlProperty.get(),
+            downloadBaseUrl = downloadBaseUrlProperty.orNull,
             ivyDependency = "com.github.webassembly:binaryen:$version:$platform@tar.gz",
             executable = getExecutable("wasm-opt", commandProperty.get(), "exe"),
             dir = targetPath,

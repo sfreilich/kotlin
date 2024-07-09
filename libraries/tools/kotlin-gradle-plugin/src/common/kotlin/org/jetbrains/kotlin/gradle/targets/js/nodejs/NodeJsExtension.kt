@@ -83,6 +83,6 @@ open class NodeJsExtension(
         get() = project.tasks.withType(NodeJsSetupTask::class.java).named(NodeJsSetupTask.NAME)
 
     companion object {
-        const val EXTENSION_NAME: String = "kotlinNodeJs"
+        const val EXTENSION_NAME: String = "kotlinNodeJsLocal"
     }
 }
