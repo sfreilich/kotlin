@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.TaskProvider
@@ -20,6 +21,8 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin.Companion.RESTORE_YARN_LOCK_NAME
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin.Companion.STORE_YARN_LOCK_NAME
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
+import org.jetbrains.kotlin.gradle.utils.getFile
+import org.jetbrains.kotlin.gradle.utils.property
 import java.io.File
 
 open class YarnRootExtension(
@@ -50,14 +53,22 @@ open class YarnRootExtension(
 
     override val postInstallTasks: ListProperty<TaskProvider<*>> = project.objects.listProperty(TaskProvider::class.java)
 
-    override var installationDir by Property(gradleHome.resolve("yarn"))
+    override val installationDirectory: DirectoryProperty = project.objects.directoryProperty()
+        .fileValue(gradleHome.resolve("yarn"))
 
-    override var downloadBaseUrl: String? by Property("https://github.com/yarnpkg/yarn/releases/download")
-    override var version by Property("1.22.17")
+    // value not convention because this property can be nullable to not add repository
+    override val downloadBaseUrlProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .value("https://github.com/yarnpkg/yarn/releases/download")
 
-    override var command by Property("yarn")
+    override val versionProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .convention("1.22.17")
 
-    override var download by Property(true)
+    override val commandProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .convention("yarn")
+
+    override val downloadProperty: org.gradle.api.provider.Property<Boolean> = project.objects.property<Boolean>()
+        .convention(true)
+
     var lockFileName by Property(LockCopyTask.YARN_LOCK)
     var lockFileDirectory: File by Property(project.rootDir.resolve(LockCopyTask.KOTLIN_JS_STORE))
 
@@ -94,12 +105,13 @@ open class YarnRootExtension(
     internal val nodeJsEnvironment: org.gradle.api.provider.Property<NodeJsEnv> = project.objects.property(NodeJsEnv::class.java)
 
     override fun finalizeConfiguration(): YarnEnv {
-        val cleanableStore = CleanableStore[installationDir.path]
+        val cleanableStore = CleanableStore[installationDirectory.getFile().path]
 
         val isWindows = platform.get().isWindows()
 
-        val home = cleanableStore["yarn-v$version"].use()
+        val home = cleanableStore["yarn-v${versionProperty.get()}"].use()
 
+        val download = downloadProperty.get()
         fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
             val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
             return if (download)
@@ -110,11 +122,11 @@ open class YarnRootExtension(
         }
         return YarnEnv(
             download = download,
-            downloadBaseUrl = downloadBaseUrl,
+            downloadBaseUrl = downloadBaseUrlProperty.get(),
             cleanableStore = cleanableStore,
             dir = home,
-            executable = getExecutable("yarn", command, "cmd"),
-            ivyDependency = "com.yarnpkg:yarn:$version@tar.gz",
+            executable = getExecutable("yarn", commandProperty.get(), "cmd"),
+            ivyDependency = "com.yarnpkg:yarn:${versionProperty.get()}@tar.gz",
             ignoreScripts = ignoreScripts,
             yarnLockMismatchReport = yarnLockMismatchReport,
             reportNewYarnLock = reportNewYarnLock,

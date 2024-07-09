@@ -6,10 +6,13 @@
 package org.jetbrains.kotlin.gradle.targets.js.d8
 
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.AbstractSettings
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
+import org.jetbrains.kotlin.gradle.utils.getFile
+import org.jetbrains.kotlin.gradle.utils.property
 
 open class D8Extension(@Transient val project: Project) : AbstractSettings<D8Env>() {
 
@@ -17,9 +20,15 @@ open class D8Extension(@Transient val project: Project) : AbstractSettings<D8Env
         project.logger.kotlinInfo("Storing cached files in $it")
     }
 
-    override var download: Boolean by Property(true)
-    override var downloadBaseUrl: String? by Property("https://storage.googleapis.com/chromium-v8/official/canary")
-    override var installationDir by Property(gradleHome.resolve("d8"))
+    override val downloadProperty: org.gradle.api.provider.Property<Boolean> = project.objects.property<Boolean>()
+        .convention(true)
+
+    // value not convention because this property can be nullable to not add repository
+    override val downloadBaseUrlProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .value("https://storage.googleapis.com/chromium-v8/official/canary")
+
+    override val installationDirectory: DirectoryProperty = project.objects.directoryProperty()
+        .fileValue(gradleHome.resolve("d8"))
 
     // Latest version number could be found here https://storage.googleapis.com/chromium-v8/official/canary/v8-linux64-rel-latest.json
     // Bash script/command to check that version specified in `VER` is available for all platforms, just copy-paste and run it in terminal:
@@ -36,19 +45,33 @@ open class D8Extension(@Transient val project: Project) : AbstractSettings<D8Env
         fi;
     done;
     */
-    override var version by Property("11.9.85")
-    var edition by Property("rel") // rel or dbg
-    override var command by Property("d8")
+    override val versionProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .convention("11.9.85")
+
+    @Deprecated("This property will be removed. Use editionProperty instead")
+    var edition // rel or dbg
+        get() = editionProperty.get()
+        set(value) {
+            editionProperty.set(value)
+        }
+
+    val editionProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .convention("rel") // rel or dbg
+
+    override val commandProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .convention("d8")
 
     val setupTaskProvider: TaskProvider<D8SetupTask>
         get() = project.tasks.withType(D8SetupTask::class.java).named(D8SetupTask.NAME)
 
     override fun finalizeConfiguration(): D8Env {
-        val requiredVersionName = "v8-${D8Platform.platform}-$edition-$version"
-        val cleanableStore = CleanableStore[installationDir.absolutePath]
+        val requiredVersion = "${D8Platform.platform}-${editionProperty.get()}-${versionProperty.get()}"
+        val requiredVersionName = "v8-$requiredVersion"
+        val cleanableStore = CleanableStore[installationDirectory.getFile().absolutePath]
         val targetPath = cleanableStore[requiredVersionName].use()
         val isWindows = D8Platform.name == D8Platform.WIN
 
+        val download = downloadProperty.get()
         fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
             val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
             return if (download)
@@ -61,9 +84,9 @@ open class D8Extension(@Transient val project: Project) : AbstractSettings<D8Env
 
         return D8Env(
             download = download,
-            downloadBaseUrl = downloadBaseUrl,
-            ivyDependency = "google.d8:v8:${D8Platform.platform}-$edition-$version@zip",
-            executable = getExecutable("d8", command, "exe"),
+            downloadBaseUrl = downloadBaseUrlProperty.get(),
+            ivyDependency = "google.d8:v8:$requiredVersion@zip",
+            executable = getExecutable("d8", commandProperty.get(), "exe"),
             dir = targetPath,
             cleanableStore = cleanableStore,
             isWindows = isWindows,

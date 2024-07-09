@@ -47,40 +47,56 @@ open class NodeJsRootExtension(
         }
     }
 
+    @Suppress("DEPRECATION")
     @Deprecated(
         "Use installationDir from NodeJsExtension (not NodeJsRootExtension) instead." +
                 "You can find this extension after applying NodeJsPlugin"
     )
     var installationDir: File by allProjectsDelegate(nodeJs::installationDir)
 
+    @Suppress("DEPRECATION")
     @Deprecated(
         "Use download from NodeJsExtension (not NodeJsRootExtension) instead" +
                 "You can find this extension after applying NodeJsPlugin"
     )
     var download by allProjectsDelegate(nodeJs::download)
 
+    @Suppress("DEPRECATION")
     @Deprecated(
         "Use downloadBaseUrl from NodeJsExtension (not NodeJsRootExtension) instead" +
                 "You can find this extension after applying NodeJsPlugin"
     )
     var nodeDownloadBaseUrl by allProjectsDelegate(nodeJs::downloadBaseUrl)
 
+    @Suppress("DEPRECATION")
+//    @Deprecated(
+//        "Use downloadBaseUrl from NodeJsExtension (not NodeJsRootExtension) instead" +
+//                "You can find this extension after applying NodeJsPlugin"
+//    )
     var downloadBaseUrl: String? by allProjectsDelegate(nodeJs::downloadBaseUrl)
 
+    @Suppress("DEPRECATION")
     @Deprecated(
         "Use version from NodeJsExtension (not NodeJsRootExtension) instead" +
                 "You can find this extension after applying NodeJsPlugin"
     )
     var nodeVersion by allProjectsDelegate(nodeJs::version)
 
+    @Suppress("DEPRECATION")
+//    @Deprecated(
+//        "Use downloadBaseUrl from NodeJsExtension (not NodeJsRootExtension) instead" +
+//                "You can find this extension after applying NodeJsPlugin"
+//    )
     var version by allProjectsDelegate(nodeJs::version)
 
+    @Suppress("DEPRECATION")
     @Deprecated(
         "Use command from NodeJsExtension (not NodeJsRootExtension) instead" +
                 "You can find this extension after applying NodeJsPlugin"
     )
     var command by allProjectsDelegate(nodeJs::command)
 
+    @Suppress("DEPRECATION")
     @Deprecated(
         "Use command from NodeJsExtension (not NodeJsRootExtension) instead" +
                 "You can find this extension after applying NodeJsPlugin"
@@ -130,7 +146,9 @@ open class NodeJsRootExtension(
         return nodeJs.requireConfigured()
     }
 
-    private fun <T> allProjectsDelegate(prop: KMutableProperty<T>): ReadWriteProperty<NodeJsRootExtension, T> {
+    private fun <T> allProjectsDelegate(
+        prop: KMutableProperty<T>,
+    ): ReadWriteProperty<NodeJsRootExtension, T> {
         return object : ReadWriteProperty<NodeJsRootExtension, T> {
             override fun getValue(thisRef: NodeJsRootExtension, property: KProperty<*>): T {
                 return prop.getter.call()

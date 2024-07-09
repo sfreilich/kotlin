@@ -6,21 +6,10 @@
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.file.Directory
-import org.gradle.api.provider.Provider
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
-import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.targets.js.AbstractSettings
-import org.jetbrains.kotlin.gradle.targets.js.NpmVersions
-import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.KotlinRootNpmResolver
-import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.PACKAGE_JSON_UMBRELLA_TASK_NAME
-import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmCachesSetup
-import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
-import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.RootPackageJsonTask
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockStoreTask
-import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import org.jetbrains.kotlin.gradle.utils.getFile
 import org.jetbrains.kotlin.gradle.utils.property
@@ -34,27 +23,24 @@ open class NodeJsExtension(
         project.logger.kotlinInfo("Storing cached files in $it")
     }
 
-    override var installationDir by Property(gradleHome.resolve("nodejs"))
+    override val installationDirectory: DirectoryProperty = project.objects.directoryProperty()
+        .fileValue(gradleHome.resolve("nodejs"))
 
-    override var download by Property(true)
+    override val downloadProperty: org.gradle.api.provider.Property<Boolean> = project.objects.property<Boolean>()
+        .convention(true)
 
-    override var downloadBaseUrl: String? by Property("https://nodejs.org/dist")
-
-    @Deprecated("Use downloadBaseUrl instead", ReplaceWith("downloadBaseUrl"))
-    var nodeDownloadBaseUrl by ::downloadBaseUrl
+    // value not convention because this property can be nullable to not add repository
+    override val downloadBaseUrlProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .value("https://nodejs.org/dist")
 
     // Release schedule: https://github.com/nodejs/Release
     // Actual LTS and Current versions: https://nodejs.org/en/download/
     // Older versions and more information, e.g. V8 version inside: https://nodejs.org/en/download/releases/
-    override var version by Property("22.0.0")
+    override val versionProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .convention("22.0.0")
 
-    @Deprecated("Use version instead", ReplaceWith("version"))
-    var nodeVersion by ::version
-
-    override var command by Property("node")
-
-    @Deprecated("Use command instead", ReplaceWith("command"))
-    var nodeCommand by ::command
+    override val commandProperty: org.gradle.api.provider.Property<String> = project.objects.property<String>()
+        .convention("node")
 
     internal val platform: org.gradle.api.provider.Property<Platform> = project.objects.property<Platform>()
 
@@ -62,15 +48,17 @@ open class NodeJsExtension(
         val name = platform.get().name
         val architecture = platform.get().arch
 
+        val version = versionProperty.get()
         val nodeDirName = "node-v$version-$name-$architecture"
-        val cleanableStore = CleanableStore[installationDir.absolutePath]
+        val cleanableStore = CleanableStore[installationDirectory.getFile().absolutePath]
         val nodeDir = cleanableStore[nodeDirName].use()
         val isWindows = platform.get().isWindows()
         val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")
+        val downloadValue = downloadProperty.get()
 
         fun getExecutable(command: String, customCommand: String, windowsExtension: String): String {
             val finalCommand = if (isWindows && customCommand == command) "$command.$windowsExtension" else customCommand
-            return if (download) File(nodeBinDir, finalCommand).absolutePath else finalCommand
+            return if (downloadValue) File(nodeBinDir, finalCommand).absolutePath else finalCommand
         }
 
         fun getIvyDependency(): String {
@@ -79,15 +67,15 @@ open class NodeJsExtension(
         }
 
         return NodeJsEnv(
-            download = download,
+            download = downloadValue,
             cleanableStore = cleanableStore,
             dir = nodeDir,
             nodeBinDir = nodeBinDir,
-            executable = getExecutable("node", command, "exe"),
+            executable = getExecutable("node", commandProperty.get(), "exe"),
             platformName = name,
             architectureName = architecture,
             ivyDependency = getIvyDependency(),
-            downloadBaseUrl = downloadBaseUrl,
+            downloadBaseUrl = downloadBaseUrlProperty.orNull,
         )
     }
 
