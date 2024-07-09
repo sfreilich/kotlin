@@ -17,9 +17,9 @@ private const val AVOID_COPYING_DATA_LENGTH_THRESHOLD = 1024
 
 internal class LargeDynamicMappedBuffer(
     private val channel: FileChannel,
-    private val fileSystem: FastJarFileSystem,
     private val mapMode: FileChannel.MapMode,
-    private val maxSize: Long
+    private val maxSize: Long,
+    private val unmapBuffer: MappedByteBuffer.() -> Unit
 ) {
 
     private var currentMappedBuffer: MappedByteBuffer? = null
@@ -65,11 +65,7 @@ internal class LargeDynamicMappedBuffer(
     }
 
     fun unmap() {
-        currentMappedBuffer?.let {
-            with(fileSystem) {
-                it.unmapBuffer()
-            }
-        }
+        currentMappedBuffer?.unmapBuffer()
     }
 
     class Mapping(private val buffer: MappedByteBuffer, private val baseOffset: Int) {

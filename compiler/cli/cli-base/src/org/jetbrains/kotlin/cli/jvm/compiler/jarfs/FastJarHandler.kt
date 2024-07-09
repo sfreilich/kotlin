@@ -11,7 +11,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 import java.nio.channels.FileChannel
-import kotlin.collections.HashMap
 
 class FastJarHandler(val fileSystem: FastJarFileSystem, path: String) {
     private val myRoot: VirtualFile?
@@ -23,7 +22,12 @@ class FastJarHandler(val fileSystem: FastJarFileSystem, path: String) {
         val entries: List<ZipEntryDescription>
         RandomAccessFile(file, "r").use { randomAccessFile ->
             val largeBuffer =
-                LargeDynamicMappedBuffer(randomAccessFile.channel, fileSystem, FileChannel.MapMode.READ_ONLY, randomAccessFile.length())
+                LargeDynamicMappedBuffer(
+                    randomAccessFile.channel,
+                    FileChannel.MapMode.READ_ONLY,
+                    randomAccessFile.length(),
+                    fileSystem.unmapBuffer
+                )
             try {
                 entries = try {
                     largeBuffer.parseCentralDirectory()
