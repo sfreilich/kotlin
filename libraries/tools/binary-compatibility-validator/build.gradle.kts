@@ -5,7 +5,7 @@ plugins {
 val testArtifacts by configurations.creating
 
 dependencies {
-    api("org.jetbrains.kotlinx:binary-compatibility-validator:0.13.0")
+    api("org.jetbrains.kotlinx:binary-compatibility-validator:0.15.0")
     api(libs.kotlinx.metadataJvm)
 
     testApi(kotlinTest("junit"))
