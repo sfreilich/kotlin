@@ -37,7 +37,9 @@ sealed class ConeKotlinType : ConeKotlinTypeProjection(), KotlinTypeMarker, Type
     abstract override fun hashCode(): Int
 }
 
-sealed class ConeSimpleKotlinType : ConeKotlinType(), SimpleTypeMarker
+sealed class ConeSimpleOrDefinitelyNotNullType : ConeKotlinType(), SimpleTypeMarker
+
+sealed class ConeSimpleKotlinType : ConeSimpleOrDefinitelyNotNullType(), SimpleTypeMarker
 
 class ConeClassLikeErrorLookupTag(override val classId: ClassId) : ConeClassLikeLookupTag()
 
@@ -69,8 +71,8 @@ abstract class ConeClassLikeType : ConeLookupTagBasedType() {
 }
 
 open class ConeFlexibleType(
-    val lowerBound: ConeSimpleKotlinType,
-    val upperBound: ConeSimpleKotlinType
+    val lowerBound: ConeSimpleOrDefinitelyNotNullType,
+    val upperBound: ConeSimpleOrDefinitelyNotNullType
 ) : ConeKotlinType(), FlexibleTypeMarker {
 
     final override val typeArguments: Array<out ConeTypeProjection>
@@ -105,20 +107,20 @@ open class ConeFlexibleType(
 annotation class DynamicTypeConstructor
 
 class ConeDynamicType @DynamicTypeConstructor constructor(
-    lowerBound: ConeSimpleKotlinType,
-    upperBound: ConeSimpleKotlinType
+    lowerBound: ConeSimpleOrDefinitelyNotNullType,
+    upperBound: ConeSimpleOrDefinitelyNotNullType
 ) : ConeFlexibleType(lowerBound, upperBound), DynamicTypeMarker {
     companion object
 }
 
-fun ConeSimpleKotlinType.unwrapDefinitelyNotNull(): ConeSimpleKotlinType {
+fun ConeSimpleOrDefinitelyNotNullType.unwrapDefinitelyNotNull(): ConeSimpleKotlinType {
     return when (this) {
         is ConeDefinitelyNotNullType -> original
-        else -> this
+        is ConeSimpleKotlinType -> this
     }
 }
 
-fun ConeKotlinType.unwrapFlexibleAndDefinitelyNotNull(): ConeKotlinType {
+fun ConeKotlinType.unwrapFlexibleAndDefinitelyNotNull(): ConeSimpleKotlinType {
     return lowerBoundIfFlexible().unwrapDefinitelyNotNull()
 }
 
@@ -176,7 +178,9 @@ data class ConeCapturedType(
 }
 
 
-data class ConeDefinitelyNotNullType(val original: ConeSimpleKotlinType) : ConeSimpleKotlinType(), DefinitelyNotNullTypeMarker {
+data class ConeDefinitelyNotNullType(
+    val original: ConeSimpleKotlinType
+) : ConeSimpleOrDefinitelyNotNullType(), DefinitelyNotNullTypeMarker {
     override val typeArguments: Array<out ConeTypeProjection>
         get() = original.typeArguments
 
@@ -190,13 +194,13 @@ data class ConeDefinitelyNotNullType(val original: ConeSimpleKotlinType) : ConeS
 }
 
 class ConeRawType private constructor(
-    lowerBound: ConeSimpleKotlinType,
-    upperBound: ConeSimpleKotlinType
+    lowerBound: ConeSimpleOrDefinitelyNotNullType,
+    upperBound: ConeSimpleOrDefinitelyNotNullType
 ) : ConeFlexibleType(lowerBound, upperBound) {
     companion object {
         fun create(
-            lowerBound: ConeSimpleKotlinType,
-            upperBound: ConeSimpleKotlinType,
+            lowerBound: ConeSimpleOrDefinitelyNotNullType,
+            upperBound: ConeSimpleOrDefinitelyNotNullType,
         ): ConeRawType {
             require(lowerBound is ConeClassLikeType && upperBound is ConeClassLikeType) {
                 "Raw bounds are expected to be class-like types, but $lowerBound and $upperBound were found"

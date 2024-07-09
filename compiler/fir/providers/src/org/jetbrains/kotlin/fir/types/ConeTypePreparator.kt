@@ -9,14 +9,14 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.resolve.fullyExpandedType
 import org.jetbrains.kotlin.types.AbstractTypePreparator
 import org.jetbrains.kotlin.types.model.KotlinTypeMarker
-import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
 
 class ConeTypePreparator(val session: FirSession) : AbstractTypePreparator() {
-    private fun prepareType(type: ConeSimpleKotlinType): ConeSimpleKotlinType {
+    private fun <T : ConeSimpleOrDefinitelyNotNullType> prepareType(type: T): T {
+        @Suppress("UNCHECKED_CAST")
         return when (type) {
             is ConeClassLikeType -> type.fullyExpandedType(session)
             else -> type
-        }
+        } as T
     }
 
     override fun prepareType(type: KotlinTypeMarker): KotlinTypeMarker {
@@ -31,6 +31,7 @@ class ConeTypePreparator(val session: FirSession) : AbstractTypePreparator() {
                 ConeFlexibleType(lowerBound, prepareType(type.upperBound))
             }
             is ConeSimpleKotlinType -> prepareType(type)
+            is ConeDefinitelyNotNullType -> ConeDefinitelyNotNullType(prepareType(type.original))
         }
     }
 }

@@ -142,7 +142,7 @@ class FirTypeDeserializer(
         return type(proto, attributesFromAnnotations(proto))
     }
 
-    fun simpleType(proto: ProtoBuf.Type): ConeSimpleKotlinType {
+    fun simpleType(proto: ProtoBuf.Type): ConeSimpleOrDefinitelyNotNullType {
         return simpleType(proto, attributesFromAnnotations(proto))
             ?: ConeErrorType(ConeSimpleDiagnostic("?!id:0", DiagnosticKind.DeserializationError))
     }
@@ -167,13 +167,17 @@ class FirTypeDeserializer(
     }
 
     interface FlexibleTypeFactory {
-        fun createFlexibleType(proto: Type, lowerBound: ConeSimpleKotlinType, upperBound: ConeSimpleKotlinType): ConeFlexibleType
+        fun createFlexibleType(
+            proto: Type,
+            lowerBound: ConeSimpleOrDefinitelyNotNullType,
+            upperBound: ConeSimpleOrDefinitelyNotNullType,
+        ): ConeFlexibleType
 
         object Default : FlexibleTypeFactory {
             override fun createFlexibleType(
                 proto: Type,
-                lowerBound: ConeSimpleKotlinType,
-                upperBound: ConeSimpleKotlinType,
+                lowerBound: ConeSimpleOrDefinitelyNotNullType,
+                upperBound: ConeSimpleOrDefinitelyNotNullType,
             ): ConeFlexibleType = ConeFlexibleType(lowerBound, upperBound)
         }
     }
@@ -193,7 +197,7 @@ class FirTypeDeserializer(
     fun FirClassLikeSymbol<*>.typeParameters(): List<FirTypeParameterSymbol> =
         (fir as? FirTypeParameterRefsOwner)?.typeParameters?.map { it.symbol }.orEmpty()
 
-    private fun simpleType(proto: ProtoBuf.Type, attributes: ConeAttributes): ConeSimpleKotlinType? {
+    private fun simpleType(proto: ProtoBuf.Type, attributes: ConeAttributes): ConeSimpleOrDefinitelyNotNullType? {
         val constructor = typeSymbol(proto) ?: return null
         if (constructor is ConeTypeParameterLookupTag) {
             return ConeTypeParameterTypeImpl(constructor, isNullable = proto.nullable, attributes).let {

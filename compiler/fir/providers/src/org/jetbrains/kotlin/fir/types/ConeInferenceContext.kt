@@ -151,7 +151,8 @@ interface ConeInferenceContext : TypeSystemInferenceExtensionContext, ConeTypeCo
     override fun KotlinTypeMarker.typeDepth() = when (this) {
         is ConeSimpleKotlinType -> typeDepth()
         is ConeFlexibleType -> maxOf(lowerBound().typeDepth(), upperBound().typeDepth())
-        else -> errorWithAttachment("Type should be simple or flexible: ${this::class.java}") {
+        is ConeDefinitelyNotNullType -> original.typeDepth()
+        else -> errorWithAttachment("Type should be simple, DNN or flexible: ${this::class.java}") {
             withConeTypeEntry("type", this@typeDepth as? ConeKotlinType)
         }
     }

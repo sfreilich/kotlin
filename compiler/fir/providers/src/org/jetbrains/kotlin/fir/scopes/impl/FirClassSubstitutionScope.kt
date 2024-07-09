@@ -117,7 +117,7 @@ class FirClassSubstitutionScope(
     }
 
     private fun ConeSimpleKotlinType.substitute(substitutor: ConeSubstitutor): ConeSimpleKotlinType? {
-        return substitutor.substituteOrNull(this)?.lowerBoundIfFlexible()
+        return substitutor.substituteOrNull(this)?.unwrapFlexibleAndDefinitelyNotNull()
     }
 
     fun createSubstitutionOverrideFunction(original: FirNamedFunctionSymbol): FirNamedFunctionSymbol {

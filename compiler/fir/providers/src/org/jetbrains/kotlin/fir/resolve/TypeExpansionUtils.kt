@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.fir.declarations.FirTypeAlias
 import org.jetbrains.kotlin.fir.declarations.utils.expandedConeType
 import org.jetbrains.kotlin.fir.resolve.substitution.AbstractConeSubstitutor
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
-import org.jetbrains.kotlin.fir.symbols.impl.FirTypeAliasSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirTypeParameterSymbol
 import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhase
 import org.jetbrains.kotlin.fir.types.*
@@ -78,12 +77,15 @@ fun ConeKotlinType.fullyExpandedType(
 /**
  * @see fullyExpandedType
  */
-fun ConeSimpleKotlinType.fullyExpandedType(
+fun <T : ConeSimpleOrDefinitelyNotNullType> T.fullyExpandedType(
     useSiteSession: FirSession,
     expandedConeType: (FirTypeAlias) -> ConeClassLikeType? = FirTypeAlias::expandedConeTypeWithEnsuredPhase,
-): ConeSimpleKotlinType = when (this) {
-    is ConeClassLikeType -> fullyExpandedType(useSiteSession, expandedConeType)
-    else -> this
+): T {
+    @Suppress("UNCHECKED_CAST")
+    return when (this) {
+        is ConeClassLikeType -> fullyExpandedType(useSiteSession, expandedConeType)
+        else -> this
+    } as T
 }
 
 private fun ConeClassLikeType.fullyExpandedTypeNoCache(
