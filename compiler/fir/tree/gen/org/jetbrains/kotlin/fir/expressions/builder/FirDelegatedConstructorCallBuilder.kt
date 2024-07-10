@@ -26,7 +26,6 @@ class FirDelegatedConstructorCallBuilder : FirCallBuilder, FirAnnotationContaine
     override val annotations: MutableList<FirAnnotation> = mutableListOf()
     override var argumentList: FirArgumentList = FirEmptyArgumentList
     val contextReceiverArguments: MutableList<FirExpression> = mutableListOf()
-    override var coneTypeOrNull: ConeKotlinType? = null
     lateinit var constructedTypeRef: FirTypeRef
     var dispatchReceiver: FirExpression? = null
     lateinit var calleeReference: FirReference
@@ -38,7 +37,6 @@ class FirDelegatedConstructorCallBuilder : FirCallBuilder, FirAnnotationContaine
             annotations.toMutableOrEmpty(),
             argumentList,
             contextReceiverArguments.toMutableOrEmpty(),
-            coneTypeOrNull,
             constructedTypeRef,
             dispatchReceiver,
             calleeReference,
@@ -47,6 +45,13 @@ class FirDelegatedConstructorCallBuilder : FirCallBuilder, FirAnnotationContaine
         )
     }
 
+
+    @Deprecated("Modification of 'coneTypeOrNull' has no impact for FirDelegatedConstructorCallBuilder", level = DeprecationLevel.HIDDEN)
+    override var coneTypeOrNull: ConeKotlinType?
+        get() = throw IllegalStateException()
+        set(_) {
+            throw IllegalStateException()
+        }
 }
 
 @OptIn(ExperimentalContracts::class)

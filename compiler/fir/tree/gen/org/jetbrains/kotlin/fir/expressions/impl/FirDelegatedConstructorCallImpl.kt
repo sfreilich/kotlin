@@ -20,23 +20,25 @@ import org.jetbrains.kotlin.fir.references.impl.FirExplicitSuperReference
 import org.jetbrains.kotlin.fir.references.impl.FirExplicitThisReference
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.FirTypeRef
+import org.jetbrains.kotlin.fir.types.toLookupTag
+import org.jetbrains.kotlin.fir.types.impl.ConeClassLikeTypeImpl
 import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.FirVisitor
 import org.jetbrains.kotlin.fir.visitors.transformInplace
+import org.jetbrains.kotlin.name.StandardClassIds
 
-@OptIn(UnresolvedExpressionTypeAccess::class)
 internal class FirDelegatedConstructorCallImpl(
     override var annotations: MutableOrEmptyList<FirAnnotation>,
     override var argumentList: FirArgumentList,
     override var contextReceiverArguments: MutableOrEmptyList<FirExpression>,
-    @property:UnresolvedExpressionTypeAccess
-    override var coneTypeOrNull: ConeKotlinType?,
     override var constructedTypeRef: FirTypeRef,
     override var dispatchReceiver: FirExpression?,
     override var calleeReference: FirReference,
     override var source: KtSourceElement?,
     override val isThis: Boolean,
 ) : FirDelegatedConstructorCall() {
+    @OptIn(UnresolvedExpressionTypeAccess::class)
+    override val coneTypeOrNull: ConeKotlinType? = ConeClassLikeTypeImpl(StandardClassIds.Unit.toLookupTag(), typeArguments = emptyArray(), isNullable = false)
     override val isSuper: Boolean
         get() = !isThis
 
@@ -84,9 +86,7 @@ internal class FirDelegatedConstructorCallImpl(
         contextReceiverArguments = newContextReceiverArguments.toMutableOrEmpty()
     }
 
-    override fun replaceConeTypeOrNull(newConeTypeOrNull: ConeKotlinType?) {
-        coneTypeOrNull = newConeTypeOrNull
-    }
+    override fun replaceConeTypeOrNull(newConeTypeOrNull: ConeKotlinType?) {}
 
     override fun replaceConstructedTypeRef(newConstructedTypeRef: FirTypeRef) {
         constructedTypeRef = newConstructedTypeRef

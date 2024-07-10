@@ -20,10 +20,7 @@ import org.jetbrains.kotlin.fir.visitors.FirTransformer
 import org.jetbrains.kotlin.fir.visitors.FirVisitor
 import org.jetbrains.kotlin.fir.visitors.transformInplace
 
-@OptIn(UnresolvedExpressionTypeAccess::class)
 class FirMultiDelegatedConstructorCallImpl @FirImplementationDetail constructor(
-    @property:UnresolvedExpressionTypeAccess
-    override var coneTypeOrNull: ConeKotlinType?,
     override val delegatedConstructorCalls: MutableList<FirDelegatedConstructorCall>,
 ) : FirMultiDelegatedConstructorCall() {
     override val annotations: List<FirAnnotation>
@@ -32,6 +29,9 @@ class FirMultiDelegatedConstructorCallImpl @FirImplementationDetail constructor(
         get() = delegatedConstructorCalls.last().argumentList
     override val contextReceiverArguments: List<FirExpression>
         get() = delegatedConstructorCalls.last().contextReceiverArguments
+    @OptIn(UnresolvedExpressionTypeAccess::class)
+    override val coneTypeOrNull: ConeKotlinType?
+        get() = delegatedConstructorCalls.last().coneTypeOrNull
     override val constructedTypeRef: FirTypeRef
         get() = delegatedConstructorCalls.last().constructedTypeRef
     override val dispatchReceiver: FirExpression?
@@ -77,9 +77,7 @@ class FirMultiDelegatedConstructorCallImpl @FirImplementationDetail constructor(
 
     override fun replaceContextReceiverArguments(newContextReceiverArguments: List<FirExpression>) {}
 
-    override fun replaceConeTypeOrNull(newConeTypeOrNull: ConeKotlinType?) {
-        coneTypeOrNull = newConeTypeOrNull
-    }
+    override fun replaceConeTypeOrNull(newConeTypeOrNull: ConeKotlinType?) {}
 
     override fun replaceConstructedTypeRef(newConstructedTypeRef: FirTypeRef) {}
 
