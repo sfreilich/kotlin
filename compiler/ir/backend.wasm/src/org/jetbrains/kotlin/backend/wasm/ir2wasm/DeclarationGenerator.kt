@@ -155,7 +155,13 @@ class DeclarationGenerator(
             bodyBuilder.generateObjectCreationPrefixIfNeeded(declaration)
         }
 
-        require(declaration.body is IrBlockBody) { "Only IrBlockBody is supported" }
+        if (declaration is IrConstructor && declaration.hasWasmPrimitiveConstructorAnnotation() &&
+            backendContext.irBuiltIns.languageVersionSettings.languageVersion.usesK2
+        ) {
+            require(declaration.body == null) { "Constructor with @WasmPrimitiveConstructor should not have body" }
+        } else {
+            require(declaration.body is IrBlockBody) { "Only IrBlockBody is supported" }
+        }
         declaration.body?.acceptVoid(bodyBuilder)
 
         // Return implicit this from constructions to avoid extra tmp
