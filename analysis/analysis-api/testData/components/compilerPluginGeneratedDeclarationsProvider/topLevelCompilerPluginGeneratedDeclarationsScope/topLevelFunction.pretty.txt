@@ -1,5 +1,4 @@
-packages: 1
-  test
+packages: 0
 classifiers: 0
 callables: 1
   fun dummyTest(value: test.Test): kotlin.String

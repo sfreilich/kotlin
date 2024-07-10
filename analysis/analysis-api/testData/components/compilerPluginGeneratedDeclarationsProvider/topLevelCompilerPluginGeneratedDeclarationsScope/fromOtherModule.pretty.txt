@@ -1,6 +1,4 @@
-packages: 2
-  dependency
-  foo
+packages: 0
 classifiers: 1
   class AllOpenGenerated
 callables: 1

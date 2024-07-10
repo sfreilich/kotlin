@@ -1,5 +1,4 @@
-packages: 1
-  foo
+packages: 0
 classifiers: 1
   class AllOpenGenerated
 callables: 0
