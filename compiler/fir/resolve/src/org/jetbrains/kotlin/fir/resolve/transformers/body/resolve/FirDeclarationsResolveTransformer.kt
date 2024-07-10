@@ -1070,11 +1070,7 @@ open class FirDeclarationsResolveTransformer(
         data: ResolutionMode
     ): FirStatement = whileAnalysing(session, anonymousFunctionExpression) {
         dataFlowAnalyzer.enterAnonymousFunctionExpression(anonymousFunctionExpression)
-        val transformedAnonymousFunction = transformAnonymousFunctionImpl(
-            anonymousFunctionExpression.anonymousFunction,
-            anonymousFunctionExpression,
-            data
-        )
+        val transformedAnonymousFunction = doTransformAnonymousFunction(anonymousFunctionExpression, data)
         anonymousFunctionExpression.replaceAnonymousFunction(transformedAnonymousFunction)
         anonymousFunctionExpression
     }
@@ -1083,14 +1079,23 @@ open class FirDeclarationsResolveTransformer(
         anonymousFunction: FirAnonymousFunction,
         data: ResolutionMode
     ): FirAnonymousFunction = whileAnalysing(session, anonymousFunction) {
-        transformAnonymousFunctionImpl(anonymousFunction, anonymousFunctionExpression = null, data)
+        error("Transformation of anonymous function should be performed via `transformAnonymousFunctionExpression`")
     }
 
-    private fun transformAnonymousFunctionImpl(
-        anonymousFunction: FirAnonymousFunction,
-        anonymousFunctionExpression: FirAnonymousFunctionExpression?,
+    /**
+     * This function might be called from two places:
+     * 1. `transformAnonymousFunctionExpression` for independent/withExpectedType/dependant modes
+     * 2. `LambdaAnalyzerImpl.analyzeAndGetLambdaReturnArguments` for postponed lambdas, which are
+     *     being analyzed during completion
+     *
+     * This method cannot be merged with `transformAnonymousFunctionExpression`, because the latter performs some
+     *   CFA preparations for lambdas, which should be called only once, during first visiting of the lambda
+     */
+    internal fun doTransformAnonymousFunction(
+        anonymousFunctionExpression: FirAnonymousFunctionExpression,
         data: ResolutionMode
     ): FirAnonymousFunction {
+        val anonymousFunction = anonymousFunctionExpression.anonymousFunction
         // Either ContextDependent, ContextIndependent or WithExpectedType could be here
         anonymousFunction.transformAnnotations(transformer, ResolutionMode.ContextIndependent)
         if (data !is ResolutionMode.LambdaResolution) {
@@ -1114,7 +1119,6 @@ open class FirDeclarationsResolveTransformer(
                 transformAnonymousFunctionBody(anonymousFunction, expectedReturnTypeRef, data)
             }
             is ResolutionMode.WithExpectedType -> {
-                requireNotNull(anonymousFunctionExpression)
                 transformAnonymousFunctionWithExpectedType(anonymousFunctionExpression, data.expectedTypeRef, data)
             }
 
@@ -1123,10 +1127,7 @@ open class FirDeclarationsResolveTransformer(
             is ResolutionMode.AssignmentLValue,
             is ResolutionMode.ReceiverResolution,
             is ResolutionMode.Delegate,
-            -> {
-                requireNotNull(anonymousFunctionExpression)
-                transformAnonymousFunctionWithExpectedType(anonymousFunctionExpression, FirImplicitTypeRefImplWithoutSource, data)
-            }
+            -> transformAnonymousFunctionWithExpectedType(anonymousFunctionExpression, FirImplicitTypeRefImplWithoutSource, data)
             is ResolutionMode.WithStatus -> error("Should not be here in WithStatus/WithExpectedTypeFromCast mode")
         }
     }
