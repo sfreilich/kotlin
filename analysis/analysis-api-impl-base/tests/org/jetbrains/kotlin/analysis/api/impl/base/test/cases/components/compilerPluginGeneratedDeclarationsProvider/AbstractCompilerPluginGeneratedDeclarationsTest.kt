@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.test.services.TestServices
 import org.jetbrains.kotlin.test.services.assertions
 
-abstract class AbstractTopLevelCompilerPluginGeneratedDeclarationsScopeTest : AbstractAnalysisApiBasedTest() {
+abstract class AbstractCompilerPluginGeneratedDeclarationsTest : AbstractAnalysisApiBasedTest() {
     override fun doTestByMainFile(mainFile: KtFile, mainModule: KtTestModule, testServices: TestServices) {
         analyseForTest(mainFile) {
             val resolveExtensionScope = mainModule.ktModule.compilerPluginGeneratedDeclarations.topLevelDeclarationsScope
