@@ -98,13 +98,15 @@ internal abstract class BuildSPMSwiftExportPackage @Inject constructor(
             "BUILT_PRODUCTS_DIR" to interfacesPath.getFile().canonicalPath,
         )
 
+        val scheme = swiftApiModuleName.get()
+
         val buildArguments = mapOf(
             "ARCHS" to target.map { it.appleArchitecture }.get(),
             "CONFIGURATION" to configuration.get(),
+            "OTHER_SWIFT_FLAGS" to "-Xfrontend -public-autolink-library -Xfrontend $scheme"
         )
 
         val derivedData = packageDerivedData.getFile()
-        val scheme = swiftApiModuleName.get()
 
         val command = listOf(
             "xcodebuild",
