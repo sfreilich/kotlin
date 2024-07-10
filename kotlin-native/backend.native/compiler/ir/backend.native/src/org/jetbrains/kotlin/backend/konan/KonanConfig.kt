@@ -421,6 +421,12 @@ class KonanConfig(val project: Project, val configuration: CompilerConfiguration
         File(distribution.defaultNatives(target)).child(it).absolutePath
     }
 
+    internal val runtimeLinkageStrategy: RuntimeLinkageStrategy by lazy {
+        // Intentionally optimize in debug mode only. See `RuntimeLinkageStrategy`.
+        val defaultStrategy = if (debug) RuntimeLinkageStrategy.Optimize else RuntimeLinkageStrategy.Raw
+        configuration.get(BinaryOptions.linkRuntime) ?: defaultStrategy
+    }
+
     internal val launcherNativeLibraries: List<String> = distribution.launcherFiles.map {
         File(distribution.defaultNatives(target)).child(it).absolutePath
     }
