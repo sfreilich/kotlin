@@ -16,7 +16,7 @@ abstract class AbstractSettings<Env : AbstractEnv> : ConfigurationPhaseAware<Env
 
     abstract val downloadProperty: org.gradle.api.provider.Property<Boolean>
 
-    @Deprecated("This property will be removed. Use downloadBaseUrlProperty instead")
+//    @Deprecated("This property will be removed. Use downloadBaseUrlProperty instead")
     var downloadBaseUrl: String?
         get() = downloadBaseUrlProperty.getOrNull()
         set(value) {
@@ -34,7 +34,7 @@ abstract class AbstractSettings<Env : AbstractEnv> : ConfigurationPhaseAware<Env
 
     abstract val installationDirectory: DirectoryProperty
 
-    @Deprecated("This property will be removed. Use versionProperty instead")
+//    @Deprecated("This property will be removed. Use versionProperty instead")
     var version: String
         get() = versionProperty.get()
         set(value) {
