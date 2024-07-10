@@ -51,6 +51,7 @@ import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.types.isNullable
 import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
+import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
 import org.jetbrains.kotlin.utils.filterIsInstanceMapNotNull
 import java.util.*
 
@@ -300,7 +301,9 @@ class JsIrBackendContext(
             override val toULongByExtensionReceiver: Map<IrClassifierSymbol, IrSimpleFunctionSymbol> by lazy(LazyThreadSafetyMode.NONE) {
                 toULongSymbols.associateBy {
                     it.owner.extensionReceiverParameter?.type?.classifierOrFail
-                        ?: error("Expected extension receiver for ${it.owner.render()}")
+                        ?: errorWithAttachment("Expected extension receiver for") {
+                            withIrEntry("irFunction", it.owner)
+                        }
                 }
             }
         }
