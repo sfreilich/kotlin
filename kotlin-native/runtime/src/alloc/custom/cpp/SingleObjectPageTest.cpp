@@ -50,7 +50,6 @@ TEST(CustomAllocTest, SingleObjectPageSweepFullPage) {
     auto gcScope = gcHandle.sweep();
     kotlin::alloc::FinalizerQueue finalizerQueue;
     EXPECT_TRUE(page->SweepAndDestroy(gcScope, finalizerQueue));
-    page->Destroy();
 }
 
 #undef MIN_BLOCK_SIZE
