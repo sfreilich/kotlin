@@ -38,7 +38,6 @@ internal class KaFirCompilerPluginGeneratedDeclarationsProvider(
                 ?: return KaBaseCompilerPluginGeneratedDeclarations(KaBaseEmptyScope(analysisSession.token))
 
             val topLevelScope = KaFirTopLevelCompilerPluginGeneratedDeclarationsScope(
-                analysisSession.token,
                 generatedDeclarationsSymbolProviderForModule,
                 analysisSession.firSymbolBuilder,
             )
@@ -53,10 +52,11 @@ internal class KaFirCompilerPluginGeneratedDeclarationsProvider(
  * Relies on [generatedDeclarationsSymbolProvider] to retrieve the generated declarations.
  */
 private class KaFirTopLevelCompilerPluginGeneratedDeclarationsScope(
-    override val token: KaLifetimeToken,
     private val generatedDeclarationsSymbolProvider: FirSwitchableExtensionDeclarationsSymbolProvider,
     private val symbolByFirBuilder: KaSymbolByFirBuilder,
 ) : KaScope {
+
+    override val token: KaLifetimeToken = symbolByFirBuilder.token
 
     /**
      * N.B. We expect that this [FirSymbolNamesProvider] is aware of all the names
@@ -138,22 +138,8 @@ private class KaFirTopLevelCompilerPluginGeneratedDeclarationsScope(
         }
 
     override fun getPackageSymbols(nameFilter: (Name) -> Boolean): Sequence<KaPackageSymbol> = withValidityAssertion {
-        sequence {
-            val packageNames = symbolNamesProvider.getPackageNames().orEmpty()
-
-            val seenTopLevelPackages = mutableSetOf<Name>()
-
-            for (packageName in packageNames) {
-                val packageFqName = FqName(packageName)
-
-                val topLevelPackageName = packageFqName.pathSegments().firstOrNull() ?: continue
-                if (seenTopLevelPackages.add(topLevelPackageName) || nameFilter(topLevelPackageName)) {
-                    val topLevelPackageSymbol = symbolByFirBuilder.createPackageSymbol(FqName.topLevel(topLevelPackageName))
-
-                    yield(topLevelPackageSymbol)
-                }
-            }
-        }
+        // we do not provide generated packages at all, since the semantics and use-cases are not yet clear
+        emptySequence()
     }
 
     override fun getPossibleCallableNames(): Set<Name> = withValidityAssertion {
