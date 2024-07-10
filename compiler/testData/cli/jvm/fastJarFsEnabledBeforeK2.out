@@ -1,0 +1,3 @@
+info: using fast Jar FS implementation
+warning: using new faster version of JAR FS: it should make your build faster, but the new implementation is experimental
+OK

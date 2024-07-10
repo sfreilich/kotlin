@@ -55,8 +55,7 @@ import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
 import org.jetbrains.kotlin.cli.common.extensions.ScriptEvaluationExtension
 import org.jetbrains.kotlin.cli.common.extensions.ShellExtension
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.STRONG_WARNING
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.common.toBooleanLenient
 import org.jetbrains.kotlin.cli.jvm.config.*
@@ -124,18 +123,28 @@ class KotlinCoreEnvironment private constructor(
 
             setIdeaIoUseFallback()
 
-            if (configuration.getBoolean(JVMConfigurationKeys.USE_FAST_JAR_FILE_SYSTEM)) {
-                messageCollector.report(
-                    STRONG_WARNING,
-                    "Using new faster version of JAR FS: it should make your build faster, but the new implementation is experimental"
-                )
+            val useFastJarFS = configuration.getBoolean(JVMConfigurationKeys.USE_FAST_JAR_FILE_SYSTEM)
+            val useK2 = configuration.getBoolean(CommonConfigurationKeys.USE_FIR)
+            when {
+                useFastJarFS && !useK2 -> {
+                    messageCollector.report(
+                        STRONG_WARNING,
+                        "Using new faster version of JAR FS: it should make your build faster, but the new implementation is experimental"
+                    )
+                }
+                !useFastJarFS && useK2 -> {
+                    messageCollector.report(
+                        INFO,
+                        "Using old slower version of JAR FS: it might make your build slower"
+                    )
+                }
             }
 
             jarFileSystem = when {
                 configuration.getBoolean(JVMConfigurationKeys.USE_PSI_CLASS_FILES_READING) -> {
                     applicationEnvironment.jarFileSystem
                 }
-                configuration.getBoolean(JVMConfigurationKeys.USE_FAST_JAR_FILE_SYSTEM) || configuration.getBoolean(CommonConfigurationKeys.USE_FIR) -> {
+                useFastJarFS -> {
                     val fastJarFs = applicationEnvironment.fastJarFileSystem
                     if (fastJarFs == null) {
                         messageCollector.report(

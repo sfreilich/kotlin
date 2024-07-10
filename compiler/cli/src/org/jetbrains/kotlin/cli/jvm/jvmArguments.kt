@@ -260,7 +260,8 @@ fun CompilerConfiguration.configureAdvancedJvmOptions(arguments: K2JVMCompilerAr
     put(JVMConfigurationKeys.PARAMETERS_METADATA, arguments.javaParameters)
 
     val useOldBackend = arguments.useOldBackend
-    val useIR = arguments.useK2 || languageVersionSettings.languageVersion.usesK2 || !useOldBackend
+    val isK2 = arguments.useK2 || languageVersionSettings.languageVersion.usesK2
+    val useIR = isK2 || !useOldBackend
 
     messageCollector.report(LOGGING, "Using ${if (useIR) "JVM IR" else "old JVM"} backend")
 
@@ -316,13 +317,17 @@ fun CompilerConfiguration.configureAdvancedJvmOptions(arguments: K2JVMCompilerAr
 
     put(JVMConfigurationKeys.USE_TYPE_TABLE, arguments.useTypeTable)
     put(JVMConfigurationKeys.USE_PSI_CLASS_FILES_READING, arguments.useOldClassFilesReading)
-    put(JVMConfigurationKeys.USE_FAST_JAR_FILE_SYSTEM, arguments.useFastJarFileSystem)
+    put(
+        JVMConfigurationKeys.USE_FAST_JAR_FILE_SYSTEM,
+        // We enable FastJarFS by default since K2
+        arguments.useFastJarFileSystem ?: isK2
+    )
 
     if (arguments.useOldClassFilesReading) {
         messageCollector.report(INFO, "Using the old java class files reading implementation")
     }
 
-    if (arguments.useFastJarFileSystem) {
+    if (arguments.useFastJarFileSystem == true) {
         messageCollector.report(INFO, "Using fast Jar FS implementation")
     }
 
