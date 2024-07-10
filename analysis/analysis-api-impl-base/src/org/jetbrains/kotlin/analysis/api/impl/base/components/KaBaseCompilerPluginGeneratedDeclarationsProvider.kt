@@ -5,17 +5,13 @@
 
 package org.jetbrains.kotlin.analysis.api.impl.base.components
 
+import org.jetbrains.kotlin.analysis.api.KaImplementationDetail
 import org.jetbrains.kotlin.analysis.api.components.KaCompilerPluginGeneratedDeclarations
 import org.jetbrains.kotlin.analysis.api.lifetime.KaLifetimeToken
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.scopes.KaScope
 
-/**
- * A simple implementation [KaCompilerPluginGeneratedDeclarations] backed by
- * a single predefined [backingTopLevelDeclarationsScope].
- *
- * Reuses [KaLifetimeToken] from the [backingTopLevelDeclarationsScope] for simplicity.
- */
+@KaImplementationDetail
 class KaBaseCompilerPluginGeneratedDeclarations(
     private val backingTopLevelDeclarationsScope: KaScope,
 ) : KaCompilerPluginGeneratedDeclarations {

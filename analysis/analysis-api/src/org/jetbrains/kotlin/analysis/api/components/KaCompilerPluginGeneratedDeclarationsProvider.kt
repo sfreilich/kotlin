@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.analysis.api.scopes.KaScope
 @KaExperimentalApi
 public interface KaCompilerPluginGeneratedDeclarationsProvider {
     /**
-     * Returns a [KaCompilerPluginGeneratedDeclarations] for [this] module.
+     * A [KaCompilerPluginGeneratedDeclarations] for [this] module.
      *
      * Important: the result **does not** include the generated declarations for the
      * dependencies of [this] module.
