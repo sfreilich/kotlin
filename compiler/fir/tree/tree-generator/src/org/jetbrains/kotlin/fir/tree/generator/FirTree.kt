@@ -1214,7 +1214,7 @@ object FirTree : AbstractFirTreeBuilder() {
         +field("usedAsExpression", boolean)
     }
 
-    val typeProjection: Element by element(TypeRefElement)
+    val typeProjection: Element by sealedElement(TypeRefElement)
 
     val typeProjectionWithVariance: Element by element(TypeRefElement) {
         parent(typeProjection)
