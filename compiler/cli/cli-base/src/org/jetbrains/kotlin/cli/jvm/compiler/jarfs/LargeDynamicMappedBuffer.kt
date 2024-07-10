@@ -43,9 +43,7 @@ internal class LargeDynamicMappedBuffer(
                 currentEnd = start + Int.MAX_VALUE
             }
             unmap()
-            currentMappedBuffer = mapBuffer(currentStart, currentSize).also {
-                it.order(ByteOrder.LITTLE_ENDIAN)
-            }
+            currentMappedBuffer = mapBuffer(currentStart, currentSize)
         }
         val buffer = currentMappedBuffer!!
         require(currentStart <= start && currentEnd >= end && start - currentStart < Int.MAX_VALUE)
@@ -69,6 +67,8 @@ internal class LargeDynamicMappedBuffer(
     }
 
     class Mapping(private val buffer: MappedByteBuffer, private val baseOffset: Int) {
+
+        fun order(bo: ByteOrder) = buffer.order(bo)
 
         fun getInt(offset: Int) = buffer.getInt(baseOffset + offset)
         fun getLong(offset: Int) = buffer.getLong(baseOffset + offset)

@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.cli.jvm.compiler.jarfs
 
+import java.nio.ByteOrder
 import java.util.zip.Inflater
 
 
@@ -33,6 +34,8 @@ internal fun LargeDynamicMappedBuffer.contentsToByteArray(
     zipEntryDescription: ZipEntryDescription
 ): ByteArray =
     withMappedRangeFrom(zipEntryDescription.offsetInFile) {
+        order(ByteOrder.LITTLE_ENDIAN)
+
         val extraSize = getUnsignedShort((LOCAL_FILE_HEADER_EXTRA_OFFSET).toInt())
         val startPos = LOCAL_FILE_HEADER_SIZE + zipEntryDescription.fileNameSize + extraSize
 
@@ -69,6 +72,8 @@ internal fun LargeDynamicMappedBuffer.parseCentralDirectory(): List<ZipEntryDesc
     val result = mutableListOf<ZipEntryDescription>()
     for (i in 0 until entriesNumber) {
         withMappedRangeFrom(currentStart) {
+            order(ByteOrder.LITTLE_ENDIAN)
+
             val headerConst = getInt(0)
             require(headerConst == 0x02014b50) {
                 "$i: $headerConst"
@@ -138,6 +143,7 @@ internal fun LargeDynamicMappedBuffer.parseCentralDirectory(): List<ZipEntryDesc
 
 private fun LargeDynamicMappedBuffer.parseCentralDirectoryRecordsNumberAndOffset(): Pair<Long, Long> =
     withMappedTail {
+        order(ByteOrder.LITTLE_ENDIAN)
         var endOfCentralDirectoryOffset = endOffset() - END_OF_CENTRAL_DIR_SIZE
         while (endOfCentralDirectoryOffset >= 0) {
             // header of "End of central directory" (see https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
